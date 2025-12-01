@@ -117,6 +117,7 @@ export class PrismaTableRepository implements TableRepository {
     });
   }
 
+  //TODO: Can be improved in performance
   async createWithColumnsAndRows(data: CreateTableWithDataInput): Promise<Table> {
     return await db.$transaction(async (tx) => {
       const table = await tx.table.create({
@@ -145,28 +146,61 @@ export class PrismaTableRepository implements TableRepository {
       );
 
       if (data.rows.length > 0) {
-        for (const rowData of data.rows) {
-          const row = await tx.row.create({
-            data: {
-              tableId: table.id,
-            },
-          });
+        const rowsToCreate = data.rows.map(() => ({
+          tableId: table.id,
+        }));
+        
+        await tx.row.createMany({
+          data: rowsToCreate,
+        });
 
+        const createdRows = await tx.row.findMany({
+          where: { tableId: table.id },
+          select: { id: true },
+          orderBy: { id: 'asc' },
+        });
+
+        if (createdRows.length !== data.rows.length) {
+          throw new Error(`Expected ${data.rows.length} rows to be created, but got ${createdRows.length}`);
+        }
+
+        const cellsToCreate = [];
+        for (let rowIndex = 0; rowIndex < data.rows.length; rowIndex++) {
+          const rowData = data.rows[rowIndex];
+          const createdRow = createdRows[rowIndex];
+          
+          if (!rowData) {
+            throw new Error(`Row data at index ${rowIndex} is undefined`);
+          }
+          
+          if (!createdRow) {
+            throw new Error(`Row at index ${rowIndex} was not created properly`);
+          }
+          
+          const rowId = createdRow.id;
+          
           for (const column of columns) {
             const value = rowData[column.name] ?? null;
-            await tx.cell.create({
-              data: {
-                rowId: row.id,
-                columnId: column.id,
-                tableId: table.id,
-                value,
-              },
+            cellsToCreate.push({
+              rowId,
+              columnId: column.id,
+              tableId: table.id,
+              value,
             });
           }
+        }
+
+        if (cellsToCreate.length > 0) {
+          await tx.cell.createMany({
+            data: cellsToCreate,
+          });
         }
       }
 
       return table;
+    }, {
+      maxWait: 15000,
+      timeout: 60000,
     });
   }
 

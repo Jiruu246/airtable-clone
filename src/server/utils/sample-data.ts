@@ -17,7 +17,7 @@ export class SampleDataGenerator {
       { name: "Score", type: "number", orderIndex: 1 },
     ];
     
-    const numberOfRows = 100;
+    const numberOfRows = 100_000;
     const rows = Array.from({ length: numberOfRows }, () => ({
       "Name": faker.lorem.words(2),
       "Score": faker.number.int({ min: 1, max: 100 }).toString(),
