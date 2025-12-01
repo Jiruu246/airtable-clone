@@ -88,6 +88,7 @@ export function Sidebar() {
   
   const createBaseMutation = api.base.create.useMutation({
     onSuccess: (newBase) => {
+      //TODO: navigate to the new base page before waiting for the table data to be created
       void utils.base.list.invalidate();
       router.push(`/base/${newBase.id}`);
     },

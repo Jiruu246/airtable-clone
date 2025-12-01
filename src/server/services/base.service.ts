@@ -6,6 +6,8 @@ import {
   type UpdateBaseData,
   baseRepository,
 } from "~/server/repositories/base.repository";
+import { tableService } from "~/server/services/table.service";
+import { SampleDataGenerator } from "~/server/utils/sample-data";
 
 export interface BaseService {
   listUserBases(userId: string): Promise<Base[]>;
@@ -58,7 +60,21 @@ export class BaseServiceImpl implements BaseService {
     };
 
     try {
-      return await this.repository.create(createData);
+      // Create the base
+      const base = await this.repository.create(createData);
+      
+      // Generate sample table data using Faker.js
+      const sampleTableData = SampleDataGenerator.generateSampleTable();
+      
+      // Create a table with sample data
+      await tableService.createTableWithSampleData({
+        name: sampleTableData.name,
+        baseId: base.id,
+        columns: sampleTableData.columns,
+        rows: sampleTableData.rows,
+      });
+
+      return base;
     } catch (error) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
