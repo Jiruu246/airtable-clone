@@ -34,9 +34,9 @@ export default async function BaseDetailPage({ params }: BaseDetailPageProps) {
 
   const { id: baseId } = await params;
 
-  const [base, firstTableData] = await Promise.all([
+  const [base, tables] = await Promise.all([
     api.base.getById({ id: baseId }),
-    api.base.getFirstTableData({ id: baseId }),
+    api.table.getByBaseId({ baseId }),
   ]);
 
   return (
@@ -51,7 +51,7 @@ export default async function BaseDetailPage({ params }: BaseDetailPageProps) {
         <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button className="flex items-center gap-2 text-gray-700 hover:bg-gray-100 px-3 py-1.5 rounded">
-              <span className="font-medium">{firstTableData?.name}</span>
+              <span className="font-medium">{tables[0]?.name}</span>
               <IoChevronDown className="w-4 h-4" />
             </button>
             <button className="flex items-center gap-2 text-gray-700 hover:bg-gray-100 px-3 py-1.5 rounded">
@@ -133,7 +133,7 @@ export default async function BaseDetailPage({ params }: BaseDetailPageProps) {
                 <input
                   type="text"
                   placeholder="Find a view"
-                  className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-9 pr-3 py-2 text-sm rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <button className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
                   <GoGear className="w-4 h-4" />
@@ -147,22 +147,11 @@ export default async function BaseDetailPage({ params }: BaseDetailPageProps) {
                 <span>Grid view</span>
               </button>
             </div>
-
-            <div className="p-3 border-t border-gray-200">
-              <button className="flex items-center gap-2 text-gray-600 hover:bg-gray-100 px-3 py-2 rounded w-full text-left text-sm">
-                <GoPlus className="w-4 h-4" />
-                <span>Add...</span>
-              </button>
-            </div>
-
-            <div className="px-3 py-2 text-xs text-gray-500">
-              {firstTableData?.rows.length} records
-            </div>
           </div>
 
           {/* Table Content Area */}
-          {firstTableData ? (
-            <DataTable data={firstTableData} />
+          {tables.length > 0 ? (
+            <DataTable tableId={tables[0]!.id} />
           ) : (
             <div className="bg-white p-12">
               <div className="text-center">

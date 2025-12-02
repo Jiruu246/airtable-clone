@@ -5,6 +5,8 @@ import {
   type Cell,
   type UpdateCellData,
   type UpsertCellData,
+  type PaginatedTableData,
+  type GetPaginatedRowsParams,
   cellRepository,
 } from "~/server/repositories/cell.repository";
 
@@ -12,6 +14,7 @@ export interface CellService {
   updateCell(data: UpdateCellInput): Promise<Cell>;
   deleteCell(data: DeleteCellInput): Promise<void>;
   upsertCell(data: UpsertCellInput): Promise<Cell>;
+  getPaginatedRows(params: GetPaginatedRowsInput): Promise<PaginatedTableData>;
 }
 
 export interface UpdateCellInput {
@@ -30,6 +33,15 @@ export interface UpsertCellInput {
   columnId: string;
   tableId: string;
   value: string | null;
+}
+
+export interface GetPaginatedRowsInput {
+  tableId: string;
+  limit?: number;
+  cursor?: string;
+  search?: string;
+  sortBy?: string;
+  sortDirection?: 'asc' | 'desc';
 }
 
 export class CellServiceImpl implements CellService {
@@ -126,6 +138,41 @@ export class CellServiceImpl implements CellService {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "Failed to upsert cell",
+        cause: error,
+      });
+    }
+  }
+
+  async getPaginatedRows(params: GetPaginatedRowsInput): Promise<PaginatedTableData> {
+    // Validate table exists
+    // TODO: access db directlt??
+    const tableExists = await db.table.findUnique({
+      where: { id: params.tableId },
+      select: { id: true },
+    });
+
+    if (!tableExists) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Table not found",
+      });
+    }
+
+    try {
+      const repositoryParams: GetPaginatedRowsParams = {
+        tableId: params.tableId,
+        limit: params.limit ?? 50,
+        cursor: params.cursor,
+        search: params.search,
+        sortBy: params.sortBy ?? 'id',
+        sortDirection: params.sortDirection ?? 'asc',
+      };
+
+      return await this.repository.getPaginatedRows(repositoryParams);
+    } catch (error) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to fetch paginated rows",
         cause: error,
       });
     }
