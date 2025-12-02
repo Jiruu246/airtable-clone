@@ -64,14 +64,19 @@ export class BaseServiceImpl implements BaseService {
       const base = await this.repository.create(createData);
       
       // Generate sample table data using Faker.js
-      const sampleTableData = SampleDataGenerator.generateSampleTable();
-      
+      const columns = [
+        { name: "Name", type: "text", orderIndex: 0 },
+        { name: "Score", type: "number", orderIndex: 1 },
+      ];
+      const numberOfRows = 100;
+      const rows = SampleDataGenerator.generateRowsForColumns(columns, numberOfRows);
+          
       // Create a table with sample data
       await tableService.createTableWithSampleData({
-        name: sampleTableData.name,
+        name: "Sample Table",
         baseId: base.id,
-        columns: sampleTableData.columns,
-        rows: sampleTableData.rows,
+        columns,
+        rows,
       });
 
       return base;

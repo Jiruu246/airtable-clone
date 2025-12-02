@@ -10,6 +10,25 @@ export interface TableRepository {
   delete(id: string): Promise<void>;
   createWithColumnsAndRows(data: CreateTableWithDataInput): Promise<Table>;
   getTableData(id: string): Promise<TableData | null>;
+  getTableRowsPaginated(id: string, cursor?: string, limit?: number): Promise<PaginatedTableData>;
+  getTableMetadata(id: string): Promise<TableMetadata | null>;
+  createRowsWithData(tableId: string, rows: Record<string, string>[], columns: { id: string; name: string; }[]): Promise<void>;
+}
+
+export interface PaginatedTableData {
+  id: string;
+  columns: {
+    id: string;
+    name: string;
+    type: string;
+    orderIndex: number;
+  }[];
+  rows: {
+    id: string;
+    [columnId: string]: string | null;
+  }[];
+  totalRows: number;
+  nextCursor?: string;
 }
 
 export interface Table {
@@ -33,7 +52,6 @@ export interface CreateTableWithDataInput {
   columns: {
     name: string;
     type: string;
-    orderIndex: number;
   }[];
   rows: Record<string, string>[];
 }
@@ -52,6 +70,19 @@ export interface TableData {
     id: string;
     [columnId: string]: string | null;
   }[];
+}
+
+export interface TableMetadata {
+  id: string;
+  name: string;
+  baseId: string;
+  columns: {
+    id: string;
+    name: string;
+    type: string;
+    orderIndex: number;
+  }[];
+  totalRows: number;
 }
 
 export class PrismaTableRepository implements TableRepository {
@@ -133,12 +164,12 @@ export class PrismaTableRepository implements TableRepository {
       });
 
       const columns = await Promise.all(
-        data.columns.map((col) =>
+        data.columns.map((col, index) =>
           tx.column.create({
             data: {
               name: col.name,
               type: col.type,
-              orderIndex: col.orderIndex,
+              orderIndex: index,
               tableId: table.id,
             },
           })
@@ -261,6 +292,181 @@ export class PrismaTableRepository implements TableRepository {
       columns: table.columns,
       rows,
     };
+  }
+
+  async getTableRowsPaginated(id: string, cursor?: string, limit = 50): Promise<PaginatedTableData> {
+    const cursorId = cursor ? BigInt(cursor) : undefined;
+
+    let rows = await db.row.findMany({
+      where: {
+        tableId: id,
+        id: cursorId ? {
+          gt: cursorId,
+        } : undefined,
+      },
+      orderBy: {
+        id: "asc",
+      },
+      take: limit + 1,
+    });
+
+    const hasNextPage = rows.length > limit;
+    rows = hasNextPage ? rows.slice(0, -1) : rows;
+    const nextCursor = hasNextPage && rows.length > 0 ? rows[rows.length - 1]?.id.toString() : undefined;
+
+    const rowIds = rows.map(row => row.id);
+
+    const cells = await db.cell.findMany({
+      where: {
+        tableId: id,
+        rowId: {
+          in: rowIds,
+        },
+      },
+      select: {
+        rowId: true,
+        columnId: true,
+        value: true,
+      },
+      orderBy: {
+        rowId: "asc",
+      },
+    });
+
+    const columns = await db.column.findMany({
+      where: {
+        tableId: id,
+      },
+      orderBy: {
+        orderIndex: "asc",
+      },
+    });
+
+    const totalRows = await db.row.count({
+      where: {
+        tableId: id,
+      },
+    });
+
+    const transformedRows = rows.map((row) => {
+      const rowData: { id: string; [columnId: string]: string | null } = {
+        id: row.id.toString(),
+      };
+
+      const rowCells = cells.filter(cell => cell.rowId === row.id);
+
+      rowCells.forEach((cell) => {
+        rowData[cell.columnId] = cell.value;
+      });
+      return rowData;
+    });
+
+    // TODO: improve the pagination object structure
+    return {
+      id,
+      columns,
+      rows: transformedRows,
+      totalRows: totalRows,
+      nextCursor,
+    };
+  }
+
+  async getTableMetadata(id: string): Promise<TableMetadata | null> {
+    const table = await db.table.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        baseId: true,
+        columns: {
+          select: {
+            id: true,
+            name: true,
+            type: true,
+            orderIndex: true,
+          },
+          orderBy: {
+            orderIndex: "asc",
+          },
+        },
+        _count: {
+          select: {
+            rows: true,
+          },
+        },
+      },
+    });
+
+    if (!table) {
+      return null;
+    }
+
+    return {
+      id: table.id,
+      name: table.name,
+      baseId: table.baseId,
+      columns: table.columns,
+      totalRows: table._count.rows,
+    };
+  }
+
+  async createRowsWithData(tableId: string, rows: Record<string, string>[], columns: { id: string; name: string; }[]): Promise<void> {
+    if (rows.length === 0) {
+      return;
+    }
+
+    await db.$transaction(async (tx) => {
+      // Create rows
+      const rowsToCreate = Array.from({ length: rows.length }, () => ({
+        tableId,
+      }));
+      
+      await tx.row.createMany({
+        data: rowsToCreate,
+      });
+
+      // Get the newly created rows
+      const createdRows = await tx.row.findMany({
+        where: { tableId },
+        select: { id: true },
+        orderBy: { id: 'desc' },
+        take: rows.length,
+      });
+
+      if (createdRows.length !== rows.length) {
+        throw new Error(`Expected ${rows.length} rows to be created, but got ${createdRows.length}`);
+      }
+
+      // Create cells with the provided data
+      const cellsToCreate = [];
+      for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+        const rowData = rows[rowIndex];
+        const createdRow = createdRows[rowIndex];
+        
+        if (!rowData || !createdRow) {
+          throw new Error(`Row data or created row at index ${rowIndex} is undefined`);
+        }
+        
+        for (const column of columns) {
+          const value = rowData[column.name] ?? null;
+          cellsToCreate.push({
+            rowId: createdRow.id,
+            columnId: column.id,
+            tableId,
+            value,
+          });
+        }
+      }
+
+      if (cellsToCreate.length > 0) {
+        await tx.cell.createMany({
+          data: cellsToCreate,
+        });
+      }
+    }, {
+      maxWait: 15000,
+      timeout: 60000,
+    });
   }
 }
 

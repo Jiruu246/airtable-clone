@@ -1,232 +1,86 @@
 "use client";
 
-import React, { useMemo, useRef, useState, useCallback, useEffect } from "react";
+import React, { useRef, useEffect } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { TableHeader } from "./TableHeader";
+import { VirtualizedRow } from "./VirtualizedRow";
+import { useDataTableLogic } from "./hooks/useDataTableLogic";
+import { useKeyboardNavigation } from "./hooks/useKeyboardNavigation";
 import { api } from "~/trpc/react";
-import { useDebouncedCallback } from "use-debounce";
+import { GoPlus } from "react-icons/go";
+import { PiMagicWandThin } from "react-icons/pi";
 
-interface TableRow {
-  id: string;
-  [columnId: string]: string | null;
+export interface DataTableProps {
+  tableId: string;
 }
 
-interface TableData {
-  id: string;
-  name: string;
-  baseId: string;
-  columns: {
-    id: string;
-    name: string;
-    type: string;
-    orderIndex: number;
-  }[];
-  rows: TableRow[];
-}
-
-interface DataTableProps {
-  data: TableData;
-}
-
-interface CellPosition {
-  rowIndex: number;
-  columnIndex: number;
-}
-
-export function DataTable({ data }: DataTableProps) {
+export function DataTable({ tableId }: DataTableProps) {
   const parentRef = useRef<HTMLDivElement>(null);
-  const parentHeaderRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-  
-  const [cellValues, setCellValues] = useState<Record<string, string>>({});
-  const [selectedCell, setSelectedCell] = useState<CellPosition | null>(null);
-  const [editingCell, setEditingCell] = useState<CellPosition | null>(null);
-  const [editValue, setEditValue] = useState<string>("");
 
-  const sortedColumns = useMemo(
-    () => [...data.columns].sort((a, b) => a.orderIndex - b.orderIndex),
-    [data.columns],
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    refetch,
+  } = api.table.getTableRowsPaginated.useInfiniteQuery(
+    { id: tableId, limit: 50 },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+    }
   );
 
-  const upsertCellMutation = api.cell.upsert.useMutation({
+  const createRandomRowsMutation = api.table.createRandomRows.useMutation({
+    onSuccess: () => {
+      void refetch();
+    },
     onError: (error) => {
-      console.error("Failed to upsert cell:", error);
+      console.error("Failed to create random rows:", error);
     },
   });
 
-  const debouncedSaveCell = useDebouncedCallback(
-    (rowId: string, columnId: string, value: string) => {
-      void (async () => {
-      try {
-        await upsertCellMutation.mutateAsync({
-          rowId,
-          columnId,
-          tableId: data.id,
-          value: value || null,
-        });
-      } catch (error) {
-        console.error("Error saving cell:", error);
-        // TODO: We can do escalation retries
-      }
-      })();
-    },
-    500
-  );
+  const rows = data?.pages.flatMap(page => page.rows) ?? [];
 
-  const handleCellChange = useCallback(
-    (rowId: string, columnId: string, value: string) => {
-      const key = `${rowId}-${columnId}`;
-      
-      setCellValues(prev => ({
-        ...prev,
-        [key]: value,
-      }));
+  const columns = data?.pages[0]?.columns ?? [];
 
-      debouncedSaveCell(rowId, columnId, value);
-    },
-    [debouncedSaveCell]
-  );
+  const {
+    cellValues,
+    selectedCell,
+    isEditing,
+    editValue,
+    setSelectedCell,
+    setEditValue,
+    startEditing,
+    stopEditing,
+    handleCellClick,
+    handleCellDoubleClick,
+  } = useDataTableLogic({
+    tableId,
+    rows,
+    columns,
+  });
 
-  const startEditing = useCallback((rowIndex: number, columnIndex: number) => {
-    const row = data.rows[rowIndex];
-    const column = sortedColumns[columnIndex];
-    if (!row || !column) return;
-
-    const cellKey = `${row.id}-${column.id}`;
-    const currentValue = cellValues[cellKey] ?? row[column.id] ?? "";
-    
-    setEditingCell({ rowIndex, columnIndex });
-    setEditValue(currentValue);
-    
-    // Focus the input after state update
-    setTimeout(() => {
-      inputRef.current?.focus();
-      inputRef.current?.select();
-    }, 0);
-  }, [data.rows, sortedColumns, cellValues]);
-
-  const stopEditing = useCallback(() => {
-    if (!editingCell) return;
-
-    const row = data.rows[editingCell.rowIndex];
-    const column = sortedColumns[editingCell.columnIndex];
-    if (row && column) {
-      handleCellChange(row.id, column.id, editValue);
-    }
-
-    setEditingCell(null);
-    setEditValue("");
-  }, [editingCell, editValue, data.rows, sortedColumns, handleCellChange]);
-
-  const handleCellClick = useCallback((rowIndex: number, columnIndex: number) => {
-    setSelectedCell({ rowIndex, columnIndex });
-  }, []);
-
-  const handleCellDoubleClick = useCallback((rowIndex: number, columnIndex: number) => {
-    startEditing(rowIndex, columnIndex);
-  }, [startEditing]);
-
-  const moveSelection = useCallback((direction: 'up' | 'down' | 'left' | 'right') => {
-    if (!selectedCell) return;
-
-    const { rowIndex, columnIndex } = selectedCell;
-    let newRowIndex = rowIndex;
-    let newColumnIndex = columnIndex;
-
-    switch (direction) {
-      case 'up':
-        newRowIndex = Math.max(0, rowIndex - 1);
-        break;
-      case 'down':
-        newRowIndex = Math.min(data.rows.length - 1, rowIndex + 1);
-        break;
-      case 'left':
-        newColumnIndex = Math.max(0, columnIndex - 1);
-        break;
-      case 'right':
-        newColumnIndex = Math.min(sortedColumns.length - 1, columnIndex + 1);
-        break;
-    }
-
-    setSelectedCell({ rowIndex: newRowIndex, columnIndex: newColumnIndex });
-  }, [selectedCell, data.rows.length, sortedColumns.length]);
-
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if (editingCell) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        stopEditing();
-        moveSelection('down');
-      } else if (e.key === 'Escape') {
-        e.preventDefault();
-        stopEditing();
-      } else if (e.key === 'Tab') {
-        e.preventDefault();
-        stopEditing();
-        moveSelection(e.shiftKey ? 'left' : 'right');
-      }
-      return;
-    }
-
-    if (!selectedCell) return;
-
-    // Handle keys during selection
-    switch (e.key) {
-      case 'ArrowUp':
-        e.preventDefault();
-        moveSelection('up');
-        break;
-      case 'ArrowDown':
-        e.preventDefault();
-        moveSelection('down');
-        break;
-      case 'ArrowLeft':
-        e.preventDefault();
-        moveSelection('left');
-        break;
-      case 'ArrowRight':
-        e.preventDefault();
-        moveSelection('right');
-        break;
-      case 'Tab':
-        e.preventDefault();
-        moveSelection(e.shiftKey ? 'left' : 'right');
-        break;
-      case 'Enter':
-        e.preventDefault();
-        startEditing(selectedCell.rowIndex, selectedCell.columnIndex);
-        break;
-      default:
-        if (e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
-          e.preventDefault();
-          startEditing(selectedCell.rowIndex, selectedCell.columnIndex);
-          setEditValue(e.key);
-        }
-        break;
-    }
-  }, [editingCell, selectedCell, stopEditing, moveSelection, startEditing]);
-
-  useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [handleKeyDown]);
-
-  // Auto-focus the table container to enable keyboard navigation
-  useEffect(() => {
-    if (parentRef.current) {
-      parentRef.current.focus();
-    }
-  }, []);
+  useKeyboardNavigation({
+    selectedCell,
+    isEditing,
+    rowCount: rows.length,
+    columnCount: columns.length,
+    setSelectedCell,
+    setEditValue,
+    startEditing,
+    stopEditing,
+  });
 
   const rowVirtualizer = useVirtualizer({
-    count: data.rows.length,
-    getScrollElement: () => parentRef.current,
+    count: rows.length,
     estimateSize: () => 40,
+    getScrollElement: () => parentRef.current,
     overscan: 10,
   });
 
   const columnVirtualizer = useVirtualizer({
     horizontal: true,
-    count: sortedColumns.length,
+    count: columns.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 200,
     overscan: 5,
@@ -235,113 +89,123 @@ export function DataTable({ data }: DataTableProps) {
   const virtualRows = rowVirtualizer.getVirtualItems();
   const virtualColumns = columnVirtualizer.getVirtualItems();
 
+  useEffect(() => {
+    if (!parentRef.current) return;
+
+    const scrollElement = parentRef.current;
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = scrollElement;
+      const scrollPercentage = (scrollTop + clientHeight) / scrollHeight;
+
+      if (scrollPercentage > 0.8 && hasNextPage && !isFetchingNextPage) {
+        void fetchNextPage();
+      }
+    };
+
+    scrollElement.addEventListener("scroll", handleScroll);
+    return () => scrollElement.removeEventListener("scroll", handleScroll);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
   return (
-    <div className="h-full w-full overflow-hidden bg-white">
-      {/* Header */}
-      <div
-        ref={parentHeaderRef}
-        className="sticky top-0 z-10 border-b border-gray-200"
-        style={{
-          height: "40px",
-        }}
-      >
-        <div
-          className="relative"
-          style={{
-            width: `${columnVirtualizer.getTotalSize()}px`,
-            height: "100%",
-          }}
-        >
-          {virtualColumns.map((virtualColumn) => {
-            const column = sortedColumns[virtualColumn.index];
-            return (
-              <div
-                key={column?.id}
-                className="absolute top-0 flex h-full items-center border-r border-gray-200 px-3 font-normal"
-                style={{
-                  left: `${virtualColumn.start}px`,
-                  width: `${virtualColumn.size}px`,
-                }}
-              >
-                <span className="truncate">{column?.name}</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+    <div className="h-full w-full overflow-hidden bg-white relative">
+      <TableHeader
+        columns={columns}
+        virtualColumns={virtualColumns}
+        totalWidth={columnVirtualizer.getTotalSize()}
+      />
 
       {/* Table Body */}
       <div
         ref={parentRef}
         className="h-full overflow-auto focus:outline-none"
         style={{
-          height: "calc(100% - 40px)", // Subtract header height
+          height: "calc(100% - 40px)",
         }}
         tabIndex={0}
       >
         <div
           className="relative"
           style={{
-            height: `${rowVirtualizer.getTotalSize()}px`,
+            height: `${rowVirtualizer.getTotalSize() + 400}px`,
             width: `${columnVirtualizer.getTotalSize()}px`,
           }}
         >
           {virtualRows.map((virtualRow) => {
-            const row = data.rows[virtualRow.index];
-            return (
-              <div
-                key={row?.id}
-                className="absolute w-full border-b border-gray-200 hover:bg-gray-50"
-                style={{
-                  top: `${virtualRow.start}px`,
-                  height: `${virtualRow.size}px`,
-                }}
-              >
-                {virtualColumns.map((virtualColumn) => {
-                  const column = sortedColumns[virtualColumn.index];
-                  const cellKey = `${row?.id}-${column?.id}`;
-                  // Use local value if exists, otherwise use server data
-                  const cellValue = cellValues[cellKey] ?? row?.[column?.id ?? ""] ?? "";
+            const row = rows[virtualRow.index];
+            if (!row) return null;
 
-                  return (
-                    <div
-                      key={cellKey}
-                      className={`absolute flex h-full items-center border-r border-gray-200 px-3 cursor-pointer ${
-                        selectedCell?.rowIndex === virtualRow.index && selectedCell?.columnIndex === virtualColumn.index
-                          ? 'ring-2 ring-blue-500 bg-blue-50'
-                          : 'hover:bg-gray-50'
-                      }`}
-                      style={{
-                        left: `${virtualColumn.start}px`,
-                        width: `${virtualColumn.size}px`,
-                      }}
-                      onClick={() => handleCellClick(virtualRow.index, virtualColumn.index)}
-                      onDoubleClick={() => handleCellDoubleClick(virtualRow.index, virtualColumn.index)}
-                    >
-                      <div className="w-full">
-                        {editingCell?.rowIndex === virtualRow.index && editingCell?.columnIndex === virtualColumn.index ? (
-                          <input
-                            ref={inputRef}
-                            type="text"
-                            value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
-                            onBlur={() => stopEditing()}
-                            className="w-full border-none bg-transparent p-0 text-sm focus:outline-none"
-                            placeholder="Empty"
-                          />
-                        ) : (
-                          <span className="text-sm text-gray-900 truncate block w-full">
-                            {cellValue || <span className="text-gray-400">Empty</span>}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+            return (
+              <VirtualizedRow
+                key={row.id}
+                virtualRow={virtualRow}
+                virtualColumns={virtualColumns}
+                row={row}
+                columns={columns}
+                cellValues={cellValues}
+                selectedCell={selectedCell}
+                isEditing={isEditing}
+                editValue={editValue}
+                onCellClick={handleCellClick}
+                onCellDoubleClick={handleCellDoubleClick}
+                onEditValueChange={setEditValue}
+                onStopEditing={stopEditing}
+              />
             );
           })}
+
+          {/* Loading indicator */}
+          {isFetchingNextPage && (
+            <div
+              className="absolute left-0 right-0 flex items-center justify-center py-4 text-gray-500"
+              style={{
+                top: `${rowVirtualizer.getTotalSize()}px`,
+                height: "40px",
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
+                <span>Loading more rows...</span>
+              </div>
+            </div>
+          )}
         </div>
+      </div>
+
+      {/* Floating Footer */}
+      <div className="absolute bottom-0 left-0 right-0 h-10 bg-gray-50 border-t border-gray-200 flex items-center px-4 text-sm text-gray-600 shadow-lg">
+        <div className="flex items-center gap-2 text-gray-900 font-light text-xs">
+          <span>{data?.pages[0]?.totalRows} records</span>
+        </div>
+      </div>
+
+      {/* Floating Add Record Button */}
+      <div className="absolute bottom-9 left-3 flex shadow-lg bg-white rounded-full border border-gray-300">
+        <button
+          className=" hover:bg-gray-200 text-gray-800  px-4 py-2 rounded-l-full  transition-colors duration-200 flex items-center justify-center"
+          onClick={() => {
+            createRandomRowsMutation.mutate({
+              tableId: tableId,
+              numberOfRows: 1,
+            });
+          }}
+          disabled={createRandomRowsMutation.isPending}
+        >
+          <GoPlus className="w-5 h-5" />
+        </button>
+        <button
+          className="bg-white hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-r-full border-l border-gray-300 transition-colors duration-200 flex items-center justify-center gap-2"
+          onClick={() => {
+            createRandomRowsMutation.mutate({
+              tableId: tableId,
+              numberOfRows: 100000,
+            });
+          }}
+          disabled={createRandomRowsMutation.isPending}
+        >
+          <PiMagicWandThin className="w-5 h-5" />
+          <span className="text-xs">Add 100,000 rows</span>
+        </button>
       </div>
     </div>
   );
