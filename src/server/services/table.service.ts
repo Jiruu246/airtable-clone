@@ -6,17 +6,23 @@ import {
   type UpdateTableData,
   type CreateTableWithDataInput,
   type TableData,
+  type TableMetadata,
+  type PaginatedTableData,
   tableRepository,
 } from "~/server/repositories/table.repository";
+import { RandomDataGenerator } from "~/server/utils/sample-data";
 
 export interface TableService {
   listTablesByBaseId(baseId: string): Promise<Table[]>;
   getById(id: string): Promise<Table>;
   getTableData(id: string): Promise<TableData>;
+  getTableRowsPaginated(id: string, cursor?: string, limit?: number): Promise<PaginatedTableData>;
+  getTableMetadata(id: string): Promise<TableMetadata>;
   createTable(data: CreateTableInput): Promise<Table>;
   updateTable(data: UpdateTableInput): Promise<Table>;
   deleteTable(data: DeleteTableInput): Promise<void>;
   createTableWithSampleData(data: CreateTableWithSampleDataInput): Promise<Table>;
+  createRandomRows(data: CreateRandomRowsInput): Promise<void>;
 }
 
 export interface CreateTableInput {
@@ -39,9 +45,13 @@ export interface CreateTableWithSampleDataInput {
   columns: {
     name: string;
     type: string;
-    orderIndex: number;
   }[];
   rows: Record<string, string>[];
+}
+
+export interface CreateRandomRowsInput {
+  tableId: string;
+  numberOfRows: number;
 }
 
 export class TableServiceImpl implements TableService {
@@ -75,6 +85,31 @@ export class TableServiceImpl implements TableService {
     }
     
     return tableData;
+  }
+
+  async getTableRowsPaginated(id: string, cursor?: string, limit?: number): Promise<PaginatedTableData> {
+    try {
+      return await this.repository.getTableRowsPaginated(id, cursor, limit);
+    } catch (error) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to get paginated table rows",
+        cause: error,
+      });
+    }
+  }
+
+  async getTableMetadata(id: string): Promise<TableMetadata> {
+    const tableMetadata = await this.repository.getTableMetadata(id);
+    
+    if (!tableMetadata) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Table not found",
+      });
+    }
+    
+    return tableMetadata;
   }
 
   async createTable(data: CreateTableInput): Promise<Table> {
@@ -154,6 +189,43 @@ export class TableServiceImpl implements TableService {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "Failed to create table with sample data",
+        cause: error,
+      });
+    }
+  }
+
+  async createRandomRows(data: CreateRandomRowsInput): Promise<void> {
+    const tableMetadata = await this.repository.getTableMetadata(data.tableId);
+    
+    if (!tableMetadata) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Table not found",
+      });
+    }
+
+    if (tableMetadata.columns.length === 0) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Table has no columns",
+      });
+    }
+
+    try {
+      const randomRows = RandomDataGenerator.generateRowsForColumns(
+        tableMetadata.columns.map(col => ({
+          name: col.name,
+          type: col.type,
+        })),
+        data.numberOfRows
+      );
+
+      // Create the rows with the generated data
+      await this.repository.createRowsWithData(data.tableId, randomRows, tableMetadata.columns);
+    } catch (error) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to create random rows",
         cause: error,
       });
     }

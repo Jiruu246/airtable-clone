@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { baseService } from "~/server/services/base.service";
-import { tableService } from "~/server/services/table.service";
 
 const createBaseSchema = z.object({
   name: z.string().min(1, "Base name is required").max(100, "Base name must be 100 characters or less"),
@@ -62,17 +61,17 @@ export const baseRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  getFirstTableData: protectedProcedure
-    .input(getBaseSchema)
-    .query(async ({ input }) => {
-      // Get tables for the base
-      const tables = await tableService.listTablesByBaseId(input.id);
+  // getFirstTableData: protectedProcedure
+  //   .input(getBaseSchema)
+  //   .query(async ({ input }) => {
+  //     // Get tables for the base
+  //     const tables = await tableService.listTablesByBaseId(input.id);
       
-      if (tables.length === 0) {
-        return null;
-      }
+  //     if (tables.length === 0) {
+  //       return null;
+  //     }
       
-      // Get data for the first table
-      return await tableService.getTableData(tables[0]!.id);
-    }),
+  //     // Get paginated data for the first table
+  //     return await tableService.getTableDataPaginated(tables[0]!.id, undefined, 50);
+  //   }),
 });
