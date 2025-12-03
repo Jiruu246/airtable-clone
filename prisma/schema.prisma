@@ -91,7 +91,8 @@ model Cell {
     
     @@id([rowId, columnId])
     @@index([tableId, value], map: "idx_cells_table_value")
-    @@index([tableId, columnId, rowId], map: "idx_cells_table_col_row")
+    @@index([tableId, columnId], map: "idx_cells_table_col")
+    @@index([tableId, rowId], map: "idx_cells_table_row")
 }
 
 model View {
