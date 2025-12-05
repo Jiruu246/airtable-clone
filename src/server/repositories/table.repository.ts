@@ -478,10 +478,18 @@ export class PrismaTableRepository implements TableRepository {
   }
 
   async addColumn(data: AddColumnData): Promise<{ id: string; name: string; columnTypeId: string; columnType: { id: string; name: string; displayName: string; }; orderIndex: number; }> {
-    //TODO check if the columnid is exists
-
-    
     return await db.$transaction(async (tx) => {
+      // Check if the columnTypeId exists
+      const columnType = await tx.columnType.findUnique({
+        where: {
+          id: data.columnTypeId,
+        },
+      });
+
+      if (!columnType) {
+        throw new Error(`Column type with id '${data.columnTypeId}' does not exist`);
+      }
+
       const column = await tx.column.create({
         data: {
           name: data.name,
@@ -503,7 +511,6 @@ export class PrismaTableRepository implements TableRepository {
           },
         },
       });
-
 
       return column;
     });
