@@ -12,18 +12,18 @@ export interface SampleTableData {
 
 export interface Column {
   name: string;
-  type: string;
+  columnTypeId: string;
 }
 
 export class RandomDataGenerator {
   /**
    * Generate random value based on column type
    */
-  static generateValueForColumn(column: Column): string {
-    switch (column.type.toLowerCase()) {
-      case 'number':
+  static generateValueForColumn(columnTypeId: string): string {
+    switch (columnTypeId) {
+      case 'NUM':
         return faker.number.int({ min: 1, max: 1000 }).toString();
-      case 'text':
+      case 'TXT':
       default:
         return faker.lorem.words({ min: 1, max: 3 });
     }
@@ -36,7 +36,7 @@ export class RandomDataGenerator {
     return Array.from({ length: numberOfRows }, () => {
       const row: Record<string, string> = {};
       for (const column of columns) {
-        row[column.name] = this.generateValueForColumn(column);
+        row[column.name] = this.generateValueForColumn(column.columnTypeId);
       }
       return row;
     });

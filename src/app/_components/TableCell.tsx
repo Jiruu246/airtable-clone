@@ -51,11 +51,10 @@ export function TableCell({
             onChange={(e) => onEditValueChange(e.target.value)}
             onBlur={onStopEditing}
             className="w-full border-none bg-transparent p-0 text-sm focus:outline-none"
-            placeholder="Empty"
           />
         ) : (
           <span className="text-sm text-gray-900 truncate block w-full">
-            {value || <span className="text-gray-400">Empty</span>}
+            {value ?? "\u00A0"}
           </span>
         )}
       </div>

@@ -34,7 +34,7 @@ export function VirtualizedRow({
 }: VirtualizedRowProps) {
   return (
     <div
-      className="absolute w-full border-b border-gray-200 hover:bg-gray-50"
+      className="absolute w-full border-b bg-white border-gray-200 hover:bg-gray-50"
       style={{
         top: `${virtualRow.start}px`,
         height: `${virtualRow.size}px`,

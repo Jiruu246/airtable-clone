@@ -23,6 +23,7 @@ export interface TableService {
   deleteTable(data: DeleteTableInput): Promise<void>;
   createTableWithSampleData(data: CreateTableWithSampleDataInput): Promise<Table>;
   createRandomRows(data: CreateRandomRowsInput): Promise<void>;
+  addColumn(data: AddColumnInput): Promise<{ id: string; name: string; columnTypeId: string; orderIndex: number; }>;
 }
 
 export interface CreateTableInput {
@@ -44,7 +45,7 @@ export interface CreateTableWithSampleDataInput {
   baseId: string;
   columns: {
     name: string;
-    type: string;
+    columnTypeId: string;
   }[];
   rows: Record<string, string>[];
 }
@@ -52,6 +53,12 @@ export interface CreateTableWithSampleDataInput {
 export interface CreateRandomRowsInput {
   tableId: string;
   numberOfRows: number;
+}
+
+export interface AddColumnInput {
+  tableId: string;
+  columnName?: string;
+  columnTypeId: string;
 }
 
 export class TableServiceImpl implements TableService {
@@ -215,17 +222,55 @@ export class TableServiceImpl implements TableService {
       const randomRows = RandomDataGenerator.generateRowsForColumns(
         tableMetadata.columns.map(col => ({
           name: col.name,
-          type: col.type,
+          columnTypeId: col.columnType.id,
         })),
         data.numberOfRows
       );
 
-      // Create the rows with the generated data
       await this.repository.createRowsWithData(data.tableId, randomRows, tableMetadata.columns);
     } catch (error) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "Failed to create random rows",
+        cause: error,
+      });
+    }
+  }
+
+  async addColumn(data: AddColumnInput): Promise<{ id: string; name: string; columnTypeId: string; columnType: { id: string; name: string; displayName: string; }; orderIndex: number; }> {
+    const table = await this.repository.findById(data.tableId);
+    if (!table) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Table not found",
+      });
+    }
+
+    const tableMetadata = await this.repository.getTableMetadata(data.tableId);
+    if (!tableMetadata) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Table metadata not found",
+      });
+    }
+
+    const columnName = data.columnName?.trim() ?? 'New Column';
+
+    const nextOrderIndex = tableMetadata.columns.length > 0 
+      ? Math.max(...tableMetadata.columns.map(col => col.orderIndex)) + 1 
+      : 0;
+
+    try {
+      return await this.repository.addColumn({
+        tableId: data.tableId,
+        name: columnName.trim(),
+        columnTypeId: data.columnTypeId,
+        orderIndex: nextOrderIndex,
+      });
+    } catch (error) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to add column",
         cause: error,
       });
     }
