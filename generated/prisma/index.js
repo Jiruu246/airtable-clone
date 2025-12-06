@@ -233,7 +233,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "D:\\src\\ts\\airtable-clone\\generated\\prisma",
+      "value": "E:\\source\\typescript\\airtable-clone\\generated\\prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -247,7 +247,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "D:\\src\\ts\\airtable-clone\\prisma\\schema.prisma",
+    "sourceFilePath": "E:\\source\\typescript\\airtable-clone\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {

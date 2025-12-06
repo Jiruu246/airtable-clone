@@ -11,16 +11,20 @@ import { useKeyboardNavigation } from "./hooks/useKeyboardNavigation";
 import { api } from "~/trpc/react";
 import { GoPlus } from "react-icons/go";
 import { PiMagicWandThin } from "react-icons/pi";
+import type { TableColumn } from "./types/DataTable.types";
 
 const BOTTOM_PADDING = 400;
 
 export interface DataTableProps {
   tableId: string;
+  viewId: string;
+  visibleColumns: TableColumn[];
 }
 
-export function DataTable({ tableId }: DataTableProps) {
+export function DataTable({ tableId, viewId, visibleColumns }: DataTableProps) {
   const parentRef = useRef<HTMLDivElement>(null);
-  const metaData = api.table.getTableMetadata.useQuery({ id: tableId });
+  const tableContentRef = useRef<HTMLDivElement>(null);
+  const metaData = api.view.getViewMetadata.useQuery({ id: viewId });
 
   // The data update is now broken when go back and forth between base, the data is not up to date until a refetch is triggered
   const {
@@ -29,16 +33,14 @@ export function DataTable({ tableId }: DataTableProps) {
     hasNextPage,
     isFetchingNextPage,
     refetch,
-  } = api.table.getTableRowsPaginated.useInfiniteQuery(
-    { id: tableId, limit: 50 },
+  } = api.view.getViewRowsPaginated.useInfiniteQuery(
+    { id: viewId, limit: 50 },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     }
   );
 
   const rows = data?.pages.flatMap(page => page.rows) ?? [];
-
-  const columns = metaData.data?.columns ?? [];
 
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
@@ -49,7 +51,7 @@ export function DataTable({ tableId }: DataTableProps) {
 
   const columnVirtualizer = useVirtualizer({
     horizontal: true,
-    count: columns.length,
+    count: visibleColumns.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 200,
     overscan: 5,
@@ -68,25 +70,28 @@ export function DataTable({ tableId }: DataTableProps) {
     handleCellDoubleClick,
   } = useCellData({
     tableId,
+    viewId,
     rows,
-    columns,
+    columns: visibleColumns,
   });
 
   const { isAddingRow, handleAddRows } = useRowData({
     tableId,
+    viewId,
     refetch,
   });
 
   const { isAddingColumn, handleAddColumn } = useColumnData({
     tableId,
+    viewId,
   });
 
   const { handleKeyDown } = useKeyboardNavigation({
-    tableRef: parentRef,
+    tableRef: tableContentRef,
     selectedCell,
     isEditing,
     rowCount: rows.length,
-    columnCount: columns.length,
+    columnCount: visibleColumns.length,
     setSelectedCell,
     scrollToRow: rowVirtualizer.scrollToIndex,
     scrollToColumn: columnVirtualizer.scrollToIndex,
@@ -120,18 +125,19 @@ export function DataTable({ tableId }: DataTableProps) {
     <div className="h-full w-full overflow-hidden bg-white relative">
       <div
         ref={parentRef}
-        onKeyDown={handleKeyDown}
         className="h-full overflow-auto focus:outline-none bg-gray-100"
-        tabIndex={0}
       >
         <TableHeader
-          columns={columns}
+          columns={visibleColumns}
           virtualColumns={virtualColumns}
           totalWidth={columnVirtualizer.getTotalSize()}
           onAddColumn={handleAddColumn}
           isAddingColumn={isAddingColumn}
         />
         <div
+          ref={tableContentRef}
+          onKeyDown={handleKeyDown}
+          tabIndex={0}
           className="relative"
           style={{
             height: `${rowVirtualizer.getTotalSize() + BOTTOM_PADDING}px`,
@@ -148,7 +154,7 @@ export function DataTable({ tableId }: DataTableProps) {
                 virtualRow={virtualRow}
                 virtualColumns={virtualColumns}
                 row={row}
-                columns={columns}
+                columns={visibleColumns}
                 cellValues={cellValues}
                 selectedCell={selectedCell}
                 isEditing={isEditing}

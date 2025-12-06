@@ -1,6 +1,7 @@
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 import { baseRouter } from "~/server/api/routers/base.router";
 import { tableRouter } from "~/server/api/routers/table.router";
+import { viewRouter } from "~/server/api/routers/view.router";
 import { cellRouter } from "~/server/api/routers/cell.router";
 import { metadataRouter } from "~/server/api/routers/metadata.router";
 
@@ -12,6 +13,7 @@ import { metadataRouter } from "~/server/api/routers/metadata.router";
 export const appRouter = createTRPCRouter({
   base: baseRouter,
   table: tableRouter,
+  view: viewRouter,
   cell: cellRouter,
   metadata: metadataRouter,
 });
