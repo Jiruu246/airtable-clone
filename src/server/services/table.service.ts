@@ -5,19 +5,17 @@ import {
   type CreateTableData,
   type UpdateTableData,
   type CreateTableWithDataInput,
-  type TableData,
-  type TableMetadata,
-  type PaginatedTableData,
   tableRepository,
 } from "~/server/repositories/table.repository";
+import {
+  type ViewRepository,
+  viewRepository,
+} from "~/server/repositories/view.repository";
 import { RandomDataGenerator } from "~/server/utils/sample-data";
 
 export interface TableService {
   listTablesByBaseId(baseId: string): Promise<Table[]>;
   getById(id: string): Promise<Table>;
-  getTableData(id: string): Promise<TableData>;
-  getTableRowsPaginated(id: string, cursor?: string, limit?: number): Promise<PaginatedTableData>;
-  getTableMetadata(id: string): Promise<TableMetadata>;
   createTable(data: CreateTableInput): Promise<Table>;
   updateTable(data: UpdateTableInput): Promise<Table>;
   deleteTable(data: DeleteTableInput): Promise<void>;
@@ -62,7 +60,10 @@ export interface AddColumnInput {
 }
 
 export class TableServiceImpl implements TableService {
-  constructor(private readonly repository: TableRepository) {}
+  constructor(
+    private readonly repository: TableRepository,
+    private readonly viewRepository: ViewRepository
+  ) {}
 
   async listTablesByBaseId(baseId: string): Promise<Table[]> {
     return await this.repository.findByBaseId(baseId);
@@ -81,52 +82,23 @@ export class TableServiceImpl implements TableService {
     return table;
   }
 
-  async getTableData(id: string): Promise<TableData> {
-    const tableData = await this.repository.getTableData(id);
-    
-    if (!tableData) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "Table not found",
-      });
-    }
-    
-    return tableData;
-  }
-
-  async getTableRowsPaginated(id: string, cursor?: string, limit?: number): Promise<PaginatedTableData> {
-    try {
-      return await this.repository.getTableRowsPaginated(id, cursor, limit);
-    } catch (error) {
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to get paginated table rows",
-        cause: error,
-      });
-    }
-  }
-
-  async getTableMetadata(id: string): Promise<TableMetadata> {
-    const tableMetadata = await this.repository.getTableMetadata(id);
-    
-    if (!tableMetadata) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "Table not found",
-      });
-    }
-    
-    return tableMetadata;
-  }
-
   async createTable(data: CreateTableInput): Promise<Table> {
     const createData: CreateTableData = {
       name: data.name.trim(),
       baseId: data.baseId,
     };
 
+    //TODO: turn this into a transaction
     try {
-      return await this.repository.create(createData);
+      const table = await this.repository.create(createData);
+      
+      // Create default GridView for the table
+      await this.viewRepository.create({
+        name: 'Grid view',
+        tableId: table.id,
+      });
+      
+      return table;
     } catch (error) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
@@ -191,7 +163,15 @@ export class TableServiceImpl implements TableService {
     };
 
     try {
-      return await this.repository.createWithColumnsAndRows(createData);
+      const table = await this.repository.createWithColumnsAndRows(createData);
+      
+      // Create default GridView for the table
+      await this.viewRepository.create({
+        name: 'GridView',
+        tableId: table.id,
+      });
+      
+      return table;
     } catch (error) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
@@ -277,4 +257,4 @@ export class TableServiceImpl implements TableService {
   }
 }
 
-export const tableService = new TableServiceImpl(tableRepository);
+export const tableService = new TableServiceImpl(tableRepository, viewRepository);

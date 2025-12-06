@@ -5,11 +5,12 @@ import type { CellPosition, TableRow, TableColumn } from "../types/DataTable.typ
 
 interface UseCellDataProps {
   tableId: string;
+  viewId: string;
   rows: TableRow[];
   columns: TableColumn[];
 }
 
-export function useCellData({ tableId, rows, columns }: UseCellDataProps) {
+export function useCellData({ tableId, viewId, rows, columns }: UseCellDataProps) {
   const [cellValues, setCellValues] = useState<Record<string, string>>({});
   const [selectedCell, setSelectedCell] = useState<CellPosition | null>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false);
@@ -57,8 +58,8 @@ export function useCellData({ tableId, rows, columns }: UseCellDataProps) {
       [key]: value,
     }));
 
-    utils.table.getTableRowsPaginated.setInfiniteData(
-      { id: tableId },
+    utils.view.getViewRowsPaginated.setInfiniteData(
+      { id: viewId },
       (oldData) => {
         if (!oldData) return oldData;
 
@@ -80,7 +81,6 @@ export function useCellData({ tableId, rows, columns }: UseCellDataProps) {
   };
 
   const startEditing = (rowIndex: number, columnIndex: number) => {
-    console.log('Start editing cell at', rowIndex, columnIndex);
     const row = rows[rowIndex];
     const column = columns[columnIndex];
     if (!row || !column) return;
