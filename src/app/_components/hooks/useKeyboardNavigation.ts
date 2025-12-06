@@ -1,28 +1,33 @@
-import { useCallback, useEffect } from "react";
 import type { CellPosition } from "../types/DataTable.types";
 
 interface UseKeyboardNavigationProps {
+  tableRef: React.RefObject<HTMLDivElement | null>;
   selectedCell: CellPosition | null;
   isEditing: boolean;
   rowCount: number;
   columnCount: number;
   setSelectedCell: (cell: CellPosition | null) => void;
+  scrollToRow: (rowIndex: number) => void;
+  scrollToColumn: (columnIndex: number) => void;
   setEditValue: (value: string) => void;
   startEditing: (rowIndex: number, columnIndex: number) => void;
-  stopEditing: () => void;
+  stopEditing: (focusRef: React.RefObject<HTMLDivElement | null>) => void;
 }
 
 export function useKeyboardNavigation({
+  tableRef,
   selectedCell,
   isEditing,
   rowCount,
   columnCount,
   setSelectedCell,
+  scrollToRow,
+  scrollToColumn,
   setEditValue,
   startEditing,
   stopEditing,
 }: UseKeyboardNavigationProps) {
-  const moveSelection = useCallback((direction: 'up' | 'down' | 'left' | 'right') => {
+  const moveSelection = (direction: 'up' | 'down' | 'left' | 'right') => {
     if (!selectedCell) return;
 
     const { rowIndex, columnIndex } = selectedCell;
@@ -45,20 +50,30 @@ export function useKeyboardNavigation({
     }
 
     setSelectedCell({ rowIndex: newRowIndex, columnIndex: newColumnIndex });
-  }, [selectedCell, rowCount, columnCount, setSelectedCell]);
+    scrollToRow(newRowIndex);
+    scrollToColumn(newColumnIndex);
+  };
 
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+  // TODO: still has bugs when typing outside the grid like in any other input on the screen
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    console.log('Key down:', e.key);
+    console.log('Is editing:', isEditing);
+    console.log('Is selected cell:', selectedCell);
+
+    // Skip if not focused on the table container
+    if (!tableRef.current?.contains(document.activeElement) && document.activeElement !== tableRef.current) return;
+
     if (isEditing) {
       if (e.key === 'Enter') {
         e.preventDefault();
-        stopEditing();
+        stopEditing(tableRef);
         moveSelection('down');
       } else if (e.key === 'Escape') {
         e.preventDefault();
-        stopEditing();
+        stopEditing(tableRef);
       } else if (e.key === 'Tab') {
         e.preventDefault();
-        stopEditing();
+        stopEditing(tableRef);
         moveSelection(e.shiftKey ? 'left' : 'right');
       }
       return;
@@ -99,12 +114,7 @@ export function useKeyboardNavigation({
         }
         break;
     }
-  }, [isEditing, selectedCell, stopEditing, moveSelection, startEditing, setEditValue]);
+  };
 
-  useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [handleKeyDown]);
-
-  return { moveSelection };
+  return { handleKeyDown };
 }

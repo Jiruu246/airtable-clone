@@ -28,11 +28,21 @@ CREATE TABLE "Table" (
 );
 
 -- CreateTable
+CREATE TABLE "ColumnType" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "display_name" TEXT NOT NULL,
+    "description" TEXT,
+
+    CONSTRAINT "ColumnType_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Column" (
     "id" TEXT NOT NULL,
     "table_id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "type" TEXT NOT NULL,
+    "column_type_id" TEXT NOT NULL,
     "order_index" INTEGER NOT NULL,
 
     CONSTRAINT "Column_pkey" PRIMARY KEY ("id")
@@ -120,6 +130,9 @@ CREATE INDEX "idx_bases_user_id" ON "Base"("user_id");
 CREATE INDEX "idx_tables_base_id" ON "Table"("base_id");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "ColumnType_name_key" ON "ColumnType"("name");
+
+-- CreateIndex
 CREATE INDEX "idx_columns_table_id" ON "Column"("table_id");
 
 -- CreateIndex
@@ -132,7 +145,10 @@ CREATE INDEX "idx_rows_table_id" ON "Row"("table_id");
 CREATE INDEX "idx_cells_table_value" ON "Cell"("table_id", "value");
 
 -- CreateIndex
-CREATE INDEX "idx_cells_table_col_row" ON "Cell"("table_id", "column_id", "row_id");
+CREATE INDEX "idx_cells_table_col" ON "Cell"("table_id", "column_id");
+
+-- CreateIndex
+CREATE INDEX "idx_cells_table_row" ON "Cell"("table_id", "row_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Account_provider_providerAccountId_key" ON "Account"("provider", "providerAccountId");
@@ -154,6 +170,9 @@ ALTER TABLE "Table" ADD CONSTRAINT "Table_base_id_fkey" FOREIGN KEY ("base_id") 
 
 -- AddForeignKey
 ALTER TABLE "Column" ADD CONSTRAINT "Column_table_id_fkey" FOREIGN KEY ("table_id") REFERENCES "Table"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Column" ADD CONSTRAINT "Column_column_type_id_fkey" FOREIGN KEY ("column_type_id") REFERENCES "ColumnType"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Row" ADD CONSTRAINT "Row_table_id_fkey" FOREIGN KEY ("table_id") REFERENCES "Table"("id") ON DELETE CASCADE ON UPDATE CASCADE;

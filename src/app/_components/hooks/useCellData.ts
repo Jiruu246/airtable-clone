@@ -1,15 +1,15 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { api } from "~/trpc/react";
 import { useDebouncedCallback } from "use-debounce";
 import type { CellPosition, TableRow, TableColumn } from "../types/DataTable.types";
 
-interface UseDataTableLogicProps {
+interface UseCellDataProps {
   tableId: string;
   rows: TableRow[];
   columns: TableColumn[];
 }
 
-export function useDataTableLogic({ tableId, rows, columns }: UseDataTableLogicProps) {
+export function useCellData({ tableId, rows, columns }: UseCellDataProps) {
   const [cellValues, setCellValues] = useState<Record<string, string>>({});
   const [selectedCell, setSelectedCell] = useState<CellPosition | null>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false);
@@ -20,7 +20,7 @@ export function useDataTableLogic({ tableId, rows, columns }: UseDataTableLogicP
   const upsertCellMutation = api.cell.upsert.useMutation({
     onError: (error, variables) => {
       console.error("Failed to upsert cell:", error);
-      
+
       const key = `${variables.rowId}-${variables.columnId}`;
       setCellValues(prev => {
         const updated = { ...prev };
@@ -48,53 +48,52 @@ export function useDataTableLogic({ tableId, rows, columns }: UseDataTableLogicP
     500
   );
 
-  const handleCellChange = useCallback(
-    (rowId: string, columnId: string, value: string) => {
-      const key = `${rowId}-${columnId}`;
-      
-      setCellValues(prev => ({
-        ...prev,
-        [key]: value,
-      }));
+  // TODO: Put the optimisitc update to the upsertCellMutation onMutate instead of here
+  const handleCellChange = (rowId: string, columnId: string, value: string) => {
+    const key = `${rowId}-${columnId}`;
 
-      utils.table.getTableRowsPaginated.setInfiniteData(
-        { id: tableId },
-        (oldData) => {
-          if (!oldData) return oldData;
-          
-          return {
-            ...oldData,
-            pages: oldData.pages.map(page => ({
-              ...page,
-              rows: page.rows.map(row => 
-                row.id === rowId 
-                  ? { ...row, [columnId]: value }
-                  : row
-              )
-            }))
-          };
-        }
-      );
+    setCellValues(prev => ({
+      ...prev,
+      [key]: value,
+    }));
 
-      debouncedSaveCell(rowId, columnId, value);
-    },
-    [debouncedSaveCell, utils.table.getTableRowsPaginated, tableId]
-  );
+    utils.table.getTableRowsPaginated.setInfiniteData(
+      { id: tableId },
+      (oldData) => {
+        if (!oldData) return oldData;
 
-  const startEditing = useCallback((rowIndex: number, columnIndex: number) => {
+        return {
+          ...oldData,
+          pages: oldData.pages.map(page => ({
+            ...page,
+            rows: page.rows.map(row =>
+              row.id === rowId
+                ? { ...row, [columnId]: value }
+                : row
+            )
+          }))
+        };
+      }
+    );
+
+    debouncedSaveCell(rowId, columnId, value);
+  };
+
+  const startEditing = (rowIndex: number, columnIndex: number) => {
+    console.log('Start editing cell at', rowIndex, columnIndex);
     const row = rows[rowIndex];
     const column = columns[columnIndex];
     if (!row || !column) return;
 
     const cellKey = `${row.id}-${column.id}`;
     const currentValue = cellValues[cellKey] ?? row[column.id] ?? "";
-    
+
     setSelectedCell({ rowIndex, columnIndex });
     setIsEditing(true);
     setEditValue(currentValue);
-  }, [rows, columns, cellValues]);
+  };
 
-  const stopEditing = useCallback(() => {
+  const stopEditing = (focusRef?: React.RefObject<HTMLDivElement | null>) => {
     if (!isEditing || !selectedCell) return;
 
     const row = rows[selectedCell.rowIndex];
@@ -105,7 +104,8 @@ export function useDataTableLogic({ tableId, rows, columns }: UseDataTableLogicP
 
     setIsEditing(false);
     setEditValue("");
-  }, [isEditing, selectedCell, editValue, rows, columns, handleCellChange]);
+    focusRef?.current?.focus();
+  };
 
   const handleCellClick = (rowIndex: number, columnIndex: number) => {
     setSelectedCell({ rowIndex, columnIndex });
@@ -120,12 +120,12 @@ export function useDataTableLogic({ tableId, rows, columns }: UseDataTableLogicP
     selectedCell,
     isEditing,
     editValue,
-    columns,
     setSelectedCell,
     setEditValue,
     startEditing,
     stopEditing,
     handleCellClick,
     handleCellDoubleClick,
+    handleCellChange,
   };
 }

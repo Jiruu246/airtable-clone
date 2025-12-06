@@ -55,15 +55,25 @@ model Table {
     @@index([baseId], map: "idx_tables_base_id")
 }
 
-model Column {
-    id         String @id @default(uuid())
-    tableId    String @map("table_id")
-    name       String
-    type       String // CHECK constraint will be handled at database level
-    orderIndex Int    @map("order_index")
+model ColumnType {
+    id          String @id // e.g., "TXT", "NUM" - 3 letter user-defined values
+    name        String @unique // e.g., "text", "number"
+    displayName String @map("display_name") // e.g., "Single line text", "Number"
+    description String? // Optional description of the column type
     
-    table Table  @relation(fields: [tableId], references: [id], onDelete: Cascade)
-    cells Cell[]
+    columns Column[]
+}
+
+model Column {
+    id           String @id @default(uuid())
+    tableId      String @map("table_id")
+    name         String
+    columnTypeId String @map("column_type_id")
+    orderIndex   Int    @map("order_index")
+    
+    table      Table      @relation(fields: [tableId], references: [id], onDelete: Cascade)
+    columnType ColumnType @relation(fields: [columnTypeId], references: [id])
+    cells      Cell[]
     
     @@index([tableId], map: "idx_columns_table_id")
     @@index([tableId, orderIndex], map: "idx_columns_table_order")

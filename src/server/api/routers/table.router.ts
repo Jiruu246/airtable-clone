@@ -39,7 +39,7 @@ const createTableWithSampleDataSchema = z.object({
   baseId: z.string().uuid("Invalid base ID"),
   columns: z.array(z.object({
     name: z.string(),
-    type: z.string(),
+    columnTypeId: z.string(),
     orderIndex: z.number(),
   })),
   rows: z.array(z.record(z.string())),
@@ -52,6 +52,12 @@ const getTableMetadataSchema = z.object({
 const createRandomRowsSchema = z.object({
   tableId: z.string().uuid("Invalid table ID"),
   numberOfRows: z.number().int().min(1).max(100000).default(1),
+});
+
+const addColumnSchema = z.object({
+  tableId: z.string().uuid("Invalid table ID"),
+  columnName: z.string().min(1, "Column name is required").max(100, "Column name must be 100 characters or less").optional(),
+  columnTypeId: z.string().min(1, "Column type ID is required"),
 });
 
 export const tableRouter = createTRPCRouter({
@@ -133,5 +139,15 @@ export const tableRouter = createTRPCRouter({
       });
       
       return { success: true, rowsCreated: input.numberOfRows };
+    }),
+
+  addColumn: protectedProcedure
+    .input(addColumnSchema)
+    .mutation(async ({ input }) => {
+      return await tableService.addColumn({
+        tableId: input.tableId,
+        columnName: input.columnName,
+        columnTypeId: input.columnTypeId,
+      });
     }),
 });

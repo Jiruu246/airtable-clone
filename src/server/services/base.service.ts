@@ -65,8 +65,8 @@ export class BaseServiceImpl implements BaseService {
       
       // Generate sample table data using Faker.js
       const columns = [
-        { name: "Name", type: "text", orderIndex: 0 },
-        { name: "Score", type: "number", orderIndex: 1 },
+        { name: "Name", columnTypeId: "TXT", orderIndex: 0 },
+        { name: "Score", columnTypeId: "NUM", orderIndex: 1 },
       ];
       const numberOfRows = 100;
       const rows = SampleDataGenerator.generateRowsForColumns(columns, numberOfRows);
