@@ -56,11 +56,6 @@ export function useKeyboardNavigation({
 
   // TODO: still has bugs when typing outside the grid like in any other input on the screen
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    console.log('Key down:', e.key);
-    console.log('Is editing:', isEditing);
-    console.log('Is selected cell:', selectedCell);
-
-    // Skip if not focused on the table container
     if (!tableRef.current?.contains(document.activeElement) && document.activeElement !== tableRef.current) return;
 
     if (isEditing) {

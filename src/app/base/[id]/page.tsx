@@ -1,9 +1,13 @@
+"use client";
+
 import { redirect } from "next/navigation";
-import { auth } from "~/server/auth";
-import { api } from "~/trpc/server";
+import { api } from "~/trpc/react";
 import { BaseSidebar } from "~/app/_components/BaseSidebar";
 import { BaseHeader } from "~/app/_components/BaseHeader";
 import { DataTable } from "~/app/_components/DataTable";
+import { HideFieldsDropdown } from "~/app/_components/HideFieldsDropdown";
+import { useSession } from "next-auth/react";
+import { useState, useRef, useEffect, use } from "react";
 
 import { IoChevronDown } from "react-icons/io5";
 import { GoPlus } from "react-icons/go";
@@ -25,19 +29,102 @@ interface BaseDetailPageProps {
   }>;
 }
 
-export default async function BaseDetailPage({ params }: BaseDetailPageProps) {
-  const session = await auth();
+export default function BaseDetailPage({ params }: BaseDetailPageProps) {
+  const { data: session } = useSession();
+  const [hiddenColumns, setHiddenColumns] = useState<Set<string>>(new Set());
+  const [isHideFieldsOpen, setIsHideFieldsOpen] = useState(false);
+  const hideFieldsRef = useRef<HTMLDivElement>(null);
 
+  //TODO: make it consistent with other auth checks
   if (!session) {
     redirect("/login");
   }
 
-  const { id: baseId } = await params;
+  // Extract baseId directly from params
+  const baseId = use(params).id;
 
-  const [base, tables] = await Promise.all([
-    api.base.getById({ id: baseId }),
-    api.table.getByBaseId({ baseId }),
-  ]);
+  const { data: base } = api.base.getById.useQuery({ id: baseId });
+  const { data: tables } = api.table.getByBaseId.useQuery({ baseId });
+  const { data: viewMetadata } = api.view.getViewMetadata.useQuery(
+    { id: tables?.[0]?.views?.[0]?.id ?? "" },
+    { enabled: !!tables?.[0]?.views?.[0]?.id }
+  );
+
+  // Get current view ID
+  const currentViewId = tables?.[0]?.views?.[0]?.id;
+  
+  // Load hidden columns from database
+  const { data: hiddenColumnsFromDb } = api.view.getHiddenColumns.useQuery(
+    { viewId: currentViewId ?? "" },
+    { enabled: !!currentViewId }
+  );
+  
+  // Mutations for hiding/showing columns
+  const addHiddenColumnMutation = api.view.addHiddenColumn.useMutation();
+  const removeHiddenColumnMutation = api.view.removeHiddenColumn.useMutation();
+
+  // Initialize hidden columns from database
+  useEffect(() => {
+    if (hiddenColumnsFromDb) {
+      setHiddenColumns(new Set(hiddenColumnsFromDb));
+    }
+  }, [hiddenColumnsFromDb]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (hideFieldsRef.current && !hideFieldsRef.current.contains(event.target as Node)) {
+        setIsHideFieldsOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleToggleColumn = async (columnId: string) => {
+    if (!currentViewId) return;
+    
+    // Optimistic update
+    const isCurrentlyHidden = hiddenColumns.has(columnId);
+    setHiddenColumns(prev => {
+      const newSet = new Set(prev);
+      if (isCurrentlyHidden) {
+        newSet.delete(columnId);
+      } else {
+        newSet.add(columnId);
+      }
+      return newSet;
+    });
+    
+    try {
+      // Save to database
+      if (isCurrentlyHidden) {
+        await removeHiddenColumnMutation.mutateAsync({
+          viewId: currentViewId,
+          columnId: columnId,
+        });
+      } else {
+        await addHiddenColumnMutation.mutateAsync({
+          viewId: currentViewId,
+          columnId: columnId,
+        });
+      }
+    } catch (error) {
+      // Revert optimistic update on error
+      console.error('Failed to toggle column visibility:', error);
+      setHiddenColumns(prev => {
+        const newSet = new Set(prev);
+        if (isCurrentlyHidden) {
+          // If we tried to show but failed, hide it again
+          newSet.add(columnId);
+        } else {
+          // If we tried to hide but failed, show it again
+          newSet.delete(columnId);
+        }
+        return newSet;
+      });
+    }
+  };
 
   return (
     <div className="h-screen bg-gray-100 grid grid-cols-[auto_1fr]">
@@ -45,13 +132,13 @@ export default async function BaseDetailPage({ params }: BaseDetailPageProps) {
       <BaseSidebar user={session.user} />
 
       <div className="grid grid-rows-[auto_auto_auto_1fr] overflow-hidden">
-        <BaseHeader baseName={base.name} />
+        <BaseHeader baseName={base?.name ?? "Loading..."} />
 
         {/* Top Header */}
         <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button className="flex items-center gap-2 text-gray-700 hover:bg-gray-100 px-3 py-1.5 rounded">
-              <span className="font-medium">{tables[0]?.name}</span>
+              <span className="font-medium">{tables?.[0]?.name}</span>
               <IoChevronDown className="w-4 h-4" />
             </button>
             <button className="flex items-center gap-2 text-gray-700 hover:bg-gray-100 px-3 py-1.5 rounded">
@@ -83,10 +170,21 @@ export default async function BaseDetailPage({ params }: BaseDetailPageProps) {
             </button>
           </div>
           <div className="flex items-center gap-2">
-            <button className="flex items-center gap-2 text-gray-600 hover:bg-gray-100 px-3 py-1.5 rounded text-sm">
-              <FaRegEyeSlash className="w-4 h-4" />
-              <span>Hide fields</span>
-            </button>
+            <div className="relative" ref={hideFieldsRef}>
+              <button 
+                className="flex items-center gap-2 text-gray-600 hover:bg-gray-100 px-3 py-1.5 rounded text-sm"
+                onClick={() => setIsHideFieldsOpen(!isHideFieldsOpen)}
+              >
+                <FaRegEyeSlash className="w-4 h-4" />
+                <span>Hide fields</span>
+              </button>
+              <HideFieldsDropdown
+                isOpen={isHideFieldsOpen}
+                columns={viewMetadata?.columns ?? []}
+                hiddenColumns={hiddenColumns}
+                onToggleColumn={handleToggleColumn}
+              />
+            </div>
             <button className="flex items-center gap-2 text-gray-600 hover:bg-gray-100 px-3 py-1.5 rounded text-sm">
               <IoFilterOutline className="w-4 h-4" />
               <span>Filter</span>
@@ -150,8 +248,12 @@ export default async function BaseDetailPage({ params }: BaseDetailPageProps) {
           </div>
 
           {/* Table Content Area */}
-          {tables.length > 0 ? (
-            <DataTable tableId={tables[0]!.id} />
+          {tables?.[0]?.views?.[0] ? (
+            <DataTable 
+              tableId={tables[0].id}
+              viewId={tables[0].views[0].id} 
+              visibleColumns={viewMetadata ? viewMetadata.columns.filter(col => !hiddenColumns.has(col.id)) : []}
+            />
           ) : (
             <div className="bg-white p-12">
               <div className="text-center">

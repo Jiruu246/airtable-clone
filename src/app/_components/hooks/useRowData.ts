@@ -2,17 +2,18 @@ import { api } from "~/trpc/react";
 
 interface UseRowDataProps {
   tableId: string;
+  viewId: string;
   refetch: () => Promise<unknown>;
 }
 
-export function useRowData({ tableId, refetch }: UseRowDataProps) {
+export function useRowData({ tableId, viewId, refetch }: UseRowDataProps) {
   const utils = api.useUtils();
 
   // TODO: Find a better way to optimize refetching after adding rows
   const createRandomRowsMutation = api.table.createRandomRows.useMutation({
     onSuccess: () => {
       void refetch();
-      void utils.table.getTableMetadata.invalidate({ id: tableId });
+      void utils.view.getViewMetadata.invalidate({ id: viewId });
     },
     onError: (error) => {
       console.error("Failed to create random rows:", error);

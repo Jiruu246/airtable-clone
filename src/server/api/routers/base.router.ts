@@ -60,18 +60,4 @@ export const baseRouter = createTRPCRouter({
       
       return { success: true };
     }),
-
-  // getFirstTableData: protectedProcedure
-  //   .input(getBaseSchema)
-  //   .query(async ({ input }) => {
-  //     // Get tables for the base
-  //     const tables = await tableService.listTablesByBaseId(input.id);
-      
-  //     if (tables.length === 0) {
-  //       return null;
-  //     }
-      
-  //     // Get paginated data for the first table
-  //     return await tableService.getTableDataPaginated(tables[0]!.id, undefined, 50);
-  //   }),
 });

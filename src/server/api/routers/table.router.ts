@@ -20,16 +20,6 @@ const getTableSchema = z.object({
   id: z.string().uuid("Invalid table ID"),
 });
 
-const getTableDataSchema = z.object({
-  id: z.string().uuid("Invalid table ID"),
-});
-
-const getTableDataPaginatedSchema = z.object({
-  id: z.string().uuid("Invalid table ID"),
-  cursor: z.string().optional(),
-  limit: z.number().int().min(1).max(1000).default(50),
-});
-
 const getTablesByBaseSchema = z.object({
   baseId: z.string().uuid("Invalid base ID"),
 });
@@ -43,10 +33,6 @@ const createTableWithSampleDataSchema = z.object({
     orderIndex: z.number(),
   })),
   rows: z.array(z.record(z.string())),
-});
-
-const getTableMetadataSchema = z.object({
-  id: z.string().uuid("Invalid table ID"),
 });
 
 const createRandomRowsSchema = z.object({
@@ -71,18 +57,6 @@ export const tableRouter = createTRPCRouter({
     .input(getTableSchema)
     .query(async ({ input }) => {
       return await tableService.getById(input.id);
-    }),
-
-  getTableData: protectedProcedure
-    .input(getTableDataSchema)
-    .query(async ({ input }) => {
-      return await tableService.getTableData(input.id);
-    }),
-
-  getTableRowsPaginated: protectedProcedure
-    .input(getTableDataPaginatedSchema)
-    .query(async ({ input }) => {
-      return await tableService.getTableRowsPaginated(input.id, input.cursor, input.limit);
     }),
 
   create: protectedProcedure
@@ -122,12 +96,6 @@ export const tableRouter = createTRPCRouter({
         columns: input.columns,
         rows: input.rows,
       });
-    }),
-
-  getTableMetadata: protectedProcedure
-    .input(getTableMetadataSchema)
-    .query(async ({ input }) => {
-      return await tableService.getTableMetadata(input.id);
     }),
 
   createRandomRows: protectedProcedure
