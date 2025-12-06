@@ -6,7 +6,12 @@ export interface TableRow {
 export interface TableColumn {
   id: string;
   name: string;
-  type: string;
+  columnTypeId: string;
+  columnType: {
+    id: string;
+    name: string;
+    displayName: string;
+  };
   orderIndex: number;
 }
 

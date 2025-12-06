@@ -63,7 +63,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
     positionClasses = "top-full mt-1 right-0",
     width = "w-48",
     children,
-    header
+    header,
 }) => {
     if (!isOpen) return null;
 
