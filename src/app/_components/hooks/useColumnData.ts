@@ -2,14 +2,15 @@ import { api } from "~/trpc/react";
 
 interface UseColumnDataProps {
   tableId: string;
+  viewId: string;
 }
 
-export function useColumnData({ tableId }: UseColumnDataProps) {
+export function useColumnData({ tableId, viewId }: UseColumnDataProps) {
   const utils = api.useUtils();
 
   const addColumnMutation = api.table.addColumn.useMutation({
     onSuccess: () => {
-      void utils.table.getTableMetadata.invalidate({ id: tableId });
+      void utils.view.getViewMetadata.invalidate({ id: viewId });
     },
     onError: (error) => {
       console.error("Failed to add column:", error);

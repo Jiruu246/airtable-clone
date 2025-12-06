@@ -9,7 +9,6 @@ export interface TableRepository {
   update(id: string, data: UpdateTableData): Promise<Table>;
   delete(id: string): Promise<void>;
   createWithColumnsAndRows(data: CreateTableWithDataInput): Promise<Table>;
-  getTableData(id: string): Promise<TableData | null>;
   getTableRowsPaginated(id: string, cursor?: string, limit?: number): Promise<PaginatedTableData>;
   getTableMetadata(id: string): Promise<TableMetadata | null>;
   createRowsWithData(tableId: string, rows: Record<string, string>[], columns: { id: string; name: string; }[]): Promise<void>;
@@ -29,6 +28,10 @@ export interface Table {
   id: string;
   name: string;
   baseId: string;
+  views?: {
+    id: string;
+    name: string;
+  }[];
 }
 
 export interface CreateTableData {
@@ -106,6 +109,12 @@ export class PrismaTableRepository implements TableRepository {
         id: true,
         name: true,
         baseId: true,
+        views: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
       orderBy: {
         name: "asc",
@@ -122,6 +131,12 @@ export class PrismaTableRepository implements TableRepository {
         id: true,
         name: true,
         baseId: true,
+        views: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
     });
   }
@@ -244,72 +259,6 @@ export class PrismaTableRepository implements TableRepository {
       maxWait: 15000,
       timeout: 60000,
     });
-  }
-
-  async getTableData(id: string): Promise<TableData | null> {
-    const table = await db.table.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        name: true,
-        baseId: true,
-        columns: {
-          select: {
-            id: true,
-            name: true,
-            columnTypeId: true,
-            orderIndex: true,
-            columnType: {
-              select: {
-                id: true,
-                name: true,
-                displayName: true,
-              },
-            },
-          },
-          orderBy: {
-            orderIndex: "asc",
-          },
-        },
-        rows: {
-          select: {
-            id: true,
-            cells: {
-              select: {
-                columnId: true,
-                value: true,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    if (!table) {
-      return null;
-    }
-
-    // Transform the data into a more usable format for TanStack Table
-    const rows = table.rows.map((row) => {
-      const rowData: { id: string; [columnId: string]: string | null } = {
-        id: row.id.toString(),
-      };
-      
-      // Add cell values mapped by column ID
-      row.cells.forEach((cell) => {
-        rowData[cell.columnId] = cell.value;
-      });
-      
-      return rowData;
-    });
-
-    return {
-      id: table.id,
-      name: table.name,
-      baseId: table.baseId,
-      columns: table.columns,
-      rows,
-    };
   }
 
   async getTableRowsPaginated(id: string, cursor?: string, limit = 50): Promise<PaginatedTableData> {
