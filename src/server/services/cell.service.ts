@@ -3,7 +3,6 @@ import { db } from "~/server/db";
 import {
   type CellRepository,
   type Cell,
-  type UpdateCellData,
   type UpsertCellData,
   type PaginatedTableData,
   type GetPaginatedRowsParams,
@@ -11,7 +10,6 @@ import {
 } from "~/server/repositories/cell.repository";
 
 export interface CellService {
-  updateCell(data: UpdateCellInput): Promise<Cell>;
   deleteCell(data: DeleteCellInput): Promise<void>;
   upsertCell(data: UpsertCellInput): Promise<Cell>;
   getPaginatedRows(params: GetPaginatedRowsInput): Promise<PaginatedTableData>;
@@ -47,29 +45,50 @@ export interface GetPaginatedRowsInput {
 export class CellServiceImpl implements CellService {
   constructor(private readonly repository: CellRepository) {}
 
-  async updateCell(data: UpdateCellInput): Promise<Cell> {
-    // Check if the cell exists
-    const existingCell = await this.repository.findByRowAndColumn(data.rowId, data.columnId);
-    
-    if (!existingCell) {
+  private async validateCellValue(columnId: string, value: string | null): Promise<void> {
+    if (value === null || value === '') {
+      // Null or empty values are always allowed
+      return;
+    }
+
+    // Get column type information
+    const column = await db.column.findUnique({
+      where: { id: columnId },
+      select: {
+        columnType: {
+          select: { id: true }
+        }
+      }
+    });
+
+    if (!column) {
       throw new TRPCError({
         code: "NOT_FOUND",
-        message: "Cell not found",
+        message: "Column not found",
       });
     }
 
-    const updateData: UpdateCellData = {
-      value: data.value,
-    };
+    const columnTypeId = column.columnType.id;
 
-    try {
-      return await this.repository.update(data.rowId, data.columnId, updateData);
-    } catch (error) {
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to update cell",
-        cause: error,
-      });
+    switch (columnTypeId) {
+      case 'NUM':
+        // Validate that the value is a valid number
+        const numValue = Number(value);
+        if (isNaN(numValue) || !isFinite(numValue)) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Value must be a valid number for numeric columns",
+          });
+        }
+        break;
+      case 'TXT':
+        // Text columns accept any string value, no validation needed
+        break;
+      default:
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Unsupported column type: ${columnTypeId}`,
+        });
     }
   }
 
@@ -124,6 +143,9 @@ export class CellServiceImpl implements CellService {
           message: "Invalid column for the specified table",
         });
       }
+
+      // Validate the cell value against column type constraints
+      await this.validateCellValue(data.columnId, data.value);
 
       const upsertData: UpsertCellData = {
         tableId: data.tableId,

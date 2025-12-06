@@ -2,12 +2,6 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { cellService } from "~/server/services/cell.service";
 
-const updateCellSchema = z.object({
-  rowId: z.string().min(1, "Row ID is required"),
-  columnId: z.string().uuid("Invalid column ID"),
-  value: z.string().nullable(),
-});
-
 const deleteCellSchema = z.object({
   rowId: z.string().min(1, "Row ID is required"),
   columnId: z.string().uuid("Invalid column ID"),
@@ -30,16 +24,6 @@ const getPaginatedRowsSchema = z.object({
 });
 
 export const cellRouter = createTRPCRouter({
-  update: protectedProcedure
-    .input(updateCellSchema)
-    .mutation(async ({ input }) => {
-      return await cellService.updateCell({
-        rowId: input.rowId,
-        columnId: input.columnId,
-        value: input.value,
-      });
-    }),
-
   delete: protectedProcedure
     .input(deleteCellSchema)
     .mutation(async ({ input }) => {

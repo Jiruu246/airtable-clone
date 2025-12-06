@@ -4,11 +4,15 @@ import React, { useRef, useEffect } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { TableHeader } from "./TableHeader";
 import { VirtualizedRow } from "./VirtualizedRow";
-import { useDataTableLogic } from "./hooks/useDataTableLogic";
+import { useCellData } from "./hooks/useCellData";
+import { useRowData } from "./hooks/useRowData";
+import { useColumnData } from "./hooks/useColumnData";
 import { useKeyboardNavigation } from "./hooks/useKeyboardNavigation";
 import { api } from "~/trpc/react";
 import { GoPlus } from "react-icons/go";
 import { PiMagicWandThin } from "react-icons/pi";
+
+const BOTTOM_PADDING = 400;
 
 export interface DataTableProps {
   tableId: string;
@@ -16,7 +20,9 @@ export interface DataTableProps {
 
 export function DataTable({ tableId }: DataTableProps) {
   const parentRef = useRef<HTMLDivElement>(null);
+  const metaData = api.table.getTableMetadata.useQuery({ id: tableId });
 
+  // The data update is now broken when go back and forth between base, the data is not up to date until a refetch is triggered
   const {
     data,
     fetchNextPage,
@@ -30,46 +36,9 @@ export function DataTable({ tableId }: DataTableProps) {
     }
   );
 
-  const createRandomRowsMutation = api.table.createRandomRows.useMutation({
-    onSuccess: () => {
-      void refetch();
-    },
-    onError: (error) => {
-      console.error("Failed to create random rows:", error);
-    },
-  });
-
   const rows = data?.pages.flatMap(page => page.rows) ?? [];
 
-  const columns = data?.pages[0]?.columns ?? [];
-
-  const {
-    cellValues,
-    selectedCell,
-    isEditing,
-    editValue,
-    setSelectedCell,
-    setEditValue,
-    startEditing,
-    stopEditing,
-    handleCellClick,
-    handleCellDoubleClick,
-  } = useDataTableLogic({
-    tableId,
-    rows,
-    columns,
-  });
-
-  useKeyboardNavigation({
-    selectedCell,
-    isEditing,
-    rowCount: rows.length,
-    columnCount: columns.length,
-    setSelectedCell,
-    setEditValue,
-    startEditing,
-    stopEditing,
-  });
+  const columns = metaData.data?.columns ?? [];
 
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
@@ -84,6 +53,46 @@ export function DataTable({ tableId }: DataTableProps) {
     getScrollElement: () => parentRef.current,
     estimateSize: () => 200,
     overscan: 5,
+  });
+
+  const {
+    cellValues,
+    selectedCell,
+    isEditing,
+    editValue,
+    setSelectedCell,
+    setEditValue,
+    startEditing,
+    stopEditing,
+    handleCellClick,
+    handleCellDoubleClick,
+  } = useCellData({
+    tableId,
+    rows,
+    columns,
+  });
+
+  const { isAddingRow, handleAddRows } = useRowData({
+    tableId,
+    refetch,
+  });
+
+  const { isAddingColumn, handleAddColumn } = useColumnData({
+    tableId,
+  });
+
+  const { handleKeyDown } = useKeyboardNavigation({
+    tableRef: parentRef,
+    selectedCell,
+    isEditing,
+    rowCount: rows.length,
+    columnCount: columns.length,
+    setSelectedCell,
+    scrollToRow: rowVirtualizer.scrollToIndex,
+    scrollToColumn: columnVirtualizer.scrollToIndex,
+    setEditValue,
+    startEditing,
+    stopEditing,
   });
 
   const virtualRows = rowVirtualizer.getVirtualItems();
@@ -109,25 +118,23 @@ export function DataTable({ tableId }: DataTableProps) {
 
   return (
     <div className="h-full w-full overflow-hidden bg-white relative">
-      <TableHeader
-        columns={columns}
-        virtualColumns={virtualColumns}
-        totalWidth={columnVirtualizer.getTotalSize()}
-      />
-
-      {/* Table Body */}
       <div
         ref={parentRef}
-        className="h-full overflow-auto focus:outline-none"
-        style={{
-          height: "calc(100% - 40px)",
-        }}
+        onKeyDown={handleKeyDown}
+        className="h-full overflow-auto focus:outline-none bg-gray-100"
         tabIndex={0}
       >
+        <TableHeader
+          columns={columns}
+          virtualColumns={virtualColumns}
+          totalWidth={columnVirtualizer.getTotalSize()}
+          onAddColumn={handleAddColumn}
+          isAddingColumn={isAddingColumn}
+        />
         <div
           className="relative"
           style={{
-            height: `${rowVirtualizer.getTotalSize() + 400}px`,
+            height: `${rowVirtualizer.getTotalSize() + BOTTOM_PADDING}px`,
             width: `${columnVirtualizer.getTotalSize()}px`,
           }}
         >
@@ -170,42 +177,31 @@ export function DataTable({ tableId }: DataTableProps) {
             </div>
           )}
         </div>
-      </div>
-
-      {/* Floating Footer */}
-      <div className="absolute bottom-0 left-0 right-0 h-10 bg-gray-50 border-t border-gray-200 flex items-center px-4 text-sm text-gray-600 shadow-lg">
-        <div className="flex items-center gap-2 text-gray-900 font-light text-xs">
-          <span>{data?.pages[0]?.totalRows} records</span>
+        {/* Floating Footer */}
+        <div className="absolute bottom-0 left-0 right-0 h-10 bg-gray-50 border-t border-gray-200 flex items-center px-4 text-sm text-gray-600 shadow-lg">
+          <div className="flex items-center gap-2 text-gray-900 font-light text-xs">
+            <span>{metaData.data?.totalRows} records</span>
+          </div>
         </div>
-      </div>
 
-      {/* Floating Add Record Button */}
-      <div className="absolute bottom-9 left-3 flex shadow-lg bg-white rounded-full border border-gray-300">
-        <button
-          className=" hover:bg-gray-200 text-gray-800  px-4 py-2 rounded-l-full  transition-colors duration-200 flex items-center justify-center"
-          onClick={() => {
-            createRandomRowsMutation.mutate({
-              tableId: tableId,
-              numberOfRows: 1,
-            });
-          }}
-          disabled={createRandomRowsMutation.isPending}
-        >
-          <GoPlus className="w-5 h-5" />
-        </button>
-        <button
-          className="bg-white hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-r-full border-l border-gray-300 transition-colors duration-200 flex items-center justify-center gap-2"
-          onClick={() => {
-            createRandomRowsMutation.mutate({
-              tableId: tableId,
-              numberOfRows: 100000,
-            });
-          }}
-          disabled={createRandomRowsMutation.isPending}
-        >
-          <PiMagicWandThin className="w-5 h-5" />
-          <span className="text-xs">Add 100,000 rows</span>
-        </button>
+        {/* Floating Add Record Button */}
+        <div className="absolute bottom-9 left-3 flex shadow-lg bg-white rounded-full border border-gray-300">
+          <button
+            className=" hover:bg-gray-200 text-gray-800  px-4 py-2 rounded-l-full  transition-colors duration-200 flex items-center justify-center"
+            onClick={() => handleAddRows(1)}
+            disabled={isAddingRow}
+          >
+            <GoPlus className="w-5 h-5" />
+          </button>
+          <button
+            className="bg-white hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-r-full border-l border-gray-300 transition-colors duration-200 flex items-center justify-center gap-2"
+            onClick={() => handleAddRows(100000)}
+            disabled={isAddingRow}
+          >
+            <PiMagicWandThin className="w-5 h-5" />
+            <span className="text-xs">Add 100,000 rows</span>
+          </button>
+        </div>
       </div>
     </div>
   );
