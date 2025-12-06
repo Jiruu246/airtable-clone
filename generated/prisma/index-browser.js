@@ -141,11 +141,18 @@ exports.Prisma.TableScalarFieldEnum = {
   name: 'name'
 };
 
+exports.Prisma.ColumnTypeScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  displayName: 'displayName',
+  description: 'description'
+};
+
 exports.Prisma.ColumnScalarFieldEnum = {
   id: 'id',
   tableId: 'tableId',
   name: 'name',
-  type: 'type',
+  columnTypeId: 'columnTypeId',
   orderIndex: 'orderIndex'
 };
 
@@ -232,6 +239,7 @@ exports.Prisma.ModelName = {
   User: 'User',
   Base: 'Base',
   Table: 'Table',
+  ColumnType: 'ColumnType',
   Column: 'Column',
   Row: 'Row',
   Cell: 'Cell',
