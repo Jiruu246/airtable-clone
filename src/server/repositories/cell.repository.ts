@@ -5,7 +5,6 @@ export interface CellRepository {
   update(rowId: string, columnId: string, data: UpdateCellData): Promise<Cell>;
   delete(rowId: string, columnId: string): Promise<void>;
   upsert(rowId: string, columnId: string, data: UpsertCellData): Promise<Cell>;
-  getPaginatedRows(params: GetPaginatedRowsParams): Promise<PaginatedTableData>;
 }
 
 export interface Cell {
@@ -124,106 +123,6 @@ export class PrismaCellRepository implements CellRepository {
       columnId: cell.columnId,
       tableId: cell.tableId,
       value: cell.value,
-    };
-  }
-
-  async getPaginatedRows(params: GetPaginatedRowsParams): Promise<PaginatedTableData> {
-    const {
-      tableId,
-      limit = 50,
-      cursor,
-      search,
-      sortBy = 'id',
-      sortDirection = 'asc'
-    } = params;
-
-    // Build where clause for search and cursor
-    const whereClause: {
-      tableId: string;
-      id?: { gt: bigint } | { lt: bigint };
-    } = {
-      tableId,
-    };
-
-    // Add cursor condition for pagination
-    if (cursor) {
-      const cursorId = BigInt(cursor);
-      whereClause.id = sortDirection === 'asc' 
-        ? { gt: cursorId }
-        : { lt: cursorId };
-    }
-
-    // Add search condition if provided
-    let searchWhereClause = undefined;
-    if (search?.trim()) {
-      searchWhereClause = {
-        cells: {
-          some: {
-            value: {
-              contains: search.trim(),
-              mode: 'insensitive' as const,
-            },
-          },
-        },
-      };
-    }
-
-    // Get total count for hasMore calculation
-    const totalCount = await db.row.count({
-      where: {
-        ...whereClause,
-        ...searchWhereClause,
-      },
-    });
-
-    // Fetch rows with cells
-    const rows = await db.row.findMany({
-      where: {
-        ...whereClause,
-        ...searchWhereClause,
-      },
-      include: {
-        cells: {
-          select: {
-            columnId: true,
-            value: true,
-          },
-        },
-      },
-      orderBy: {
-        [sortBy]: sortDirection,
-      },
-      take: limit + 1, // Take one more to check if there are more results
-    });
-
-    // Check if there are more results
-    const hasMore = rows.length > limit;
-    const resultRows = hasMore ? rows.slice(0, limit) : rows;
-
-    // Get next cursor
-    const nextCursor = hasMore && resultRows.length > 0
-      ? resultRows[resultRows.length - 1]?.id.toString()
-      : undefined;
-
-    // Transform rows to the expected format
-    const transformedRows: RowData[] = resultRows.map((row) => {
-      const cells: Record<string, string | null> = {};
-      
-      row.cells.forEach((cell) => {
-        cells[cell.columnId] = cell.value;
-      });
-
-      return {
-        id: row.id.toString(),
-        cells,
-      };
-    });
-
-    return {
-      rows: transformedRows,
-      nextCursor,
-      hasMore,
-      totalCount,
     };
   }
 }

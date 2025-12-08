@@ -55,7 +55,7 @@ export function VirtualizedRow({
           <TableCell
             key={cellKey}
             value={cellValue}
-            type={column.columnTypeId}
+            type={column.columnType}
             isSelected={isSelected}
             isEditing={isCellEditing}
             editValue={editValue}

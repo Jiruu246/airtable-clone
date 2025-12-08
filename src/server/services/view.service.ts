@@ -4,8 +4,14 @@ import {
   type View,
   type PaginatedViewData,
   type ViewMetadata,
+  type ViewFilter,
+  type ViewFilterCondition,
   viewRepository,
 } from "~/server/repositories/view.repository";
+import { ColumnTypes, type ColumnTypeValue } from "~/data/columnTypes";
+import { TextFilterOperators, NumberFilterOperators } from "~/data/filterOperators";
+import { tableRepository } from "../repositories/table.repository";
+import { LogicalOperators, type LogicalOperatorValue } from "~/data/logicalOperators";
 
 export interface ViewService {
   listViewsByTableId(tableId: string): Promise<View[]>;
@@ -14,6 +20,12 @@ export interface ViewService {
   addHiddenColumn(viewId: string, columnId: string): Promise<void>;
   removeHiddenColumn(viewId: string, columnId: string): Promise<void>;
   getHiddenColumns(viewId: string): Promise<string[]>;
+  getViewFilters(viewId: string): Promise<ViewFilter | null>;
+  addViewFilterCondition(viewId: string, condition: ViewFilterCondition, operator?: LogicalOperatorValue): Promise<void>;
+  removeViewFilterCondition(viewId: string, conditionIndex: number): Promise<void>;
+  updateViewFilterCondition(viewId: string, conditionIndex: number, condition: ViewFilterCondition): Promise<void>;
+  updateViewFilterOperator(viewId: string, operator: LogicalOperatorValue): Promise<void>;
+  validateFilterConditionForColumnType(condition: ViewFilterCondition): Promise<boolean>;
 }
 
 export class ViewServiceImpl implements ViewService {
@@ -35,7 +47,8 @@ export class ViewServiceImpl implements ViewService {
 
   async getViewRowsPaginated(viewId: string, cursor?: string, limit?: number): Promise<PaginatedViewData> {
     try {
-      return await this.viewRepository.getViewRowsPaginated(viewId, cursor, limit);
+      const viewFilters = await this.viewRepository.getViewFilter(viewId);
+      return await this.viewRepository.getViewRowsPaginated(viewId, cursor, limit, viewFilters);
     } catch (error) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
@@ -100,6 +113,167 @@ export class ViewServiceImpl implements ViewService {
         cause: error,
       });
     }
+  }
+
+  async getViewFilters(viewId: string): Promise<ViewFilter | null> {
+    try {
+      return await this.viewRepository.getViewFilter(viewId);
+    } catch (error) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to get view filters",
+        cause: error,
+      });
+    }
+  }
+
+  async addViewFilterCondition(viewId: string, condition: ViewFilterCondition, operator: LogicalOperatorValue = LogicalOperators.AND.value): Promise<void> {
+    try {
+      if (!await this.validateFilterConditionForColumnType(condition)) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Invalid filter condition for column type",
+        });
+      }
+      
+      const processedCondition = await this.roundConditionValueIfNeeded(condition);
+      
+      await this.viewRepository.addViewFilterCondition(viewId, processedCondition, operator);
+    } catch (error) {
+      // Check if this is a validation error and preserve the message
+      if (error instanceof TRPCError) {
+        throw error;
+      }
+      if (error instanceof Error) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: error.message,
+          cause: error,
+        });
+      }
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to add view filter condition",
+        cause: error,
+      });
+    }
+  }
+
+  async removeViewFilterCondition(viewId: string, conditionIndex: number): Promise<void> {
+    try {
+      await this.viewRepository.removeViewFilterCondition(viewId, conditionIndex);
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: error.message,
+          cause: error,
+        });
+      }
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to remove view filter condition",
+        cause: error,
+      });
+    }
+  }
+
+  async updateViewFilterCondition(viewId: string, conditionIndex: number, condition: ViewFilterCondition): Promise<void> {
+    try {
+      if (!await this.validateFilterConditionForColumnType(condition)) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Invalid filter condition for column type",
+        });
+      }
+      
+      const processedCondition = await this.roundConditionValueIfNeeded(condition);
+      
+      await this.viewRepository.updateViewFilterCondition(viewId, conditionIndex, processedCondition);
+    } catch (error) {
+      // Check if this is a validation error and preserve the message
+      if (error instanceof TRPCError) {
+        throw error;
+      }
+      if (error instanceof Error) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: error.message,
+          cause: error,
+        });
+      }
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to update view filter condition",
+        cause: error,
+      });
+    }
+  }
+
+  async updateViewFilterOperator(viewId: string, operator: LogicalOperatorValue): Promise<void> {
+    try {
+      await this.viewRepository.updateViewFilterOperator(viewId, operator);
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: error.message,
+          cause: error,
+        });
+      }
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to update view filter operator",
+        cause: error,
+      });
+    }
+  }
+
+  async validateFilterConditionForColumnType(condition: ViewFilterCondition): Promise<boolean> {
+    const columnMetadata = await tableRepository.getColumnMetadata(condition.column_id);
+    if (!columnMetadata) {
+      return false;
+    }
+
+    const { columnType } = columnMetadata;
+    const { operator } = condition;
+      
+    switch (columnType) {
+      case ColumnTypes.Text.value:
+        if (!TextFilterOperators.some(op => op.value === operator)) {
+          return false;
+        }
+        break;
+      case ColumnTypes.Number.value:
+        if (!NumberFilterOperators.some(op => op.value === operator)) {
+          return false;
+        }
+        break;
+      default:
+        return false;
+    }
+    return true;
+  }
+
+  async roundConditionValueIfNeeded(condition: ViewFilterCondition): Promise<ViewFilterCondition> {
+    const columnMetadata = await tableRepository.getColumnMetadata(condition.column_id);
+    if (!columnMetadata) {
+      return condition;
+    }
+
+    const { columnType } = columnMetadata;
+    
+    if (columnType === ColumnTypes.Number.value && condition.value) {
+      const numValue = parseFloat(condition.value);
+      if (!isNaN(numValue)) {
+        return {
+          ...condition,
+          value: numValue.toFixed(1)
+        };
+      }
+    }
+    
+    return condition;
   }
 }
 

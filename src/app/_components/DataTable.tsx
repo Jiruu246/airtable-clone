@@ -125,7 +125,7 @@ export function DataTable({ tableId, viewId, visibleColumns }: DataTableProps) {
     <div className="h-full w-full overflow-hidden bg-white relative">
       <div
         ref={parentRef}
-        className="h-full overflow-auto focus:outline-none bg-gray-100"
+        className="h-full overflow-auto bg-gray-100"
       >
         <TableHeader
           columns={visibleColumns}
@@ -138,7 +138,7 @@ export function DataTable({ tableId, viewId, visibleColumns }: DataTableProps) {
           ref={tableContentRef}
           onKeyDown={handleKeyDown}
           tabIndex={0}
-          className="relative"
+          className="relative focus:outline-none"
           style={{
             height: `${rowVirtualizer.getTotalSize() + BOTTOM_PADDING}px`,
             width: `${columnVirtualizer.getTotalSize()}px`,

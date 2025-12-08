@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { viewService } from "~/server/services/view.service";
+import { ColumnTypeZodEnum, FilterOperatorZodEnum, LogicalOperatorZodEnum } from "../schema/schema";
+import { LogicalOperators } from "~/data/logicalOperators";
 
 const getViewRowsPaginatedSchema = z.object({
   id: z.string().uuid("Invalid view ID"),
@@ -18,7 +20,7 @@ const listViewsByTableSchema = z.object({
 
 const addHiddenColumnSchema = z.object({
   viewId: z.string().uuid("Invalid view ID"),
-  columnId: z.string().uuid("Invalid column ID"),
+  columnId : z.string().uuid("Invalid column ID"),
 });
 
 const removeHiddenColumnSchema = z.object({
@@ -28,6 +30,38 @@ const removeHiddenColumnSchema = z.object({
 
 const getHiddenColumnsSchema = z.object({
   viewId: z.string().uuid("Invalid view ID"),
+});
+
+const viewFilterConditionSchema = z.object({
+  column_id: z.string().uuid("Invalid column ID"),
+  operator: FilterOperatorZodEnum,
+  value: z.string().nullable(),
+});
+
+const getViewFiltersSchema = z.object({
+  viewId: z.string().uuid("Invalid view ID"),
+});
+
+const addViewFilterConditionSchema = z.object({
+  viewId: z.string().uuid("Invalid view ID"),
+  condition: viewFilterConditionSchema,
+  operator: LogicalOperatorZodEnum.optional().default(LogicalOperators.AND.value),
+});
+
+const removeViewFilterConditionSchema = z.object({
+  viewId: z.string().uuid("Invalid view ID"),
+  conditionIndex: z.number().int().min(0),
+});
+
+const updateViewFilterConditionSchema = z.object({
+  viewId: z.string().uuid("Invalid view ID"),
+  conditionIndex: z.number().int().min(0),
+  condition: viewFilterConditionSchema,
+});
+
+const updateViewFilterOperatorSchema = z.object({
+  viewId: z.string().uuid("Invalid view ID"),
+  operator: LogicalOperatorZodEnum,
 });
 
 export const viewRouter = createTRPCRouter({
@@ -67,5 +101,39 @@ export const viewRouter = createTRPCRouter({
     .input(getHiddenColumnsSchema)
     .query(async ({ input }) => {
       return await viewService.getHiddenColumns(input.viewId);
+    }),
+
+  getViewFilters: protectedProcedure
+    .input(getViewFiltersSchema)
+    .query(async ({ input }) => {
+      return await viewService.getViewFilters(input.viewId);
+    }),
+
+  addViewFilterCondition: protectedProcedure
+    .input(addViewFilterConditionSchema)
+    .mutation(async ({ input }) => {
+      await viewService.addViewFilterCondition(input.viewId, input.condition, input.operator);
+      return { success: true };
+    }),
+
+  removeViewFilterCondition: protectedProcedure
+    .input(removeViewFilterConditionSchema)
+    .mutation(async ({ input }) => {
+      await viewService.removeViewFilterCondition(input.viewId, input.conditionIndex);
+      return { success: true };
+    }),
+
+  updateViewFilterCondition: protectedProcedure
+    .input(updateViewFilterConditionSchema)
+    .mutation(async ({ input }) => {
+      await viewService.updateViewFilterCondition(input.viewId, input.conditionIndex, input.condition);
+      return { success: true };
+    }),
+
+  updateViewFilterOperator: protectedProcedure
+    .input(updateViewFilterOperatorSchema)
+    .mutation(async ({ input }) => {
+      await viewService.updateViewFilterOperator(input.viewId, input.operator);
+      return { success: true };
     }),
 });

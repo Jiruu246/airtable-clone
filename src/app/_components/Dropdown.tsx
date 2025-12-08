@@ -68,7 +68,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
     if (!isOpen) return null;
 
     return (
-        <div className={`absolute ${positionClasses} ${width} bg-white rounded-lg shadow-lg shadow-gray-400 border border-gray-200 overflow-hidden z-50`}>
+        <div className={`absolute ${positionClasses} ${width} bg-white rounded-lg shadow-lg shadow-gray-400 border border-gray-200 overflow-visible z-50`}>
             {header && (
                 <div className="px-4 py-4 border-b border-gray-200">
                     {header}
