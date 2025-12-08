@@ -28,21 +28,11 @@ CREATE TABLE "Table" (
 );
 
 -- CreateTable
-CREATE TABLE "ColumnType" (
-    "id" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "display_name" TEXT NOT NULL,
-    "description" TEXT,
-
-    CONSTRAINT "ColumnType_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "Column" (
     "id" TEXT NOT NULL,
     "table_id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "column_type_id" TEXT NOT NULL,
+    "columnType" TEXT NOT NULL,
     "order_index" INTEGER NOT NULL,
 
     CONSTRAINT "Column_pkey" PRIMARY KEY ("id")
@@ -130,9 +120,6 @@ CREATE INDEX "idx_bases_user_id" ON "Base"("user_id");
 CREATE INDEX "idx_tables_base_id" ON "Table"("base_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "ColumnType_name_key" ON "ColumnType"("name");
-
--- CreateIndex
 CREATE INDEX "idx_columns_table_id" ON "Column"("table_id");
 
 -- CreateIndex
@@ -170,9 +157,6 @@ ALTER TABLE "Table" ADD CONSTRAINT "Table_base_id_fkey" FOREIGN KEY ("base_id") 
 
 -- AddForeignKey
 ALTER TABLE "Column" ADD CONSTRAINT "Column_table_id_fkey" FOREIGN KEY ("table_id") REFERENCES "Table"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Column" ADD CONSTRAINT "Column_column_type_id_fkey" FOREIGN KEY ("column_type_id") REFERENCES "ColumnType"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Row" ADD CONSTRAINT "Row_table_id_fkey" FOREIGN KEY ("table_id") REFERENCES "Table"("id") ON DELETE CASCADE ON UPDATE CASCADE;

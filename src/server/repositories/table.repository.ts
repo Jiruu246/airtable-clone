@@ -1,7 +1,6 @@
 import { db } from "~/server/db";
+import type { ColumnTypeValue } from "~/data/columnTypes";
 
-
-//TODO: Check to see if any route is not using
 export interface TableRepository {
   findByBaseId(baseId: string): Promise<Table[]>;
   findById(id: string): Promise<Table | null>;
@@ -12,7 +11,8 @@ export interface TableRepository {
   getTableRowsPaginated(id: string, cursor?: string, limit?: number): Promise<PaginatedTableData>;
   getTableMetadata(id: string): Promise<TableMetadata | null>;
   createRowsWithData(tableId: string, rows: Record<string, string>[], columns: { id: string; name: string; }[]): Promise<void>;
-  addColumn(data: AddColumnData): Promise<{ id: string; name: string; columnTypeId: string; columnType: { id: string; name: string; displayName: string; }; orderIndex: number; }>;
+  addColumn(data: AddColumnData): Promise<ColumnMetadata>;
+  getColumnMetadata(columnId: string): Promise<ColumnMetadata | null>;
 }
 
 export interface PaginatedTableData {
@@ -48,7 +48,7 @@ export interface CreateTableWithDataInput {
   baseId: string;
   columns: {
     name: string;
-    columnTypeId: string;
+    columnType: string;
   }[];
   rows: Record<string, string>[];
 }
@@ -56,7 +56,7 @@ export interface CreateTableWithDataInput {
 export interface AddColumnData {
   tableId: string;
   name: string;
-  columnTypeId: string;
+  columnType: ColumnTypeValue;
   orderIndex: number;
 }
 
@@ -67,12 +67,7 @@ export interface TableData {
   columns: {
     id: string;
     name: string;
-    columnTypeId: string;
-    columnType: {
-      id: string;
-      name: string;
-      displayName: string;
-    };
+    columnType: ColumnTypeValue;
     orderIndex: number;
   }[];
   rows: {
@@ -88,15 +83,18 @@ export interface TableMetadata {
   columns: {
     id: string;
     name: string;
-    columnTypeId: string;
-    columnType: {
-      id: string;
-      name: string;
-      displayName: string;
-    };
+    columnType: ColumnTypeValue;
     orderIndex: number;
   }[];
   totalRows: number;
+}
+
+export interface ColumnMetadata {
+  id: string;
+  name: string;
+  columnType: ColumnTypeValue;
+  orderIndex: number;
+  tableId: string;
 }
 
 export class PrismaTableRepository implements TableRepository {
@@ -194,7 +192,7 @@ export class PrismaTableRepository implements TableRepository {
           tx.column.create({
             data: {
               name: col.name,
-              columnTypeId: col.columnTypeId,
+              columnType: col.columnType,
               orderIndex: index,
               tableId: table.id,
             },
@@ -332,15 +330,8 @@ export class PrismaTableRepository implements TableRepository {
           select: {
             id: true,
             name: true,
-            columnTypeId: true,
+            columnType: true,
             orderIndex: true,
-            columnType: {
-              select: {
-                id: true,
-                name: true,
-                displayName: true,
-              },
-            },
           },
           orderBy: {
             orderIndex: "asc",
@@ -362,7 +353,12 @@ export class PrismaTableRepository implements TableRepository {
       id: table.id,
       name: table.name,
       baseId: table.baseId,
-      columns: table.columns,
+      columns: table.columns.map((col) => ({
+        id: col.id,
+        name: col.name,
+        columnType: col.columnType as ColumnTypeValue,
+        orderIndex: col.orderIndex,
+      })),
       totalRows: table._count.rows,
     };
   }
@@ -426,42 +422,54 @@ export class PrismaTableRepository implements TableRepository {
     });
   }
 
-  async addColumn(data: AddColumnData): Promise<{ id: string; name: string; columnTypeId: string; columnType: { id: string; name: string; displayName: string; }; orderIndex: number; }> {
-    return await db.$transaction(async (tx) => {
-      const columnType = await tx.columnType.findUnique({
-        where: {
-          id: data.columnTypeId,
-        },
-      });
-
-      if (!columnType) {
-        throw new Error(`Invalid column type with ID '${data.columnTypeId}'`);
-      }
-
-      const column = await tx.column.create({
-        data: {
-          name: data.name,
-          columnTypeId: data.columnTypeId,
-          orderIndex: data.orderIndex,
-          tableId: data.tableId,
-        },
-        select: {
-          id: true,
-          name: true,
-          columnTypeId: true,
-          orderIndex: true,
-          columnType: {
-            select: {
-              id: true,
-              name: true,
-              displayName: true,
-            },
-          },
-        },
-      });
-
-      return column;
+  async addColumn(data: AddColumnData): Promise<ColumnMetadata> {
+    const column = await db.column.create({
+      data: {
+        name: data.name,
+        columnType: data.columnType,
+        orderIndex: data.orderIndex,
+        tableId: data.tableId,
+      },
+      select: {
+        id: true,
+        name: true,
+        columnType: true,
+        orderIndex: true,
+      },
     });
+
+    return {
+      id: column.id,
+      name: column.name,
+      columnType: column.columnType as ColumnTypeValue,
+      orderIndex: column.orderIndex,
+      tableId: data.tableId,
+    };
+  }
+
+  async getColumnMetadata(columnId: string): Promise<ColumnMetadata | null> {
+    const column = await db.column.findUnique({
+      where: { id: columnId },
+      select: {
+        id: true,
+        name: true,
+        columnType: true,
+        orderIndex: true,
+        tableId: true,
+      },
+    });
+
+    if (!column) {
+      return null;
+    }
+
+    return {
+      id: column.id,
+      name: column.name,
+      columnType: column.columnType as ColumnTypeValue,
+      orderIndex: column.orderIndex,
+      tableId: column.tableId,
+    };
   }
 }
 

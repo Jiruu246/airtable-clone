@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server";
+import type { ColumnTypeValue } from "~/data/columnTypes";
 import {
   type TableRepository,
   type Table,
@@ -6,6 +7,7 @@ import {
   type UpdateTableData,
   type CreateTableWithDataInput,
   tableRepository,
+  type ColumnMetadata,
 } from "~/server/repositories/table.repository";
 import {
   type ViewRepository,
@@ -21,7 +23,7 @@ export interface TableService {
   deleteTable(data: DeleteTableInput): Promise<void>;
   createTableWithSampleData(data: CreateTableWithSampleDataInput): Promise<Table>;
   createRandomRows(data: CreateRandomRowsInput): Promise<void>;
-  addColumn(data: AddColumnInput): Promise<{ id: string; name: string; columnTypeId: string; orderIndex: number; }>;
+  addColumn(data: AddColumnInput): Promise<{ id: string; name: string; columnType: string; orderIndex: number; }>;
 }
 
 export interface CreateTableInput {
@@ -43,7 +45,7 @@ export interface CreateTableWithSampleDataInput {
   baseId: string;
   columns: {
     name: string;
-    columnTypeId: string;
+    columnType: string;
   }[];
   rows: Record<string, string>[];
 }
@@ -56,7 +58,7 @@ export interface CreateRandomRowsInput {
 export interface AddColumnInput {
   tableId: string;
   columnName?: string;
-  columnTypeId: string;
+  columnType: ColumnTypeValue;
 }
 
 export class TableServiceImpl implements TableService {
@@ -202,7 +204,7 @@ export class TableServiceImpl implements TableService {
       const randomRows = RandomDataGenerator.generateRowsForColumns(
         tableMetadata.columns.map(col => ({
           name: col.name,
-          columnTypeId: col.columnType.id,
+          columnType: col.columnType,
         })),
         data.numberOfRows
       );
@@ -217,7 +219,7 @@ export class TableServiceImpl implements TableService {
     }
   }
 
-  async addColumn(data: AddColumnInput): Promise<{ id: string; name: string; columnTypeId: string; columnType: { id: string; name: string; displayName: string; }; orderIndex: number; }> {
+  async addColumn(data: AddColumnInput): Promise<ColumnMetadata> {
     const table = await this.repository.findById(data.tableId);
     if (!table) {
       throw new TRPCError({
@@ -244,14 +246,13 @@ export class TableServiceImpl implements TableService {
       return await this.repository.addColumn({
         tableId: data.tableId,
         name: columnName.trim(),
-        columnTypeId: data.columnTypeId ?? 'TXT',
+        columnType: data.columnType,
         orderIndex: nextOrderIndex,
       });
-    } catch (error) {
+    } catch {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "Failed to add column",
-        cause: error,
       });
     }
   }

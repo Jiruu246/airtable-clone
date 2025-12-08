@@ -9,7 +9,7 @@ interface HideFieldsDropdownProps {
   isOpen: boolean;
   columns: TableColumn[];
   hiddenColumns: Set<string>;
-  onToggleColumn: (columnId: string) => void;
+  onToggleColumn?: (columnId: string) => void;
 }
 
 export const HideFieldsDropdown: React.FC<HideFieldsDropdownProps> = ({
@@ -36,7 +36,7 @@ export const HideFieldsDropdown: React.FC<HideFieldsDropdownProps> = ({
             key={column.id}
             icon={isHidden ? <IoEyeOffOutline className="w-4 h-4" /> : <IoEyeOutline className="w-4 h-4" />}
             label={column.name}
-            onClick={() => onToggleColumn(column.id)}
+            onClick={() => onToggleColumn?.(column.id)}
             className={isHidden ? "text-gray-400" : "text-gray-700"}
           />
         );

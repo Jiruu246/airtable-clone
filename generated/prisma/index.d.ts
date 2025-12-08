@@ -29,11 +29,6 @@ export type Base = $Result.DefaultSelection<Prisma.$BasePayload>
  */
 export type Table = $Result.DefaultSelection<Prisma.$TablePayload>
 /**
- * Model ColumnType
- * 
- */
-export type ColumnType = $Result.DefaultSelection<Prisma.$ColumnTypePayload>
-/**
  * Model Column
  * 
  */
@@ -221,16 +216,6 @@ export class PrismaClient<
     * ```
     */
   get table(): Prisma.TableDelegate<ExtArgs, ClientOptions>;
-
-  /**
-   * `prisma.columnType`: Exposes CRUD operations for the **ColumnType** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more ColumnTypes
-    * const columnTypes = await prisma.columnType.findMany()
-    * ```
-    */
-  get columnType(): Prisma.ColumnTypeDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.column`: Exposes CRUD operations for the **Column** model.
@@ -755,7 +740,6 @@ export namespace Prisma {
     User: 'User',
     Base: 'Base',
     Table: 'Table',
-    ColumnType: 'ColumnType',
     Column: 'Column',
     Row: 'Row',
     Cell: 'Cell',
@@ -782,7 +766,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "base" | "table" | "columnType" | "column" | "row" | "cell" | "view" | "viewConf" | "account" | "session" | "verificationToken"
+      modelProps: "user" | "base" | "table" | "column" | "row" | "cell" | "view" | "viewConf" | "account" | "session" | "verificationToken"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1005,80 +989,6 @@ export namespace Prisma {
           count: {
             args: Prisma.TableCountArgs<ExtArgs>
             result: $Utils.Optional<TableCountAggregateOutputType> | number
-          }
-        }
-      }
-      ColumnType: {
-        payload: Prisma.$ColumnTypePayload<ExtArgs>
-        fields: Prisma.ColumnTypeFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.ColumnTypeFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ColumnTypePayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.ColumnTypeFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ColumnTypePayload>
-          }
-          findFirst: {
-            args: Prisma.ColumnTypeFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ColumnTypePayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.ColumnTypeFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ColumnTypePayload>
-          }
-          findMany: {
-            args: Prisma.ColumnTypeFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ColumnTypePayload>[]
-          }
-          create: {
-            args: Prisma.ColumnTypeCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ColumnTypePayload>
-          }
-          createMany: {
-            args: Prisma.ColumnTypeCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          createManyAndReturn: {
-            args: Prisma.ColumnTypeCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ColumnTypePayload>[]
-          }
-          delete: {
-            args: Prisma.ColumnTypeDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ColumnTypePayload>
-          }
-          update: {
-            args: Prisma.ColumnTypeUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ColumnTypePayload>
-          }
-          deleteMany: {
-            args: Prisma.ColumnTypeDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.ColumnTypeUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.ColumnTypeUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ColumnTypePayload>[]
-          }
-          upsert: {
-            args: Prisma.ColumnTypeUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ColumnTypePayload>
-          }
-          aggregate: {
-            args: Prisma.ColumnTypeAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateColumnType>
-          }
-          groupBy: {
-            args: Prisma.ColumnTypeGroupByArgs<ExtArgs>
-            result: $Utils.Optional<ColumnTypeGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.ColumnTypeCountArgs<ExtArgs>
-            result: $Utils.Optional<ColumnTypeCountAggregateOutputType> | number
           }
         }
       }
@@ -1773,7 +1683,6 @@ export namespace Prisma {
     user?: UserOmit
     base?: BaseOmit
     table?: TableOmit
-    columnType?: ColumnTypeOmit
     column?: ColumnOmit
     row?: RowOmit
     cell?: CellOmit
@@ -1992,37 +1901,6 @@ export namespace Prisma {
    */
   export type TableCountOutputTypeCountCellsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: CellWhereInput
-  }
-
-
-  /**
-   * Count Type ColumnTypeCountOutputType
-   */
-
-  export type ColumnTypeCountOutputType = {
-    columns: number
-  }
-
-  export type ColumnTypeCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    columns?: boolean | ColumnTypeCountOutputTypeCountColumnsArgs
-  }
-
-  // Custom InputTypes
-  /**
-   * ColumnTypeCountOutputType without action
-   */
-  export type ColumnTypeCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ColumnTypeCountOutputType
-     */
-    select?: ColumnTypeCountOutputTypeSelect<ExtArgs> | null
-  }
-
-  /**
-   * ColumnTypeCountOutputType without action
-   */
-  export type ColumnTypeCountOutputTypeCountColumnsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: ColumnWhereInput
   }
 
 
@@ -5458,1063 +5336,6 @@ export namespace Prisma {
 
 
   /**
-   * Model ColumnType
-   */
-
-  export type AggregateColumnType = {
-    _count: ColumnTypeCountAggregateOutputType | null
-    _min: ColumnTypeMinAggregateOutputType | null
-    _max: ColumnTypeMaxAggregateOutputType | null
-  }
-
-  export type ColumnTypeMinAggregateOutputType = {
-    id: string | null
-    name: string | null
-    displayName: string | null
-    description: string | null
-  }
-
-  export type ColumnTypeMaxAggregateOutputType = {
-    id: string | null
-    name: string | null
-    displayName: string | null
-    description: string | null
-  }
-
-  export type ColumnTypeCountAggregateOutputType = {
-    id: number
-    name: number
-    displayName: number
-    description: number
-    _all: number
-  }
-
-
-  export type ColumnTypeMinAggregateInputType = {
-    id?: true
-    name?: true
-    displayName?: true
-    description?: true
-  }
-
-  export type ColumnTypeMaxAggregateInputType = {
-    id?: true
-    name?: true
-    displayName?: true
-    description?: true
-  }
-
-  export type ColumnTypeCountAggregateInputType = {
-    id?: true
-    name?: true
-    displayName?: true
-    description?: true
-    _all?: true
-  }
-
-  export type ColumnTypeAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which ColumnType to aggregate.
-     */
-    where?: ColumnTypeWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of ColumnTypes to fetch.
-     */
-    orderBy?: ColumnTypeOrderByWithRelationInput | ColumnTypeOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the start position
-     */
-    cursor?: ColumnTypeWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` ColumnTypes from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` ColumnTypes.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Count returned ColumnTypes
-    **/
-    _count?: true | ColumnTypeCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the minimum value
-    **/
-    _min?: ColumnTypeMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the maximum value
-    **/
-    _max?: ColumnTypeMaxAggregateInputType
-  }
-
-  export type GetColumnTypeAggregateType<T extends ColumnTypeAggregateArgs> = {
-        [P in keyof T & keyof AggregateColumnType]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateColumnType[P]>
-      : GetScalarType<T[P], AggregateColumnType[P]>
-  }
-
-
-
-
-  export type ColumnTypeGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: ColumnTypeWhereInput
-    orderBy?: ColumnTypeOrderByWithAggregationInput | ColumnTypeOrderByWithAggregationInput[]
-    by: ColumnTypeScalarFieldEnum[] | ColumnTypeScalarFieldEnum
-    having?: ColumnTypeScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: ColumnTypeCountAggregateInputType | true
-    _min?: ColumnTypeMinAggregateInputType
-    _max?: ColumnTypeMaxAggregateInputType
-  }
-
-  export type ColumnTypeGroupByOutputType = {
-    id: string
-    name: string
-    displayName: string
-    description: string | null
-    _count: ColumnTypeCountAggregateOutputType | null
-    _min: ColumnTypeMinAggregateOutputType | null
-    _max: ColumnTypeMaxAggregateOutputType | null
-  }
-
-  type GetColumnTypeGroupByPayload<T extends ColumnTypeGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<ColumnTypeGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof ColumnTypeGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], ColumnTypeGroupByOutputType[P]>
-            : GetScalarType<T[P], ColumnTypeGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type ColumnTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    name?: boolean
-    displayName?: boolean
-    description?: boolean
-    columns?: boolean | ColumnType$columnsArgs<ExtArgs>
-    _count?: boolean | ColumnTypeCountOutputTypeDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["columnType"]>
-
-  export type ColumnTypeSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    name?: boolean
-    displayName?: boolean
-    description?: boolean
-  }, ExtArgs["result"]["columnType"]>
-
-  export type ColumnTypeSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    name?: boolean
-    displayName?: boolean
-    description?: boolean
-  }, ExtArgs["result"]["columnType"]>
-
-  export type ColumnTypeSelectScalar = {
-    id?: boolean
-    name?: boolean
-    displayName?: boolean
-    description?: boolean
-  }
-
-  export type ColumnTypeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "displayName" | "description", ExtArgs["result"]["columnType"]>
-  export type ColumnTypeInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    columns?: boolean | ColumnType$columnsArgs<ExtArgs>
-    _count?: boolean | ColumnTypeCountOutputTypeDefaultArgs<ExtArgs>
-  }
-  export type ColumnTypeIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
-  export type ColumnTypeIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
-
-  export type $ColumnTypePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "ColumnType"
-    objects: {
-      columns: Prisma.$ColumnPayload<ExtArgs>[]
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      id: string
-      name: string
-      displayName: string
-      description: string | null
-    }, ExtArgs["result"]["columnType"]>
-    composites: {}
-  }
-
-  type ColumnTypeGetPayload<S extends boolean | null | undefined | ColumnTypeDefaultArgs> = $Result.GetResult<Prisma.$ColumnTypePayload, S>
-
-  type ColumnTypeCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<ColumnTypeFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: ColumnTypeCountAggregateInputType | true
-    }
-
-  export interface ColumnTypeDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ColumnType'], meta: { name: 'ColumnType' } }
-    /**
-     * Find zero or one ColumnType that matches the filter.
-     * @param {ColumnTypeFindUniqueArgs} args - Arguments to find a ColumnType
-     * @example
-     * // Get one ColumnType
-     * const columnType = await prisma.columnType.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends ColumnTypeFindUniqueArgs>(args: SelectSubset<T, ColumnTypeFindUniqueArgs<ExtArgs>>): Prisma__ColumnTypeClient<$Result.GetResult<Prisma.$ColumnTypePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one ColumnType that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {ColumnTypeFindUniqueOrThrowArgs} args - Arguments to find a ColumnType
-     * @example
-     * // Get one ColumnType
-     * const columnType = await prisma.columnType.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends ColumnTypeFindUniqueOrThrowArgs>(args: SelectSubset<T, ColumnTypeFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ColumnTypeClient<$Result.GetResult<Prisma.$ColumnTypePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first ColumnType that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ColumnTypeFindFirstArgs} args - Arguments to find a ColumnType
-     * @example
-     * // Get one ColumnType
-     * const columnType = await prisma.columnType.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends ColumnTypeFindFirstArgs>(args?: SelectSubset<T, ColumnTypeFindFirstArgs<ExtArgs>>): Prisma__ColumnTypeClient<$Result.GetResult<Prisma.$ColumnTypePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first ColumnType that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ColumnTypeFindFirstOrThrowArgs} args - Arguments to find a ColumnType
-     * @example
-     * // Get one ColumnType
-     * const columnType = await prisma.columnType.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends ColumnTypeFindFirstOrThrowArgs>(args?: SelectSubset<T, ColumnTypeFindFirstOrThrowArgs<ExtArgs>>): Prisma__ColumnTypeClient<$Result.GetResult<Prisma.$ColumnTypePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more ColumnTypes that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ColumnTypeFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all ColumnTypes
-     * const columnTypes = await prisma.columnType.findMany()
-     * 
-     * // Get first 10 ColumnTypes
-     * const columnTypes = await prisma.columnType.findMany({ take: 10 })
-     * 
-     * // Only select the `id`
-     * const columnTypeWithIdOnly = await prisma.columnType.findMany({ select: { id: true } })
-     * 
-     */
-    findMany<T extends ColumnTypeFindManyArgs>(args?: SelectSubset<T, ColumnTypeFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ColumnTypePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a ColumnType.
-     * @param {ColumnTypeCreateArgs} args - Arguments to create a ColumnType.
-     * @example
-     * // Create one ColumnType
-     * const ColumnType = await prisma.columnType.create({
-     *   data: {
-     *     // ... data to create a ColumnType
-     *   }
-     * })
-     * 
-     */
-    create<T extends ColumnTypeCreateArgs>(args: SelectSubset<T, ColumnTypeCreateArgs<ExtArgs>>): Prisma__ColumnTypeClient<$Result.GetResult<Prisma.$ColumnTypePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many ColumnTypes.
-     * @param {ColumnTypeCreateManyArgs} args - Arguments to create many ColumnTypes.
-     * @example
-     * // Create many ColumnTypes
-     * const columnType = await prisma.columnType.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *     
-     */
-    createMany<T extends ColumnTypeCreateManyArgs>(args?: SelectSubset<T, ColumnTypeCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many ColumnTypes and returns the data saved in the database.
-     * @param {ColumnTypeCreateManyAndReturnArgs} args - Arguments to create many ColumnTypes.
-     * @example
-     * // Create many ColumnTypes
-     * const columnType = await prisma.columnType.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Create many ColumnTypes and only return the `id`
-     * const columnTypeWithIdOnly = await prisma.columnType.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    createManyAndReturn<T extends ColumnTypeCreateManyAndReturnArgs>(args?: SelectSubset<T, ColumnTypeCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ColumnTypePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Delete a ColumnType.
-     * @param {ColumnTypeDeleteArgs} args - Arguments to delete one ColumnType.
-     * @example
-     * // Delete one ColumnType
-     * const ColumnType = await prisma.columnType.delete({
-     *   where: {
-     *     // ... filter to delete one ColumnType
-     *   }
-     * })
-     * 
-     */
-    delete<T extends ColumnTypeDeleteArgs>(args: SelectSubset<T, ColumnTypeDeleteArgs<ExtArgs>>): Prisma__ColumnTypeClient<$Result.GetResult<Prisma.$ColumnTypePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one ColumnType.
-     * @param {ColumnTypeUpdateArgs} args - Arguments to update one ColumnType.
-     * @example
-     * // Update one ColumnType
-     * const columnType = await prisma.columnType.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    update<T extends ColumnTypeUpdateArgs>(args: SelectSubset<T, ColumnTypeUpdateArgs<ExtArgs>>): Prisma__ColumnTypeClient<$Result.GetResult<Prisma.$ColumnTypePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more ColumnTypes.
-     * @param {ColumnTypeDeleteManyArgs} args - Arguments to filter ColumnTypes to delete.
-     * @example
-     * // Delete a few ColumnTypes
-     * const { count } = await prisma.columnType.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     * 
-     */
-    deleteMany<T extends ColumnTypeDeleteManyArgs>(args?: SelectSubset<T, ColumnTypeDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more ColumnTypes.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ColumnTypeUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many ColumnTypes
-     * const columnType = await prisma.columnType.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    updateMany<T extends ColumnTypeUpdateManyArgs>(args: SelectSubset<T, ColumnTypeUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more ColumnTypes and returns the data updated in the database.
-     * @param {ColumnTypeUpdateManyAndReturnArgs} args - Arguments to update many ColumnTypes.
-     * @example
-     * // Update many ColumnTypes
-     * const columnType = await prisma.columnType.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more ColumnTypes and only return the `id`
-     * const columnTypeWithIdOnly = await prisma.columnType.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends ColumnTypeUpdateManyAndReturnArgs>(args: SelectSubset<T, ColumnTypeUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ColumnTypePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Create or update one ColumnType.
-     * @param {ColumnTypeUpsertArgs} args - Arguments to update or create a ColumnType.
-     * @example
-     * // Update or create a ColumnType
-     * const columnType = await prisma.columnType.upsert({
-     *   create: {
-     *     // ... data to create a ColumnType
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the ColumnType we want to update
-     *   }
-     * })
-     */
-    upsert<T extends ColumnTypeUpsertArgs>(args: SelectSubset<T, ColumnTypeUpsertArgs<ExtArgs>>): Prisma__ColumnTypeClient<$Result.GetResult<Prisma.$ColumnTypePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of ColumnTypes.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ColumnTypeCountArgs} args - Arguments to filter ColumnTypes to count.
-     * @example
-     * // Count the number of ColumnTypes
-     * const count = await prisma.columnType.count({
-     *   where: {
-     *     // ... the filter for the ColumnTypes we want to count
-     *   }
-     * })
-    **/
-    count<T extends ColumnTypeCountArgs>(
-      args?: Subset<T, ColumnTypeCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], ColumnTypeCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a ColumnType.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ColumnTypeAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends ColumnTypeAggregateArgs>(args: Subset<T, ColumnTypeAggregateArgs>): Prisma.PrismaPromise<GetColumnTypeAggregateType<T>>
-
-    /**
-     * Group by ColumnType.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ColumnTypeGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     * 
-    **/
-    groupBy<
-      T extends ColumnTypeGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: ColumnTypeGroupByArgs['orderBy'] }
-        : { orderBy?: ColumnTypeGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, ColumnTypeGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetColumnTypeGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the ColumnType model
-   */
-  readonly fields: ColumnTypeFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for ColumnType.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__ColumnTypeClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    columns<T extends ColumnType$columnsArgs<ExtArgs> = {}>(args?: Subset<T, ColumnType$columnsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ColumnPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the ColumnType model
-   */
-  interface ColumnTypeFieldRefs {
-    readonly id: FieldRef<"ColumnType", 'String'>
-    readonly name: FieldRef<"ColumnType", 'String'>
-    readonly displayName: FieldRef<"ColumnType", 'String'>
-    readonly description: FieldRef<"ColumnType", 'String'>
-  }
-    
-
-  // Custom InputTypes
-  /**
-   * ColumnType findUnique
-   */
-  export type ColumnTypeFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ColumnType
-     */
-    select?: ColumnTypeSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ColumnType
-     */
-    omit?: ColumnTypeOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ColumnTypeInclude<ExtArgs> | null
-    /**
-     * Filter, which ColumnType to fetch.
-     */
-    where: ColumnTypeWhereUniqueInput
-  }
-
-  /**
-   * ColumnType findUniqueOrThrow
-   */
-  export type ColumnTypeFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ColumnType
-     */
-    select?: ColumnTypeSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ColumnType
-     */
-    omit?: ColumnTypeOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ColumnTypeInclude<ExtArgs> | null
-    /**
-     * Filter, which ColumnType to fetch.
-     */
-    where: ColumnTypeWhereUniqueInput
-  }
-
-  /**
-   * ColumnType findFirst
-   */
-  export type ColumnTypeFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ColumnType
-     */
-    select?: ColumnTypeSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ColumnType
-     */
-    omit?: ColumnTypeOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ColumnTypeInclude<ExtArgs> | null
-    /**
-     * Filter, which ColumnType to fetch.
-     */
-    where?: ColumnTypeWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of ColumnTypes to fetch.
-     */
-    orderBy?: ColumnTypeOrderByWithRelationInput | ColumnTypeOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for ColumnTypes.
-     */
-    cursor?: ColumnTypeWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` ColumnTypes from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` ColumnTypes.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of ColumnTypes.
-     */
-    distinct?: ColumnTypeScalarFieldEnum | ColumnTypeScalarFieldEnum[]
-  }
-
-  /**
-   * ColumnType findFirstOrThrow
-   */
-  export type ColumnTypeFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ColumnType
-     */
-    select?: ColumnTypeSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ColumnType
-     */
-    omit?: ColumnTypeOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ColumnTypeInclude<ExtArgs> | null
-    /**
-     * Filter, which ColumnType to fetch.
-     */
-    where?: ColumnTypeWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of ColumnTypes to fetch.
-     */
-    orderBy?: ColumnTypeOrderByWithRelationInput | ColumnTypeOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for ColumnTypes.
-     */
-    cursor?: ColumnTypeWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` ColumnTypes from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` ColumnTypes.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of ColumnTypes.
-     */
-    distinct?: ColumnTypeScalarFieldEnum | ColumnTypeScalarFieldEnum[]
-  }
-
-  /**
-   * ColumnType findMany
-   */
-  export type ColumnTypeFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ColumnType
-     */
-    select?: ColumnTypeSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ColumnType
-     */
-    omit?: ColumnTypeOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ColumnTypeInclude<ExtArgs> | null
-    /**
-     * Filter, which ColumnTypes to fetch.
-     */
-    where?: ColumnTypeWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of ColumnTypes to fetch.
-     */
-    orderBy?: ColumnTypeOrderByWithRelationInput | ColumnTypeOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for listing ColumnTypes.
-     */
-    cursor?: ColumnTypeWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` ColumnTypes from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` ColumnTypes.
-     */
-    skip?: number
-    distinct?: ColumnTypeScalarFieldEnum | ColumnTypeScalarFieldEnum[]
-  }
-
-  /**
-   * ColumnType create
-   */
-  export type ColumnTypeCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ColumnType
-     */
-    select?: ColumnTypeSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ColumnType
-     */
-    omit?: ColumnTypeOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ColumnTypeInclude<ExtArgs> | null
-    /**
-     * The data needed to create a ColumnType.
-     */
-    data: XOR<ColumnTypeCreateInput, ColumnTypeUncheckedCreateInput>
-  }
-
-  /**
-   * ColumnType createMany
-   */
-  export type ColumnTypeCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many ColumnTypes.
-     */
-    data: ColumnTypeCreateManyInput | ColumnTypeCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * ColumnType createManyAndReturn
-   */
-  export type ColumnTypeCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ColumnType
-     */
-    select?: ColumnTypeSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the ColumnType
-     */
-    omit?: ColumnTypeOmit<ExtArgs> | null
-    /**
-     * The data used to create many ColumnTypes.
-     */
-    data: ColumnTypeCreateManyInput | ColumnTypeCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * ColumnType update
-   */
-  export type ColumnTypeUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ColumnType
-     */
-    select?: ColumnTypeSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ColumnType
-     */
-    omit?: ColumnTypeOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ColumnTypeInclude<ExtArgs> | null
-    /**
-     * The data needed to update a ColumnType.
-     */
-    data: XOR<ColumnTypeUpdateInput, ColumnTypeUncheckedUpdateInput>
-    /**
-     * Choose, which ColumnType to update.
-     */
-    where: ColumnTypeWhereUniqueInput
-  }
-
-  /**
-   * ColumnType updateMany
-   */
-  export type ColumnTypeUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update ColumnTypes.
-     */
-    data: XOR<ColumnTypeUpdateManyMutationInput, ColumnTypeUncheckedUpdateManyInput>
-    /**
-     * Filter which ColumnTypes to update
-     */
-    where?: ColumnTypeWhereInput
-    /**
-     * Limit how many ColumnTypes to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * ColumnType updateManyAndReturn
-   */
-  export type ColumnTypeUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ColumnType
-     */
-    select?: ColumnTypeSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the ColumnType
-     */
-    omit?: ColumnTypeOmit<ExtArgs> | null
-    /**
-     * The data used to update ColumnTypes.
-     */
-    data: XOR<ColumnTypeUpdateManyMutationInput, ColumnTypeUncheckedUpdateManyInput>
-    /**
-     * Filter which ColumnTypes to update
-     */
-    where?: ColumnTypeWhereInput
-    /**
-     * Limit how many ColumnTypes to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * ColumnType upsert
-   */
-  export type ColumnTypeUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ColumnType
-     */
-    select?: ColumnTypeSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ColumnType
-     */
-    omit?: ColumnTypeOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ColumnTypeInclude<ExtArgs> | null
-    /**
-     * The filter to search for the ColumnType to update in case it exists.
-     */
-    where: ColumnTypeWhereUniqueInput
-    /**
-     * In case the ColumnType found by the `where` argument doesn't exist, create a new ColumnType with this data.
-     */
-    create: XOR<ColumnTypeCreateInput, ColumnTypeUncheckedCreateInput>
-    /**
-     * In case the ColumnType was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<ColumnTypeUpdateInput, ColumnTypeUncheckedUpdateInput>
-  }
-
-  /**
-   * ColumnType delete
-   */
-  export type ColumnTypeDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ColumnType
-     */
-    select?: ColumnTypeSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ColumnType
-     */
-    omit?: ColumnTypeOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ColumnTypeInclude<ExtArgs> | null
-    /**
-     * Filter which ColumnType to delete.
-     */
-    where: ColumnTypeWhereUniqueInput
-  }
-
-  /**
-   * ColumnType deleteMany
-   */
-  export type ColumnTypeDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which ColumnTypes to delete
-     */
-    where?: ColumnTypeWhereInput
-    /**
-     * Limit how many ColumnTypes to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * ColumnType.columns
-   */
-  export type ColumnType$columnsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Column
-     */
-    select?: ColumnSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Column
-     */
-    omit?: ColumnOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ColumnInclude<ExtArgs> | null
-    where?: ColumnWhereInput
-    orderBy?: ColumnOrderByWithRelationInput | ColumnOrderByWithRelationInput[]
-    cursor?: ColumnWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: ColumnScalarFieldEnum | ColumnScalarFieldEnum[]
-  }
-
-  /**
-   * ColumnType without action
-   */
-  export type ColumnTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ColumnType
-     */
-    select?: ColumnTypeSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ColumnType
-     */
-    omit?: ColumnTypeOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ColumnTypeInclude<ExtArgs> | null
-  }
-
-
-  /**
    * Model Column
    */
 
@@ -6538,7 +5359,7 @@ export namespace Prisma {
     id: string | null
     tableId: string | null
     name: string | null
-    columnTypeId: string | null
+    columnType: string | null
     orderIndex: number | null
   }
 
@@ -6546,7 +5367,7 @@ export namespace Prisma {
     id: string | null
     tableId: string | null
     name: string | null
-    columnTypeId: string | null
+    columnType: string | null
     orderIndex: number | null
   }
 
@@ -6554,7 +5375,7 @@ export namespace Prisma {
     id: number
     tableId: number
     name: number
-    columnTypeId: number
+    columnType: number
     orderIndex: number
     _all: number
   }
@@ -6572,7 +5393,7 @@ export namespace Prisma {
     id?: true
     tableId?: true
     name?: true
-    columnTypeId?: true
+    columnType?: true
     orderIndex?: true
   }
 
@@ -6580,7 +5401,7 @@ export namespace Prisma {
     id?: true
     tableId?: true
     name?: true
-    columnTypeId?: true
+    columnType?: true
     orderIndex?: true
   }
 
@@ -6588,7 +5409,7 @@ export namespace Prisma {
     id?: true
     tableId?: true
     name?: true
-    columnTypeId?: true
+    columnType?: true
     orderIndex?: true
     _all?: true
   }
@@ -6683,7 +5504,7 @@ export namespace Prisma {
     id: string
     tableId: string
     name: string
-    columnTypeId: string
+    columnType: string
     orderIndex: number
     _count: ColumnCountAggregateOutputType | null
     _avg: ColumnAvgAggregateOutputType | null
@@ -6710,10 +5531,9 @@ export namespace Prisma {
     id?: boolean
     tableId?: boolean
     name?: boolean
-    columnTypeId?: boolean
+    columnType?: boolean
     orderIndex?: boolean
     table?: boolean | TableDefaultArgs<ExtArgs>
-    columnType?: boolean | ColumnTypeDefaultArgs<ExtArgs>
     cells?: boolean | Column$cellsArgs<ExtArgs>
     _count?: boolean | ColumnCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["column"]>
@@ -6722,58 +5542,52 @@ export namespace Prisma {
     id?: boolean
     tableId?: boolean
     name?: boolean
-    columnTypeId?: boolean
+    columnType?: boolean
     orderIndex?: boolean
     table?: boolean | TableDefaultArgs<ExtArgs>
-    columnType?: boolean | ColumnTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["column"]>
 
   export type ColumnSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     tableId?: boolean
     name?: boolean
-    columnTypeId?: boolean
+    columnType?: boolean
     orderIndex?: boolean
     table?: boolean | TableDefaultArgs<ExtArgs>
-    columnType?: boolean | ColumnTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["column"]>
 
   export type ColumnSelectScalar = {
     id?: boolean
     tableId?: boolean
     name?: boolean
-    columnTypeId?: boolean
+    columnType?: boolean
     orderIndex?: boolean
   }
 
-  export type ColumnOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tableId" | "name" | "columnTypeId" | "orderIndex", ExtArgs["result"]["column"]>
+  export type ColumnOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tableId" | "name" | "columnType" | "orderIndex", ExtArgs["result"]["column"]>
   export type ColumnInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     table?: boolean | TableDefaultArgs<ExtArgs>
-    columnType?: boolean | ColumnTypeDefaultArgs<ExtArgs>
     cells?: boolean | Column$cellsArgs<ExtArgs>
     _count?: boolean | ColumnCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ColumnIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     table?: boolean | TableDefaultArgs<ExtArgs>
-    columnType?: boolean | ColumnTypeDefaultArgs<ExtArgs>
   }
   export type ColumnIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     table?: boolean | TableDefaultArgs<ExtArgs>
-    columnType?: boolean | ColumnTypeDefaultArgs<ExtArgs>
   }
 
   export type $ColumnPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Column"
     objects: {
       table: Prisma.$TablePayload<ExtArgs>
-      columnType: Prisma.$ColumnTypePayload<ExtArgs>
       cells: Prisma.$CellPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       tableId: string
       name: string
-      columnTypeId: string
+      columnType: string
       orderIndex: number
     }, ExtArgs["result"]["column"]>
     composites: {}
@@ -7170,7 +5984,6 @@ export namespace Prisma {
   export interface Prisma__ColumnClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     table<T extends TableDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TableDefaultArgs<ExtArgs>>): Prisma__TableClient<$Result.GetResult<Prisma.$TablePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    columnType<T extends ColumnTypeDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ColumnTypeDefaultArgs<ExtArgs>>): Prisma__ColumnTypeClient<$Result.GetResult<Prisma.$ColumnTypePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     cells<T extends Column$cellsArgs<ExtArgs> = {}>(args?: Subset<T, Column$cellsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CellPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -7204,7 +6017,7 @@ export namespace Prisma {
     readonly id: FieldRef<"Column", 'String'>
     readonly tableId: FieldRef<"Column", 'String'>
     readonly name: FieldRef<"Column", 'String'>
-    readonly columnTypeId: FieldRef<"Column", 'String'>
+    readonly columnType: FieldRef<"Column", 'String'>
     readonly orderIndex: FieldRef<"Column", 'Int'>
   }
     
@@ -15169,21 +13982,11 @@ export namespace Prisma {
   export type TableScalarFieldEnum = (typeof TableScalarFieldEnum)[keyof typeof TableScalarFieldEnum]
 
 
-  export const ColumnTypeScalarFieldEnum: {
-    id: 'id',
-    name: 'name',
-    displayName: 'displayName',
-    description: 'description'
-  };
-
-  export type ColumnTypeScalarFieldEnum = (typeof ColumnTypeScalarFieldEnum)[keyof typeof ColumnTypeScalarFieldEnum]
-
-
   export const ColumnScalarFieldEnum: {
     id: 'id',
     tableId: 'tableId',
     name: 'name',
-    columnTypeId: 'columnTypeId',
+    columnType: 'columnType',
     orderIndex: 'orderIndex'
   };
 
@@ -15562,56 +14365,6 @@ export namespace Prisma {
     name?: StringWithAggregatesFilter<"Table"> | string
   }
 
-  export type ColumnTypeWhereInput = {
-    AND?: ColumnTypeWhereInput | ColumnTypeWhereInput[]
-    OR?: ColumnTypeWhereInput[]
-    NOT?: ColumnTypeWhereInput | ColumnTypeWhereInput[]
-    id?: StringFilter<"ColumnType"> | string
-    name?: StringFilter<"ColumnType"> | string
-    displayName?: StringFilter<"ColumnType"> | string
-    description?: StringNullableFilter<"ColumnType"> | string | null
-    columns?: ColumnListRelationFilter
-  }
-
-  export type ColumnTypeOrderByWithRelationInput = {
-    id?: SortOrder
-    name?: SortOrder
-    displayName?: SortOrder
-    description?: SortOrderInput | SortOrder
-    columns?: ColumnOrderByRelationAggregateInput
-  }
-
-  export type ColumnTypeWhereUniqueInput = Prisma.AtLeast<{
-    id?: string
-    name?: string
-    AND?: ColumnTypeWhereInput | ColumnTypeWhereInput[]
-    OR?: ColumnTypeWhereInput[]
-    NOT?: ColumnTypeWhereInput | ColumnTypeWhereInput[]
-    displayName?: StringFilter<"ColumnType"> | string
-    description?: StringNullableFilter<"ColumnType"> | string | null
-    columns?: ColumnListRelationFilter
-  }, "id" | "name">
-
-  export type ColumnTypeOrderByWithAggregationInput = {
-    id?: SortOrder
-    name?: SortOrder
-    displayName?: SortOrder
-    description?: SortOrderInput | SortOrder
-    _count?: ColumnTypeCountOrderByAggregateInput
-    _max?: ColumnTypeMaxOrderByAggregateInput
-    _min?: ColumnTypeMinOrderByAggregateInput
-  }
-
-  export type ColumnTypeScalarWhereWithAggregatesInput = {
-    AND?: ColumnTypeScalarWhereWithAggregatesInput | ColumnTypeScalarWhereWithAggregatesInput[]
-    OR?: ColumnTypeScalarWhereWithAggregatesInput[]
-    NOT?: ColumnTypeScalarWhereWithAggregatesInput | ColumnTypeScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"ColumnType"> | string
-    name?: StringWithAggregatesFilter<"ColumnType"> | string
-    displayName?: StringWithAggregatesFilter<"ColumnType"> | string
-    description?: StringNullableWithAggregatesFilter<"ColumnType"> | string | null
-  }
-
   export type ColumnWhereInput = {
     AND?: ColumnWhereInput | ColumnWhereInput[]
     OR?: ColumnWhereInput[]
@@ -15619,10 +14372,9 @@ export namespace Prisma {
     id?: StringFilter<"Column"> | string
     tableId?: StringFilter<"Column"> | string
     name?: StringFilter<"Column"> | string
-    columnTypeId?: StringFilter<"Column"> | string
+    columnType?: StringFilter<"Column"> | string
     orderIndex?: IntFilter<"Column"> | number
     table?: XOR<TableScalarRelationFilter, TableWhereInput>
-    columnType?: XOR<ColumnTypeScalarRelationFilter, ColumnTypeWhereInput>
     cells?: CellListRelationFilter
   }
 
@@ -15630,10 +14382,9 @@ export namespace Prisma {
     id?: SortOrder
     tableId?: SortOrder
     name?: SortOrder
-    columnTypeId?: SortOrder
+    columnType?: SortOrder
     orderIndex?: SortOrder
     table?: TableOrderByWithRelationInput
-    columnType?: ColumnTypeOrderByWithRelationInput
     cells?: CellOrderByRelationAggregateInput
   }
 
@@ -15644,10 +14395,9 @@ export namespace Prisma {
     NOT?: ColumnWhereInput | ColumnWhereInput[]
     tableId?: StringFilter<"Column"> | string
     name?: StringFilter<"Column"> | string
-    columnTypeId?: StringFilter<"Column"> | string
+    columnType?: StringFilter<"Column"> | string
     orderIndex?: IntFilter<"Column"> | number
     table?: XOR<TableScalarRelationFilter, TableWhereInput>
-    columnType?: XOR<ColumnTypeScalarRelationFilter, ColumnTypeWhereInput>
     cells?: CellListRelationFilter
   }, "id">
 
@@ -15655,7 +14405,7 @@ export namespace Prisma {
     id?: SortOrder
     tableId?: SortOrder
     name?: SortOrder
-    columnTypeId?: SortOrder
+    columnType?: SortOrder
     orderIndex?: SortOrder
     _count?: ColumnCountOrderByAggregateInput
     _avg?: ColumnAvgOrderByAggregateInput
@@ -15671,7 +14421,7 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"Column"> | string
     tableId?: StringWithAggregatesFilter<"Column"> | string
     name?: StringWithAggregatesFilter<"Column"> | string
-    columnTypeId?: StringWithAggregatesFilter<"Column"> | string
+    columnType?: StringWithAggregatesFilter<"Column"> | string
     orderIndex?: IntWithAggregatesFilter<"Column"> | number
   }
 
@@ -16234,65 +14984,12 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
   }
 
-  export type ColumnTypeCreateInput = {
-    id: string
-    name: string
-    displayName: string
-    description?: string | null
-    columns?: ColumnCreateNestedManyWithoutColumnTypeInput
-  }
-
-  export type ColumnTypeUncheckedCreateInput = {
-    id: string
-    name: string
-    displayName: string
-    description?: string | null
-    columns?: ColumnUncheckedCreateNestedManyWithoutColumnTypeInput
-  }
-
-  export type ColumnTypeUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    displayName?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    columns?: ColumnUpdateManyWithoutColumnTypeNestedInput
-  }
-
-  export type ColumnTypeUncheckedUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    displayName?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    columns?: ColumnUncheckedUpdateManyWithoutColumnTypeNestedInput
-  }
-
-  export type ColumnTypeCreateManyInput = {
-    id: string
-    name: string
-    displayName: string
-    description?: string | null
-  }
-
-  export type ColumnTypeUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    displayName?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
-  export type ColumnTypeUncheckedUpdateManyInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    displayName?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
   export type ColumnCreateInput = {
     id?: string
     name: string
+    columnType: string
     orderIndex: number
     table: TableCreateNestedOneWithoutColumnsInput
-    columnType: ColumnTypeCreateNestedOneWithoutColumnsInput
     cells?: CellCreateNestedManyWithoutColumnInput
   }
 
@@ -16300,7 +14997,7 @@ export namespace Prisma {
     id?: string
     tableId: string
     name: string
-    columnTypeId: string
+    columnType: string
     orderIndex: number
     cells?: CellUncheckedCreateNestedManyWithoutColumnInput
   }
@@ -16308,9 +15005,9 @@ export namespace Prisma {
   export type ColumnUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    columnType?: StringFieldUpdateOperationsInput | string
     orderIndex?: IntFieldUpdateOperationsInput | number
     table?: TableUpdateOneRequiredWithoutColumnsNestedInput
-    columnType?: ColumnTypeUpdateOneRequiredWithoutColumnsNestedInput
     cells?: CellUpdateManyWithoutColumnNestedInput
   }
 
@@ -16318,7 +15015,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tableId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    columnTypeId?: StringFieldUpdateOperationsInput | string
+    columnType?: StringFieldUpdateOperationsInput | string
     orderIndex?: IntFieldUpdateOperationsInput | number
     cells?: CellUncheckedUpdateManyWithoutColumnNestedInput
   }
@@ -16327,13 +15024,14 @@ export namespace Prisma {
     id?: string
     tableId: string
     name: string
-    columnTypeId: string
+    columnType: string
     orderIndex: number
   }
 
   export type ColumnUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    columnType?: StringFieldUpdateOperationsInput | string
     orderIndex?: IntFieldUpdateOperationsInput | number
   }
 
@@ -16341,7 +15039,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tableId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    columnTypeId?: StringFieldUpdateOperationsInput | string
+    columnType?: StringFieldUpdateOperationsInput | string
     orderIndex?: IntFieldUpdateOperationsInput | number
   }
 
@@ -16962,27 +15660,6 @@ export namespace Prisma {
     name?: SortOrder
   }
 
-  export type ColumnTypeCountOrderByAggregateInput = {
-    id?: SortOrder
-    name?: SortOrder
-    displayName?: SortOrder
-    description?: SortOrder
-  }
-
-  export type ColumnTypeMaxOrderByAggregateInput = {
-    id?: SortOrder
-    name?: SortOrder
-    displayName?: SortOrder
-    description?: SortOrder
-  }
-
-  export type ColumnTypeMinOrderByAggregateInput = {
-    id?: SortOrder
-    name?: SortOrder
-    displayName?: SortOrder
-    description?: SortOrder
-  }
-
   export type IntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -16999,16 +15676,11 @@ export namespace Prisma {
     isNot?: TableWhereInput
   }
 
-  export type ColumnTypeScalarRelationFilter = {
-    is?: ColumnTypeWhereInput
-    isNot?: ColumnTypeWhereInput
-  }
-
   export type ColumnCountOrderByAggregateInput = {
     id?: SortOrder
     tableId?: SortOrder
     name?: SortOrder
-    columnTypeId?: SortOrder
+    columnType?: SortOrder
     orderIndex?: SortOrder
   }
 
@@ -17020,7 +15692,7 @@ export namespace Prisma {
     id?: SortOrder
     tableId?: SortOrder
     name?: SortOrder
-    columnTypeId?: SortOrder
+    columnType?: SortOrder
     orderIndex?: SortOrder
   }
 
@@ -17028,7 +15700,7 @@ export namespace Prisma {
     id?: SortOrder
     tableId?: SortOrder
     name?: SortOrder
-    columnTypeId?: SortOrder
+    columnType?: SortOrder
     orderIndex?: SortOrder
   }
 
@@ -17784,58 +16456,10 @@ export namespace Prisma {
     deleteMany?: CellScalarWhereInput | CellScalarWhereInput[]
   }
 
-  export type ColumnCreateNestedManyWithoutColumnTypeInput = {
-    create?: XOR<ColumnCreateWithoutColumnTypeInput, ColumnUncheckedCreateWithoutColumnTypeInput> | ColumnCreateWithoutColumnTypeInput[] | ColumnUncheckedCreateWithoutColumnTypeInput[]
-    connectOrCreate?: ColumnCreateOrConnectWithoutColumnTypeInput | ColumnCreateOrConnectWithoutColumnTypeInput[]
-    createMany?: ColumnCreateManyColumnTypeInputEnvelope
-    connect?: ColumnWhereUniqueInput | ColumnWhereUniqueInput[]
-  }
-
-  export type ColumnUncheckedCreateNestedManyWithoutColumnTypeInput = {
-    create?: XOR<ColumnCreateWithoutColumnTypeInput, ColumnUncheckedCreateWithoutColumnTypeInput> | ColumnCreateWithoutColumnTypeInput[] | ColumnUncheckedCreateWithoutColumnTypeInput[]
-    connectOrCreate?: ColumnCreateOrConnectWithoutColumnTypeInput | ColumnCreateOrConnectWithoutColumnTypeInput[]
-    createMany?: ColumnCreateManyColumnTypeInputEnvelope
-    connect?: ColumnWhereUniqueInput | ColumnWhereUniqueInput[]
-  }
-
-  export type ColumnUpdateManyWithoutColumnTypeNestedInput = {
-    create?: XOR<ColumnCreateWithoutColumnTypeInput, ColumnUncheckedCreateWithoutColumnTypeInput> | ColumnCreateWithoutColumnTypeInput[] | ColumnUncheckedCreateWithoutColumnTypeInput[]
-    connectOrCreate?: ColumnCreateOrConnectWithoutColumnTypeInput | ColumnCreateOrConnectWithoutColumnTypeInput[]
-    upsert?: ColumnUpsertWithWhereUniqueWithoutColumnTypeInput | ColumnUpsertWithWhereUniqueWithoutColumnTypeInput[]
-    createMany?: ColumnCreateManyColumnTypeInputEnvelope
-    set?: ColumnWhereUniqueInput | ColumnWhereUniqueInput[]
-    disconnect?: ColumnWhereUniqueInput | ColumnWhereUniqueInput[]
-    delete?: ColumnWhereUniqueInput | ColumnWhereUniqueInput[]
-    connect?: ColumnWhereUniqueInput | ColumnWhereUniqueInput[]
-    update?: ColumnUpdateWithWhereUniqueWithoutColumnTypeInput | ColumnUpdateWithWhereUniqueWithoutColumnTypeInput[]
-    updateMany?: ColumnUpdateManyWithWhereWithoutColumnTypeInput | ColumnUpdateManyWithWhereWithoutColumnTypeInput[]
-    deleteMany?: ColumnScalarWhereInput | ColumnScalarWhereInput[]
-  }
-
-  export type ColumnUncheckedUpdateManyWithoutColumnTypeNestedInput = {
-    create?: XOR<ColumnCreateWithoutColumnTypeInput, ColumnUncheckedCreateWithoutColumnTypeInput> | ColumnCreateWithoutColumnTypeInput[] | ColumnUncheckedCreateWithoutColumnTypeInput[]
-    connectOrCreate?: ColumnCreateOrConnectWithoutColumnTypeInput | ColumnCreateOrConnectWithoutColumnTypeInput[]
-    upsert?: ColumnUpsertWithWhereUniqueWithoutColumnTypeInput | ColumnUpsertWithWhereUniqueWithoutColumnTypeInput[]
-    createMany?: ColumnCreateManyColumnTypeInputEnvelope
-    set?: ColumnWhereUniqueInput | ColumnWhereUniqueInput[]
-    disconnect?: ColumnWhereUniqueInput | ColumnWhereUniqueInput[]
-    delete?: ColumnWhereUniqueInput | ColumnWhereUniqueInput[]
-    connect?: ColumnWhereUniqueInput | ColumnWhereUniqueInput[]
-    update?: ColumnUpdateWithWhereUniqueWithoutColumnTypeInput | ColumnUpdateWithWhereUniqueWithoutColumnTypeInput[]
-    updateMany?: ColumnUpdateManyWithWhereWithoutColumnTypeInput | ColumnUpdateManyWithWhereWithoutColumnTypeInput[]
-    deleteMany?: ColumnScalarWhereInput | ColumnScalarWhereInput[]
-  }
-
   export type TableCreateNestedOneWithoutColumnsInput = {
     create?: XOR<TableCreateWithoutColumnsInput, TableUncheckedCreateWithoutColumnsInput>
     connectOrCreate?: TableCreateOrConnectWithoutColumnsInput
     connect?: TableWhereUniqueInput
-  }
-
-  export type ColumnTypeCreateNestedOneWithoutColumnsInput = {
-    create?: XOR<ColumnTypeCreateWithoutColumnsInput, ColumnTypeUncheckedCreateWithoutColumnsInput>
-    connectOrCreate?: ColumnTypeCreateOrConnectWithoutColumnsInput
-    connect?: ColumnTypeWhereUniqueInput
   }
 
   export type CellCreateNestedManyWithoutColumnInput = {
@@ -17866,14 +16490,6 @@ export namespace Prisma {
     upsert?: TableUpsertWithoutColumnsInput
     connect?: TableWhereUniqueInput
     update?: XOR<XOR<TableUpdateToOneWithWhereWithoutColumnsInput, TableUpdateWithoutColumnsInput>, TableUncheckedUpdateWithoutColumnsInput>
-  }
-
-  export type ColumnTypeUpdateOneRequiredWithoutColumnsNestedInput = {
-    create?: XOR<ColumnTypeCreateWithoutColumnsInput, ColumnTypeUncheckedCreateWithoutColumnsInput>
-    connectOrCreate?: ColumnTypeCreateOrConnectWithoutColumnsInput
-    upsert?: ColumnTypeUpsertWithoutColumnsInput
-    connect?: ColumnTypeWhereUniqueInput
-    update?: XOR<XOR<ColumnTypeUpdateToOneWithWhereWithoutColumnsInput, ColumnTypeUpdateWithoutColumnsInput>, ColumnTypeUncheckedUpdateWithoutColumnsInput>
   }
 
   export type CellUpdateManyWithoutColumnNestedInput = {
@@ -18657,15 +17273,15 @@ export namespace Prisma {
   export type ColumnCreateWithoutTableInput = {
     id?: string
     name: string
+    columnType: string
     orderIndex: number
-    columnType: ColumnTypeCreateNestedOneWithoutColumnsInput
     cells?: CellCreateNestedManyWithoutColumnInput
   }
 
   export type ColumnUncheckedCreateWithoutTableInput = {
     id?: string
     name: string
-    columnTypeId: string
+    columnType: string
     orderIndex: number
     cells?: CellUncheckedCreateNestedManyWithoutColumnInput
   }
@@ -18790,7 +17406,7 @@ export namespace Prisma {
     id?: StringFilter<"Column"> | string
     tableId?: StringFilter<"Column"> | string
     name?: StringFilter<"Column"> | string
-    columnTypeId?: StringFilter<"Column"> | string
+    columnType?: StringFilter<"Column"> | string
     orderIndex?: IntFilter<"Column"> | number
   }
 
@@ -18869,48 +17485,6 @@ export namespace Prisma {
     value?: StringNullableFilter<"Cell"> | string | null
   }
 
-  export type ColumnCreateWithoutColumnTypeInput = {
-    id?: string
-    name: string
-    orderIndex: number
-    table: TableCreateNestedOneWithoutColumnsInput
-    cells?: CellCreateNestedManyWithoutColumnInput
-  }
-
-  export type ColumnUncheckedCreateWithoutColumnTypeInput = {
-    id?: string
-    tableId: string
-    name: string
-    orderIndex: number
-    cells?: CellUncheckedCreateNestedManyWithoutColumnInput
-  }
-
-  export type ColumnCreateOrConnectWithoutColumnTypeInput = {
-    where: ColumnWhereUniqueInput
-    create: XOR<ColumnCreateWithoutColumnTypeInput, ColumnUncheckedCreateWithoutColumnTypeInput>
-  }
-
-  export type ColumnCreateManyColumnTypeInputEnvelope = {
-    data: ColumnCreateManyColumnTypeInput | ColumnCreateManyColumnTypeInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type ColumnUpsertWithWhereUniqueWithoutColumnTypeInput = {
-    where: ColumnWhereUniqueInput
-    update: XOR<ColumnUpdateWithoutColumnTypeInput, ColumnUncheckedUpdateWithoutColumnTypeInput>
-    create: XOR<ColumnCreateWithoutColumnTypeInput, ColumnUncheckedCreateWithoutColumnTypeInput>
-  }
-
-  export type ColumnUpdateWithWhereUniqueWithoutColumnTypeInput = {
-    where: ColumnWhereUniqueInput
-    data: XOR<ColumnUpdateWithoutColumnTypeInput, ColumnUncheckedUpdateWithoutColumnTypeInput>
-  }
-
-  export type ColumnUpdateManyWithWhereWithoutColumnTypeInput = {
-    where: ColumnScalarWhereInput
-    data: XOR<ColumnUpdateManyMutationInput, ColumnUncheckedUpdateManyWithoutColumnTypeInput>
-  }
-
   export type TableCreateWithoutColumnsInput = {
     id?: string
     name: string
@@ -18932,25 +17506,6 @@ export namespace Prisma {
   export type TableCreateOrConnectWithoutColumnsInput = {
     where: TableWhereUniqueInput
     create: XOR<TableCreateWithoutColumnsInput, TableUncheckedCreateWithoutColumnsInput>
-  }
-
-  export type ColumnTypeCreateWithoutColumnsInput = {
-    id: string
-    name: string
-    displayName: string
-    description?: string | null
-  }
-
-  export type ColumnTypeUncheckedCreateWithoutColumnsInput = {
-    id: string
-    name: string
-    displayName: string
-    description?: string | null
-  }
-
-  export type ColumnTypeCreateOrConnectWithoutColumnsInput = {
-    where: ColumnTypeWhereUniqueInput
-    create: XOR<ColumnTypeCreateWithoutColumnsInput, ColumnTypeUncheckedCreateWithoutColumnsInput>
   }
 
   export type CellCreateWithoutColumnInput = {
@@ -19002,31 +17557,6 @@ export namespace Prisma {
     rows?: RowUncheckedUpdateManyWithoutTableNestedInput
     views?: ViewUncheckedUpdateManyWithoutTableNestedInput
     cells?: CellUncheckedUpdateManyWithoutTableNestedInput
-  }
-
-  export type ColumnTypeUpsertWithoutColumnsInput = {
-    update: XOR<ColumnTypeUpdateWithoutColumnsInput, ColumnTypeUncheckedUpdateWithoutColumnsInput>
-    create: XOR<ColumnTypeCreateWithoutColumnsInput, ColumnTypeUncheckedCreateWithoutColumnsInput>
-    where?: ColumnTypeWhereInput
-  }
-
-  export type ColumnTypeUpdateToOneWithWhereWithoutColumnsInput = {
-    where?: ColumnTypeWhereInput
-    data: XOR<ColumnTypeUpdateWithoutColumnsInput, ColumnTypeUncheckedUpdateWithoutColumnsInput>
-  }
-
-  export type ColumnTypeUpdateWithoutColumnsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    displayName?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
-  export type ColumnTypeUncheckedUpdateWithoutColumnsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    displayName?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type CellUpsertWithWhereUniqueWithoutColumnInput = {
@@ -19153,16 +17683,16 @@ export namespace Prisma {
   export type ColumnCreateWithoutCellsInput = {
     id?: string
     name: string
+    columnType: string
     orderIndex: number
     table: TableCreateNestedOneWithoutColumnsInput
-    columnType: ColumnTypeCreateNestedOneWithoutColumnsInput
   }
 
   export type ColumnUncheckedCreateWithoutCellsInput = {
     id?: string
     tableId: string
     name: string
-    columnTypeId: string
+    columnType: string
     orderIndex: number
   }
 
@@ -19229,16 +17759,16 @@ export namespace Prisma {
   export type ColumnUpdateWithoutCellsInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    columnType?: StringFieldUpdateOperationsInput | string
     orderIndex?: IntFieldUpdateOperationsInput | number
     table?: TableUpdateOneRequiredWithoutColumnsNestedInput
-    columnType?: ColumnTypeUpdateOneRequiredWithoutColumnsNestedInput
   }
 
   export type ColumnUncheckedUpdateWithoutCellsInput = {
     id?: StringFieldUpdateOperationsInput | string
     tableId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    columnTypeId?: StringFieldUpdateOperationsInput | string
+    columnType?: StringFieldUpdateOperationsInput | string
     orderIndex?: IntFieldUpdateOperationsInput | number
   }
 
@@ -19657,7 +18187,7 @@ export namespace Prisma {
   export type ColumnCreateManyTableInput = {
     id?: string
     name: string
-    columnTypeId: string
+    columnType: string
     orderIndex: number
   }
 
@@ -19679,15 +18209,15 @@ export namespace Prisma {
   export type ColumnUpdateWithoutTableInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    columnType?: StringFieldUpdateOperationsInput | string
     orderIndex?: IntFieldUpdateOperationsInput | number
-    columnType?: ColumnTypeUpdateOneRequiredWithoutColumnsNestedInput
     cells?: CellUpdateManyWithoutColumnNestedInput
   }
 
   export type ColumnUncheckedUpdateWithoutTableInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    columnTypeId?: StringFieldUpdateOperationsInput | string
+    columnType?: StringFieldUpdateOperationsInput | string
     orderIndex?: IntFieldUpdateOperationsInput | number
     cells?: CellUncheckedUpdateManyWithoutColumnNestedInput
   }
@@ -19695,7 +18225,7 @@ export namespace Prisma {
   export type ColumnUncheckedUpdateManyWithoutTableInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    columnTypeId?: StringFieldUpdateOperationsInput | string
+    columnType?: StringFieldUpdateOperationsInput | string
     orderIndex?: IntFieldUpdateOperationsInput | number
   }
 
@@ -19746,36 +18276,6 @@ export namespace Prisma {
     rowId?: BigIntFieldUpdateOperationsInput | bigint | number
     columnId?: StringFieldUpdateOperationsInput | string
     value?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
-  export type ColumnCreateManyColumnTypeInput = {
-    id?: string
-    tableId: string
-    name: string
-    orderIndex: number
-  }
-
-  export type ColumnUpdateWithoutColumnTypeInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    orderIndex?: IntFieldUpdateOperationsInput | number
-    table?: TableUpdateOneRequiredWithoutColumnsNestedInput
-    cells?: CellUpdateManyWithoutColumnNestedInput
-  }
-
-  export type ColumnUncheckedUpdateWithoutColumnTypeInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    tableId?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    orderIndex?: IntFieldUpdateOperationsInput | number
-    cells?: CellUncheckedUpdateManyWithoutColumnNestedInput
-  }
-
-  export type ColumnUncheckedUpdateManyWithoutColumnTypeInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    tableId?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    orderIndex?: IntFieldUpdateOperationsInput | number
   }
 
   export type CellCreateManyColumnInput = {

@@ -6,8 +6,10 @@ import { BaseSidebar } from "~/app/_components/BaseSidebar";
 import { BaseHeader } from "~/app/_components/BaseHeader";
 import { DataTable } from "~/app/_components/DataTable";
 import { HideFieldsDropdown } from "~/app/_components/HideFieldsDropdown";
+import { FilterDropdown } from "~/app/_components/FilterDropdown";
 import { useSession } from "next-auth/react";
 import { useState, useRef, useEffect, use } from "react";
+import { useHiddenColumns } from "~/app/_components/hooks/useHiddenColumns";
 
 import { IoChevronDown } from "react-icons/io5";
 import { GoPlus } from "react-icons/go";
@@ -31,16 +33,16 @@ interface BaseDetailPageProps {
 
 export default function BaseDetailPage({ params }: BaseDetailPageProps) {
   const { data: session } = useSession();
-  const [hiddenColumns, setHiddenColumns] = useState<Set<string>>(new Set());
   const [isHideFieldsOpen, setIsHideFieldsOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const hideFieldsRef = useRef<HTMLDivElement>(null);
+  const filterRef = useRef<HTMLDivElement>(null);
 
   //TODO: make it consistent with other auth checks
   if (!session) {
     redirect("/login");
   }
 
-  // Extract baseId directly from params
   const baseId = use(params).id;
 
   const { data: base } = api.base.getById.useQuery({ id: baseId });
@@ -50,81 +52,24 @@ export default function BaseDetailPage({ params }: BaseDetailPageProps) {
     { enabled: !!tables?.[0]?.views?.[0]?.id }
   );
 
-  // Get current view ID
   const currentViewId = tables?.[0]?.views?.[0]?.id;
-  
-  // Load hidden columns from database
-  const { data: hiddenColumnsFromDb } = api.view.getHiddenColumns.useQuery(
-    { viewId: currentViewId ?? "" },
-    { enabled: !!currentViewId }
-  );
-  
-  // Mutations for hiding/showing columns
-  const addHiddenColumnMutation = api.view.addHiddenColumn.useMutation();
-  const removeHiddenColumnMutation = api.view.removeHiddenColumn.useMutation();
-
-  // Initialize hidden columns from database
-  useEffect(() => {
-    if (hiddenColumnsFromDb) {
-      setHiddenColumns(new Set(hiddenColumnsFromDb));
-    }
-  }, [hiddenColumnsFromDb]);
+  const { hiddenColumns, toggleColumn } = useHiddenColumns({
+    viewId: currentViewId,
+  });
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (hideFieldsRef.current && !hideFieldsRef.current.contains(event.target as Node)) {
         setIsHideFieldsOpen(false);
       }
+      if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
+        setIsFilterOpen(false);
+      }
     }
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  const handleToggleColumn = async (columnId: string) => {
-    if (!currentViewId) return;
-    
-    // Optimistic update
-    const isCurrentlyHidden = hiddenColumns.has(columnId);
-    setHiddenColumns(prev => {
-      const newSet = new Set(prev);
-      if (isCurrentlyHidden) {
-        newSet.delete(columnId);
-      } else {
-        newSet.add(columnId);
-      }
-      return newSet;
-    });
-    
-    try {
-      // Save to database
-      if (isCurrentlyHidden) {
-        await removeHiddenColumnMutation.mutateAsync({
-          viewId: currentViewId,
-          columnId: columnId,
-        });
-      } else {
-        await addHiddenColumnMutation.mutateAsync({
-          viewId: currentViewId,
-          columnId: columnId,
-        });
-      }
-    } catch (error) {
-      // Revert optimistic update on error
-      console.error('Failed to toggle column visibility:', error);
-      setHiddenColumns(prev => {
-        const newSet = new Set(prev);
-        if (isCurrentlyHidden) {
-          // If we tried to show but failed, hide it again
-          newSet.add(columnId);
-        } else {
-          // If we tried to hide but failed, show it again
-          newSet.delete(columnId);
-        }
-        return newSet;
-      });
-    }
-  };
 
   return (
     <div className="h-screen bg-gray-100 grid grid-cols-[auto_1fr]">
@@ -182,13 +127,23 @@ export default function BaseDetailPage({ params }: BaseDetailPageProps) {
                 isOpen={isHideFieldsOpen}
                 columns={viewMetadata?.columns ?? []}
                 hiddenColumns={hiddenColumns}
-                onToggleColumn={handleToggleColumn}
+                onToggleColumn={toggleColumn}
               />
             </div>
-            <button className="flex items-center gap-2 text-gray-600 hover:bg-gray-100 px-3 py-1.5 rounded text-sm">
-              <IoFilterOutline className="w-4 h-4" />
-              <span>Filter</span>
-            </button>
+            <div className="relative" ref={filterRef}>
+              <button 
+                className="flex items-center gap-2 text-gray-600 hover:bg-gray-100 px-3 py-1.5 rounded text-sm"
+                onClick={() => setIsFilterOpen(!isFilterOpen)}
+              >
+                <IoFilterOutline className="w-4 h-4" />
+                <span>Filter</span>
+              </button>
+              <FilterDropdown
+                isOpen={isFilterOpen}
+                columns={viewMetadata?.columns ?? []}
+                viewId={currentViewId}
+              />
+            </div>
             <button className="flex items-center gap-2 text-gray-600 hover:bg-gray-100 px-3 py-1.5 rounded text-sm">
               <BsCardList className="w-4 h-4" />
               <span>Group</span>

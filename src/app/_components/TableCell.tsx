@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from "react";
+import { ColumnTypes } from "~/data/columnTypes";
 
 export interface CellProps {
   value: string;
@@ -35,7 +36,7 @@ export function TableCell({
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
 
-    if (type === "NUM") {
+    if (type === ColumnTypes.Number.value) {
       const allowedKeys = [
         'Backspace', 'Delete', 'Tab', 'Escape', 'Enter',
         'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',

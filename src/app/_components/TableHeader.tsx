@@ -6,24 +6,24 @@ import { Dropdown, DropdownItem } from "./Dropdown";
 import { FaChevronDown } from "react-icons/fa6";
 import { MdTextFormat } from "react-icons/md";
 import { AiOutlineNumber } from "react-icons/ai";
-import { api } from "~/trpc/react";
+import { ColumnTypeList, ColumnTypes, type ColumnTypeValue } from "~/data/columnTypes";
 
 export interface TableHeaderProps {
   columns: TableColumn[];
   virtualColumns: VirtualItem[];
   totalWidth: number;
-  onAddColumn?: (columnTypeId: string, columnName: string) => void;
+  onAddColumn?: (columnType: ColumnTypeValue, columnName: string) => void;
   isAddingColumn?: boolean;
 }
 
 export function TableHeader({ columns, virtualColumns, totalWidth, onAddColumn, isAddingColumn }: TableHeaderProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [selectedColumnTypeId, setSelectedColumnTypeId] = useState<string>('');
+  const [selectedColumnType, setSelectedColumnType] = useState<ColumnTypeValue | null>(null);
   const [fieldName, setFieldName] = useState('');
   const useDropdownRef = useRef<HTMLDivElement>(null);
   
-  const { data: columnTypes, isLoading: isLoadingColumnTypes } = api.metadata.getColumnTypes.useQuery();
-
+  // const { data: columnTypes, isLoading: isLoadingColumnTypes } = api.metadata.getColumnTypes.useQuery();
+  
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (useDropdownRef.current && !useDropdownRef.current.contains(event.target as Node)) {
@@ -39,8 +39,8 @@ export function TableHeader({ columns, virtualColumns, totalWidth, onAddColumn, 
   }, [isDropdownOpen]);
 
   const handleCreateField = () => {
-    if (onAddColumn && fieldName.trim() && selectedColumnTypeId) {
-      onAddColumn(selectedColumnTypeId, fieldName.trim());
+    if (onAddColumn && fieldName.trim() && selectedColumnType) {
+      onAddColumn(selectedColumnType, fieldName.trim());
       handleClose();
     }
   };
@@ -48,14 +48,14 @@ export function TableHeader({ columns, virtualColumns, totalWidth, onAddColumn, 
   const handleClose = () => {
     setIsDropdownOpen(false);
     setFieldName('');
-    setSelectedColumnTypeId('');
+    setSelectedColumnType(null);
   };
 
-  const getColumnTypeIcon = (columnTypeId: string) => {
-    switch (columnTypeId) {
-      case 'TXT':
+  const getColumnTypeIcon = (columnType: ColumnTypeValue) => {
+    switch (columnType) {
+      case ColumnTypes.Text.value:
         return <MdTextFormat className="w-4 h-4" />;
-      case 'NUM':
+      case ColumnTypes.Number.value:
         return <AiOutlineNumber className="w-4 h-4" />;
       default:
         return <MdTextFormat className="w-4 h-4" />;
@@ -117,20 +117,17 @@ export function TableHeader({ columns, virtualColumns, totalWidth, onAddColumn, 
               positionClasses="top-8 mt-1 right-5"
               width="w-112"
             >
-              {!selectedColumnTypeId ? (
+              {!selectedColumnType ? (
                 <>
                   <div className="px-4 py-3 border-b border-gray-200">
                     <h3 className="text-sm font-medium text-gray-900">Select column type</h3>
                   </div>
-                  {isLoadingColumnTypes ? (
-                    <div className="px-4 py-3 text-sm text-gray-500">Loading column types...</div>
-                  ) : (
-                    columnTypes?.map((columnType) => (
+                  {( ColumnTypeList?.map((columnType, index) => (
                       <DropdownItem
-                        key={columnType.id}
-                        icon={getColumnTypeIcon(columnType.id)}
-                        label={columnType.displayName}
-                        onClick={() => setSelectedColumnTypeId(columnType.id)}
+                        key={index}
+                        icon={getColumnTypeIcon(columnType.value)}
+                        label={columnType.name}
+                        onClick={() => setSelectedColumnType(columnType.value)}
                       />
                     ))
                   )}
@@ -148,18 +145,18 @@ export function TableHeader({ columns, virtualColumns, totalWidth, onAddColumn, 
                   </div>
                   <div className="px-4 pb-4">
                     <button
-                      onClick={() => setSelectedColumnTypeId('')}
+                      onClick={() => setSelectedColumnType(null)}
                       className="w-full flex items-center text-sm justify-between border border-gray-300 rounded-md px-3 py-2 hover:cursor-pointer"
                     >
-                      {selectedColumnTypeId && (
+                      {selectedColumnType && (
                         <div className="flex gap-2 items-center">
-                          {getColumnTypeIcon(selectedColumnTypeId)}
-                          <p>{columnTypes?.find(ct => ct.id === selectedColumnTypeId)?.displayName}</p>
+                          {getColumnTypeIcon(selectedColumnType)}
+                          <p>{ColumnTypeList?.find(ct => ct.value === selectedColumnType)?.name}</p>
                         </div>
                       )}
                       <FaChevronDown className="w-3 h-3 text-gray-500" />
                     </button>
-                      <p className="mt-2 text-xs text-gray-700">{columnTypes?.find(ct => ct.id === selectedColumnTypeId)?.description}</p>
+                      <p className="mt-2 text-xs text-gray-700">{ColumnTypeList?.find(ct => ct.value === selectedColumnType)?.longName}</p>
                   </div>
                   <div className="px-4 pb-4">
                     <p className="text-xs font-light text-gray-700 mb-1">Default</p>
