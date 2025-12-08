@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server";
+import { ColumnTypes } from "~/data/columnTypes";
 import {
   type BaseRepository,
   type Base,
@@ -65,8 +66,8 @@ export class BaseServiceImpl implements BaseService {
       
       // Generate sample table data using Faker.js
       const columns = [
-        { name: "Name", columnTypeId: "TXT", orderIndex: 0 },
-        { name: "Score", columnTypeId: "NUM", orderIndex: 1 },
+        { name: "Name", columnType: ColumnTypes.Text.value, orderIndex: 0 },
+        { name: "Score", columnType: ColumnTypes.Number.value, orderIndex: 1 },
       ];
       const numberOfRows = 100;
       const rows = SampleDataGenerator.generateRowsForColumns(columns, numberOfRows);

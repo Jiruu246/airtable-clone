@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { tableService } from "~/server/services/table.service";
+import { ColumnTypeZodEnum } from "../schema/schema";
 
 const createTableSchema = z.object({
   name: z.string().min(1, "Table name is required").max(100, "Table name must be 100 characters or less"),
@@ -29,7 +30,7 @@ const createTableWithSampleDataSchema = z.object({
   baseId: z.string().uuid("Invalid base ID"),
   columns: z.array(z.object({
     name: z.string(),
-    columnTypeId: z.string(),
+    columnType: ColumnTypeZodEnum,
     orderIndex: z.number(),
   })),
   rows: z.array(z.record(z.string())),
@@ -43,7 +44,7 @@ const createRandomRowsSchema = z.object({
 const addColumnSchema = z.object({
   tableId: z.string().uuid("Invalid table ID"),
   columnName: z.string().min(1, "Column name is required").max(100, "Column name must be 100 characters or less").optional(),
-  columnTypeId: z.string().min(1, "Column type ID is required"),
+  columnType: ColumnTypeZodEnum,
 });
 
 export const tableRouter = createTRPCRouter({
@@ -115,7 +116,7 @@ export const tableRouter = createTRPCRouter({
       return await tableService.addColumn({
         tableId: input.tableId,
         columnName: input.columnName,
-        columnTypeId: input.columnTypeId,
+        columnType: input.columnType,
       });
     }),
 });

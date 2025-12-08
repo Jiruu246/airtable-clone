@@ -1,3 +1,5 @@
+import type { ColumnTypeValue } from "~/data/columnTypes";
+
 export interface TableRow {
   id: string;
   [columnId: string]: string | null;
@@ -6,12 +8,7 @@ export interface TableRow {
 export interface TableColumn {
   id: string;
   name: string;
-  columnTypeId: string;
-  columnType: {
-    id: string;
-    name: string;
-    displayName: string;
-  };
+  columnType: ColumnTypeValue;
   orderIndex: number;
 }
 

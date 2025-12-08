@@ -1,3 +1,4 @@
+import type { ColumnTypeValue } from "~/data/columnTypes";
 import { api } from "~/trpc/react";
 
 interface UseColumnDataProps {
@@ -17,10 +18,10 @@ export function useColumnData({ tableId, viewId }: UseColumnDataProps) {
     },
   });
 
-  const handleAddColumn = (columnTypeId: string, columnName: string) => {
+  const handleAddColumn = (columnType: ColumnTypeValue, columnName: string) => {
     addColumnMutation.mutate({
       tableId: tableId,
-      columnTypeId: columnTypeId,
+      columnType: columnType,
       columnName: columnName,
     });
   };

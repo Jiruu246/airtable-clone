@@ -14,15 +14,6 @@ const upsertCellSchema = z.object({
   value: z.string().nullable(),
 });
 
-const getPaginatedRowsSchema = z.object({
-  tableId: z.string().uuid("Invalid table ID"),
-  limit: z.number().min(1).max(100).optional().default(50),
-  cursor: z.string().optional(),
-  search: z.string().optional(),
-  sortBy: z.string().optional().default('id'),
-  sortDirection: z.enum(['asc', 'desc']).optional().default('asc'),
-});
-
 export const cellRouter = createTRPCRouter({
   delete: protectedProcedure
     .input(deleteCellSchema)
@@ -43,19 +34,6 @@ export const cellRouter = createTRPCRouter({
         columnId: input.columnId,
         tableId: input.tableId,
         value: input.value,
-      });
-    }),
-
-  getPaginatedRows: protectedProcedure
-    .input(getPaginatedRowsSchema)
-    .query(async ({ input }) => {
-      return await cellService.getPaginatedRows({
-        tableId: input.tableId,
-        limit: input.limit,
-        cursor: input.cursor,
-        search: input.search,
-        sortBy: input.sortBy,
-        sortDirection: input.sortDirection,
       });
     }),
 });

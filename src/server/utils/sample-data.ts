@@ -1,4 +1,5 @@
 import { faker } from "@faker-js/faker";
+import { ColumnTypes, type ColumnTypeValue } from "~/data/columnTypes";
 
 export interface SampleTableData {
   name: string;
@@ -12,18 +13,18 @@ export interface SampleTableData {
 
 export interface Column {
   name: string;
-  columnTypeId: string;
+  columnType: ColumnTypeValue;
 }
 
 export class RandomDataGenerator {
   /**
    * Generate random value based on column type
    */
-  static generateValueForColumn(columnTypeId: string): string {
-    switch (columnTypeId) {
-      case 'NUM':
+  static generateValueForColumn(columnType: ColumnTypeValue): string {
+    switch (columnType) {
+      case ColumnTypes.Number.value:
         return faker.number.int({ min: 1, max: 1000 }).toString();
-      case 'TXT':
+      case ColumnTypes.Text.value:
       default:
         return faker.lorem.words({ min: 1, max: 3 });
     }
@@ -36,30 +37,11 @@ export class RandomDataGenerator {
     return Array.from({ length: numberOfRows }, () => {
       const row: Record<string, string> = {};
       for (const column of columns) {
-        row[column.name] = this.generateValueForColumn(column.columnTypeId);
+        row[column.name] = this.generateValueForColumn(column.columnType);
       }
       return row;
     });
   }
-
-  /**
-   * Generate a sample table with predefined columns
-   */
-  // static generateSampleTable(): SampleTableData {
-  //   const columns = [
-  //     { name: "Name", type: "text", orderIndex: 0 },
-  //     { name: "Score", type: "number", orderIndex: 1 },
-  //   ];
-    
-  //   const numberOfRows = 100;
-  //   const rows = this.generateRowsForColumns(columns, numberOfRows);
-    
-  //   return {
-  //     name: "Sample Table",
-  //     columns,
-  //     rows,
-  //   };
-  // }
 }
 
 // Keep backward compatibility
