@@ -66,8 +66,8 @@ export const SelectDropdown: React.FC<SelectDropdownProps> = ({
           disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
         }`}
       >
-        <span className="text-gray-700">{displayValue}</span>
-        <IoChevronDown className={`w-4 h-4 text-gray-400`} />
+        <span className="text-gray-700 truncate flex-1 text-left mr-2" title={displayValue}>{displayValue}</span>
+        <IoChevronDown className={`w-4 h-4 text-gray-400 shrink-0`} />
       </button>
 
       {isOpen && (
@@ -76,9 +76,10 @@ export const SelectDropdown: React.FC<SelectDropdownProps> = ({
             <button
               key={option.key}
               onClick={() => selectOption(option.key)}
-              className={`w-full px-3 py-3 text-left text-sm hover:bg-gray-50 text-gray-700 ${
+              className={`w-full px-3 py-3 text-left text-sm hover:bg-gray-50 text-gray-700 truncate ${
                 option.key === PreSelectedKey ? 'bg-gray-50' : ''
               }`}
+              title={option.value}
             >
               {option.value}
             </button>

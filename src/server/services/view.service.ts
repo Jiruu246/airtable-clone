@@ -8,14 +8,14 @@ import {
   type ViewFilterCondition,
   viewRepository,
 } from "~/server/repositories/view.repository";
-import { ColumnTypes, type ColumnTypeValue } from "~/data/columnTypes";
+import { ColumnTypes } from "~/data/columnTypes";
 import { TextFilterOperators, NumberFilterOperators } from "~/data/filterOperators";
 import { tableRepository } from "../repositories/table.repository";
 import { LogicalOperators, type LogicalOperatorValue } from "~/data/logicalOperators";
 
 export interface ViewService {
   listViewsByTableId(tableId: string): Promise<View[]>;
-  getViewRowsPaginated(viewId: string, cursor?: string, limit?: number): Promise<PaginatedViewData>;
+  getViewRowsPaginated(viewId: string, cursor?: string, limit?: number, searchString?: string): Promise<PaginatedViewData>;
   getViewMetadata(viewId: string): Promise<ViewMetadata>;
   addHiddenColumn(viewId: string, columnId: string): Promise<void>;
   removeHiddenColumn(viewId: string, columnId: string): Promise<void>;
@@ -45,10 +45,10 @@ export class ViewServiceImpl implements ViewService {
     }
   }
 
-  async getViewRowsPaginated(viewId: string, cursor?: string, limit?: number): Promise<PaginatedViewData> {
+  async getViewRowsPaginated(viewId: string, cursor?: string, limit?: number, searchString?: string): Promise<PaginatedViewData> {
     try {
       const viewFilters = await this.viewRepository.getViewFilter(viewId);
-      return await this.viewRepository.getViewRowsPaginated(viewId, cursor, limit, viewFilters);
+      return await this.viewRepository.getViewRowsPaginated(viewId, cursor, limit, viewFilters, searchString);
     } catch (error) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",

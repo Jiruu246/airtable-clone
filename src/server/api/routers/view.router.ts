@@ -1,13 +1,14 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { viewService } from "~/server/services/view.service";
-import { ColumnTypeZodEnum, FilterOperatorZodEnum, LogicalOperatorZodEnum } from "../schema/schema";
+import { FilterOperatorZodEnum, LogicalOperatorZodEnum } from "../schema/schema";
 import { LogicalOperators } from "~/data/logicalOperators";
 
 const getViewRowsPaginatedSchema = z.object({
   id: z.string().uuid("Invalid view ID"),
   cursor: z.string().optional(),
   limit: z.number().int().min(1).max(1000).default(50),
+  searchString: z.string().optional(),
 });
 
 const getViewMetadataSchema = z.object({
@@ -74,7 +75,7 @@ export const viewRouter = createTRPCRouter({
   getViewRowsPaginated: protectedProcedure
     .input(getViewRowsPaginatedSchema)
     .query(async ({ input }) => {
-      return await viewService.getViewRowsPaginated(input.id, input.cursor, input.limit);
+      return await viewService.getViewRowsPaginated(input.id, input.cursor, input.limit, input.searchString);
     }),
 
   getViewMetadata: protectedProcedure

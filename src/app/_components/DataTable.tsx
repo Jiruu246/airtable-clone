@@ -19,9 +19,10 @@ export interface DataTableProps {
   tableId: string;
   viewId: string;
   visibleColumns: TableColumn[];
+  searchString?: string;
 }
 
-export function DataTable({ tableId, viewId, visibleColumns }: DataTableProps) {
+export function DataTable({ tableId, viewId, visibleColumns, searchString }: DataTableProps) {
   const parentRef = useRef<HTMLDivElement>(null);
   const tableContentRef = useRef<HTMLDivElement>(null);
   const metaData = api.view.getViewMetadata.useQuery({ id: viewId });
@@ -34,7 +35,7 @@ export function DataTable({ tableId, viewId, visibleColumns }: DataTableProps) {
     isFetchingNextPage,
     refetch,
   } = api.view.getViewRowsPaginated.useInfiniteQuery(
-    { id: viewId, limit: 50 },
+    { id: viewId, limit: 50, searchString },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     }

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Dropdown, DropdownItem } from './Dropdown';
-import { IoEyeOutline, IoEyeOffOutline } from "react-icons/io5";
+import { LiaToggleOffSolid, LiaToggleOnSolid } from "react-icons/lia";
 import type { TableColumn } from './types/DataTable.types';
 
 interface HideFieldsDropdownProps {
@@ -34,10 +34,10 @@ export const HideFieldsDropdown: React.FC<HideFieldsDropdownProps> = ({
         return (
           <DropdownItem
             key={column.id}
-            icon={isHidden ? <IoEyeOffOutline className="w-4 h-4" /> : <IoEyeOutline className="w-4 h-4" />}
+            icon={isHidden ? <LiaToggleOffSolid className="w-4 h-4" /> : <LiaToggleOnSolid className="w-4 h-4" />}
             label={column.name}
             onClick={() => onToggleColumn?.(column.id)}
-            className={isHidden ? "text-gray-400" : "text-gray-700"}
+            className={`${isHidden ? "text-gray-300" : "text-gray-700"}`}
           />
         );
       })}

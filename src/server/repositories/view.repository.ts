@@ -10,7 +10,7 @@ export interface ViewRepository {
   create(data: CreateViewData): Promise<View>;
   update(id: string, data: UpdateViewData): Promise<View>;
   delete(id: string): Promise<void>;
-  getViewRowsPaginated(id: string, cursor?: string, limit?: number, viewFilters?: ViewFilter | null): Promise<PaginatedViewData>;
+  getViewRowsPaginated(id: string, cursor?: string, limit?: number, viewFilters?: ViewFilter | null, searchString?: string): Promise<PaginatedViewData>;
   getViewMetadata(id: string): Promise<ViewMetadata | null>;
   addHiddenColumn(viewId: string, columnId: string): Promise<void>;
   removeHiddenColumn(viewId: string, columnId: string): Promise<void>;
@@ -253,7 +253,7 @@ export class PrismaViewRepository implements ViewRepository {
     });
   }
 
-  async getViewRowsPaginated(id: string, cursor?: string, limit = 50, viewFilters?: ViewFilter | null): Promise<PaginatedViewData> {
+  async getViewRowsPaginated(id: string, cursor?: string, limit = 50, viewFilters?: ViewFilter | null, searchString?: string): Promise<PaginatedViewData> {
     const view = await db.view.findUnique({
       where: { id },
       select: { tableId: true },
@@ -273,7 +273,7 @@ export class PrismaViewRepository implements ViewRepository {
 
     if (viewFilters && viewFilters.conditions.length > 0) {
       const filterConditions = viewFilters.conditions.map(buildFilterConditionSql);
-    
+
       if (viewFilters.operator === LogicalOperators.OR.value) {
         const combinedFilters = Prisma.join(filterConditions, ' OR ');
         whereConditions.push(Prisma.sql`(${combinedFilters})`);
@@ -284,8 +284,18 @@ export class PrismaViewRepository implements ViewRepository {
       }
     }
 
-    const whereClause = Prisma.join(whereConditions, ' AND ');
-            
+    if (searchString && searchString.trim() !== '') {
+      whereConditions.push(Prisma.sql`EXISTS (
+        SELECT 1 FROM "Cell" c
+        WHERE c."row_id" = r."id"
+          AND c."value" ILIKE ${`%${searchString}%`}
+      )`);
+    }
+
+    const whereClause = whereConditions.length > 0 
+      ? Prisma.join(whereConditions, ' AND ') 
+      : Prisma.sql`TRUE`;
+
     const rows = await db.$queryRaw<Array<{ id: bigint; table_id: string }>>`
       SELECT r."id", r."table_id" 
       FROM "Row" r
