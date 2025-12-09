@@ -25,7 +25,7 @@ export const DropdownItem: React.FC<DropdownItemProps> = ({
     const content = (
         <>
             {icon && <span className={disabled ? "text-gray-400" : "text-gray-600"}>{icon}</span>}
-            <span className="flex-1">{label}</span>
+            <span className="flex-1 truncate">{label}</span>
             {hasArrow && <MdOutlineChevronRight className="w-4 h-4 text-gray-400" />}
         </>
     );

@@ -7,6 +7,7 @@ import { BaseHeader } from "~/app/_components/BaseHeader";
 import { DataTable } from "~/app/_components/DataTable";
 import { HideFieldsDropdown } from "~/app/_components/HideFieldsDropdown";
 import { FilterDropdown } from "~/app/_components/FilterDropdown";
+import { SearchDropdown } from "~/app/_components/SearchDropdown";
 import { useSession } from "next-auth/react";
 import { useState, useRef, useEffect, use } from "react";
 import { useHiddenColumns } from "~/app/_components/hooks/useHiddenColumns";
@@ -35,6 +36,8 @@ export default function BaseDetailPage({ params }: BaseDetailPageProps) {
   const { data: session } = useSession();
   const [isHideFieldsOpen, setIsHideFieldsOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchString, setSearchString] = useState<string>("");
   const hideFieldsRef = useRef<HTMLDivElement>(null);
   const filterRef = useRef<HTMLDivElement>(null);
 
@@ -163,9 +166,19 @@ export default function BaseDetailPage({ params }: BaseDetailPageProps) {
               <GoShare className="w-4 h-4" />
               <span>Share and sync</span>
             </button>
-            <button className="text-gray-600 hover:bg-gray-100 p-2 rounded">
-              <IoSearch className="w-4 h-4" />
-            </button>
+            <div className="relative">
+              <button 
+                className="text-gray-600 hover:bg-gray-100 p-2 rounded"
+                onClick={() => setIsSearchOpen(!isSearchOpen)}
+              >
+                <IoSearch className="w-4 h-4" />
+              </button>
+              <SearchDropdown
+                isOpen={isSearchOpen}
+                onSearchChange={setSearchString}
+                onClose={() => setIsSearchOpen(false)}
+              />
+            </div>
           </div>
         </div>
 
@@ -208,6 +221,7 @@ export default function BaseDetailPage({ params }: BaseDetailPageProps) {
               tableId={tables[0].id}
               viewId={tables[0].views[0].id} 
               visibleColumns={viewMetadata ? viewMetadata.columns.filter(col => !hiddenColumns.has(col.id)) : []}
+              searchString={searchString}
             />
           ) : (
             <div className="bg-white p-12">
