@@ -7,6 +7,7 @@ import { BaseHeader } from "~/app/_components/BaseHeader";
 import { DataTable } from "~/app/_components/DataTable";
 import { HideFieldsDropdown } from "~/app/_components/HideFieldsDropdown";
 import { FilterDropdown } from "~/app/_components/FilterDropdown";
+import { SortDropdown } from "~/app/_components/SortDropdown";
 import { SearchDropdown } from "~/app/_components/SearchDropdown";
 import { useSession } from "next-auth/react";
 import { useState, useRef, useEffect, use } from "react";
@@ -36,10 +37,12 @@ export default function BaseDetailPage({ params }: BaseDetailPageProps) {
   const { data: session } = useSession();
   const [isHideFieldsOpen, setIsHideFieldsOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isSortOpen, setIsSortOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchString, setSearchString] = useState<string>("");
   const hideFieldsRef = useRef<HTMLDivElement>(null);
   const filterRef = useRef<HTMLDivElement>(null);
+  const sortRef = useRef<HTMLDivElement>(null);
 
   //TODO: make it consistent with other auth checks
   if (!session) {
@@ -67,6 +70,9 @@ export default function BaseDetailPage({ params }: BaseDetailPageProps) {
       }
       if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
         setIsFilterOpen(false);
+      }
+      if (sortRef.current && !sortRef.current.contains(event.target as Node)) {
+        setIsSortOpen(false);
       }
     }
 
@@ -151,10 +157,20 @@ export default function BaseDetailPage({ params }: BaseDetailPageProps) {
               <BsCardList className="w-4 h-4" />
               <span>Group</span>
             </button>
-            <button className="flex items-center gap-2 text-gray-600 hover:bg-gray-100 px-3 py-1.5 rounded text-sm">
-              <LuArrowUpDown className="w-4 h-4" />
-              <span>Sort</span>
-            </button>
+            <div className="relative" ref={sortRef}>
+              <button 
+                className="flex items-center gap-2 text-gray-600 hover:bg-gray-100 px-3 py-1.5 rounded text-sm"
+                onClick={() => setIsSortOpen(!isSortOpen)}
+              >
+                <LuArrowUpDown className="w-4 h-4" />
+                <span>Sort</span>
+              </button>
+              <SortDropdown
+                isOpen={isSortOpen}
+                columns={viewMetadata?.columns ?? []}
+                viewId={currentViewId}
+              />
+            </div>
             <button className="flex items-center gap-2 text-gray-600 hover:bg-gray-100 px-3 py-1.5 rounded text-sm">
               <IoColorFillOutline className="w-4 h-4" />
               <span>Color</span>

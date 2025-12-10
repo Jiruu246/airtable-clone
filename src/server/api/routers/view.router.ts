@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { viewService } from "~/server/services/view.service";
-import { FilterOperatorZodEnum, LogicalOperatorZodEnum } from "../schema/schema";
+import { FilterOperatorZodEnum, LogicalOperatorZodEnum, OrderingTypeZodEnum } from "../schema/schema";
 import { LogicalOperators } from "~/data/logicalOperators";
 
 const getViewRowsPaginatedSchema = z.object({
@@ -63,6 +63,31 @@ const updateViewFilterConditionSchema = z.object({
 const updateViewFilterOperatorSchema = z.object({
   viewId: z.string().uuid("Invalid view ID"),
   operator: LogicalOperatorZodEnum,
+});
+
+const viewOrderingConditionSchema = z.object({
+  column_id: z.string().uuid("Invalid column ID"),
+  direction: OrderingTypeZodEnum,
+});
+
+const getViewOrderingSchema = z.object({
+  viewId: z.string().uuid("Invalid view ID"),
+});
+
+const addViewOrderingConditionSchema = z.object({
+  viewId: z.string().uuid("Invalid view ID"),
+  condition: viewOrderingConditionSchema,
+});
+
+const removeViewOrderingConditionSchema = z.object({
+  viewId: z.string().uuid("Invalid view ID"),
+  conditionIndex: z.number().int().min(0),
+});
+
+const updateViewOrderingConditionSchema = z.object({
+  viewId: z.string().uuid("Invalid view ID"),
+  conditionIndex: z.number().int().min(0),
+  condition: viewOrderingConditionSchema,
 });
 
 export const viewRouter = createTRPCRouter({
@@ -135,6 +160,33 @@ export const viewRouter = createTRPCRouter({
     .input(updateViewFilterOperatorSchema)
     .mutation(async ({ input }) => {
       await viewService.updateViewFilterOperator(input.viewId, input.operator);
+      return { success: true };
+    }),
+
+  getViewOrdering: protectedProcedure
+    .input(getViewOrderingSchema)
+    .query(async ({ input }) => {
+      return await viewService.getViewOrdering(input.viewId);
+    }),
+
+  addViewOrderingCondition: protectedProcedure
+    .input(addViewOrderingConditionSchema)
+    .mutation(async ({ input }) => {
+      await viewService.addViewOrderingCondition(input.viewId, input.condition);
+      return { success: true };
+    }),
+
+  removeViewOrderingCondition: protectedProcedure
+    .input(removeViewOrderingConditionSchema)
+    .mutation(async ({ input }) => {
+      await viewService.removeViewOrderingCondition(input.viewId, input.conditionIndex);
+      return { success: true };
+    }),
+
+  updateViewOrderingCondition: protectedProcedure
+    .input(updateViewOrderingConditionSchema)
+    .mutation(async ({ input }) => {
+      await viewService.updateViewOrderingCondition(input.viewId, input.conditionIndex, input.condition);
       return { success: true };
     }),
 });

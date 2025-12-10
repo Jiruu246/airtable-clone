@@ -43,7 +43,7 @@ const createRandomRowsSchema = z.object({
 
 const addColumnSchema = z.object({
   tableId: z.string().uuid("Invalid table ID"),
-  columnName: z.string().min(1, "Column name is required").max(100, "Column name must be 100 characters or less").optional(),
+  columnName: z.string().max(100, "Column name must be 100 characters or less").optional(),
   columnType: ColumnTypeZodEnum,
 });
 

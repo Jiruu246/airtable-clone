@@ -10,7 +10,7 @@ export interface TableRepository {
   createWithColumnsAndRows(data: CreateTableWithDataInput): Promise<Table>;
   getTableRowsPaginated(id: string, cursor?: string, limit?: number): Promise<PaginatedTableData>;
   getTableMetadata(id: string): Promise<TableMetadata | null>;
-  createRowsWithData(tableId: string, rows: Record<string, string>[], columns: { id: string; name: string; }[]): Promise<void>;
+  createRowsWithData(tableId: string, processedRows: Record<string, { value: string; sortKey: string; }>[], columns: { id: string; name: string; }[]): Promise<void>;
   addColumn(data: AddColumnData): Promise<ColumnMetadata>;
   getColumnMetadata(columnId: string): Promise<ColumnMetadata | null>;
 }
@@ -50,7 +50,7 @@ export interface CreateTableWithDataInput {
     name: string;
     columnType: string;
   }[];
-  rows: Record<string, string>[];
+  processedRows: Record<string, { value: string; sortKey: string; }>[];
 }
 
 export interface AddColumnData {
@@ -200,8 +200,8 @@ export class PrismaTableRepository implements TableRepository {
         )
       );
 
-      if (data.rows.length > 0) {
-        const rowsToCreate = data.rows.map(() => ({
+      if (data.processedRows.length > 0) {
+        const rowsToCreate = data.processedRows.map(() => ({
           tableId: table.id,
         }));
         
@@ -215,17 +215,17 @@ export class PrismaTableRepository implements TableRepository {
           orderBy: { id: 'asc' },
         });
 
-        if (createdRows.length !== data.rows.length) {
-          throw new Error(`Expected ${data.rows.length} rows to be created, but got ${createdRows.length}`);
+        if (createdRows.length !== data.processedRows.length) {
+          throw new Error(`Expected ${data.processedRows.length} rows to be created, but got ${createdRows.length}`);
         }
 
         const cellsToCreate = [];
-        for (let rowIndex = 0; rowIndex < data.rows.length; rowIndex++) {
-          const rowData = data.rows[rowIndex];
+        for (let rowIndex = 0; rowIndex < data.processedRows.length; rowIndex++) {
+          const processedRowData = data.processedRows[rowIndex];
           const createdRow = createdRows[rowIndex];
           
-          if (!rowData) {
-            throw new Error(`Row data at index ${rowIndex} is undefined`);
+          if (!processedRowData) {
+            throw new Error(`Processed row data at index ${rowIndex} is undefined`);
           }
           
           if (!createdRow) {
@@ -235,12 +235,15 @@ export class PrismaTableRepository implements TableRepository {
           const rowId = createdRow.id;
           
           for (const column of columns) {
-            const value = rowData[column.name] ?? null;
+            const cellData = processedRowData[column.name];
+            const value = cellData?.value ?? '';
+            const sortKey = cellData?.sortKey ?? '';
             cellsToCreate.push({
               rowId,
               columnId: column.id,
               tableId: table.id,
               value,
+              sort_key: sortKey,
             });
           }
         }
@@ -363,14 +366,14 @@ export class PrismaTableRepository implements TableRepository {
     };
   }
 
-  async createRowsWithData(tableId: string, rows: Record<string, string>[], columns: { id: string; name: string; }[]): Promise<void> {
-    if (rows.length === 0) {
+  async createRowsWithData(tableId: string, processedRows: Record<string, { value: string; sortKey: string; }>[], columns: { id: string; name: string; }[]): Promise<void> {
+    if (processedRows.length === 0) {
       return;
     }
 
     await db.$transaction(async (tx) => {
       // Create rows
-      const rowsToCreate = Array.from({ length: rows.length }, () => ({
+      const rowsToCreate = Array.from({ length: processedRows.length }, () => ({
         tableId,
       }));
       
@@ -383,30 +386,33 @@ export class PrismaTableRepository implements TableRepository {
         where: { tableId },
         select: { id: true },
         orderBy: { id: 'desc' },
-        take: rows.length,
+        take: processedRows.length,
       });
 
-      if (createdRows.length !== rows.length) {
-        throw new Error(`Expected ${rows.length} rows to be created, but got ${createdRows.length}`);
+      if (createdRows.length !== processedRows.length) {
+        throw new Error(`Expected ${processedRows.length} rows to be created, but got ${createdRows.length}`);
       }
 
       // Create cells with the provided data
       const cellsToCreate = [];
-      for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
-        const rowData = rows[rowIndex];
+      for (let rowIndex = 0; rowIndex < processedRows.length; rowIndex++) {
+        const processedRowData = processedRows[rowIndex];
         const createdRow = createdRows[rowIndex];
         
-        if (!rowData || !createdRow) {
-          throw new Error(`Row data or created row at index ${rowIndex} is undefined`);
+        if (!processedRowData || !createdRow) {
+          throw new Error(`Processed row data or created row at index ${rowIndex} is undefined`);
         }
         
         for (const column of columns) {
-          const value = rowData[column.name] ?? null;
+          const cellData = processedRowData[column.name];
+          const value = cellData?.value ?? '';
+          const sortKey = cellData?.sortKey ?? '';
           cellsToCreate.push({
             rowId: createdRow.id,
             columnId: column.id,
             tableId,
             value,
+            sort_key: sortKey,
           });
         }
       }

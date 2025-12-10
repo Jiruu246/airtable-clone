@@ -51,7 +51,8 @@ CREATE TABLE "Cell" (
     "row_id" BIGINT NOT NULL,
     "column_id" TEXT NOT NULL,
     "table_id" TEXT NOT NULL,
-    "value" TEXT,
+    "value" TEXT NOT NULL,
+    "sort_key" TEXT NOT NULL,
 
     CONSTRAINT "Cell_pkey" PRIMARY KEY ("row_id","column_id")
 );
