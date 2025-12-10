@@ -83,7 +83,8 @@ model Cell {
     rowId    BigInt @map("row_id")
     columnId String @map("column_id")
     tableId  String @map("table_id")
-    value    String?
+    value    String
+    sort_key String
     
     row    Row    @relation(fields: [rowId], references: [id], onDelete: Cascade)
     column Column @relation(fields: [columnId], references: [id], onDelete: Cascade)

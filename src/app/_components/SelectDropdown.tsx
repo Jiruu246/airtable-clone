@@ -10,6 +10,7 @@ interface SelectOption {
 
 interface SelectDropdownProps {
   options: SelectOption[];
+  condition?: (key: string) => boolean;
   PreSelectedKey?: string;
   onSelectItem?: (key: string) => void;
   placeholder?: string;
@@ -17,10 +18,12 @@ interface SelectDropdownProps {
   controlClassName?: string;
   dropdownClassName?: string;
   disabled?: boolean;
+  trigger?: React.ReactNode;
 }
 
 export const SelectDropdown: React.FC<SelectDropdownProps> = ({
   options,
+  condition,
   PreSelectedKey,
   onSelectItem,
   placeholder = "Select option",
@@ -28,6 +31,7 @@ export const SelectDropdown: React.FC<SelectDropdownProps> = ({
   controlClassName = "",
   dropdownClassName = "",
   disabled = false,
+  trigger,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -57,22 +61,31 @@ export const SelectDropdown: React.FC<SelectDropdownProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const availableOptions = condition
+    ? options.filter(option => condition(option.key))
+    : options;
+
   return (
     <div className={`relative ${className}`} ref={dropdownRef}>
-      <button
-        onClick={toggleDropdown}
-        disabled={disabled}
-        className={`w-full flex items-center justify-between text-sm border-gray-200 hover:bg-gray-200 ${controlClassName} ${
-          disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-        }`}
-      >
-        <span className="text-gray-700 truncate flex-1 text-left mr-2" title={displayValue}>{displayValue}</span>
-        <IoChevronDown className={`w-4 h-4 text-gray-400 shrink-0`} />
-      </button>
+      {trigger ? (
+        <div onClick={toggleDropdown}>
+          {trigger}
+        </div>
+      ) : (
+        <button
+          onClick={toggleDropdown}
+          disabled={disabled}
+          className={`w-full flex items-center justify-between text-sm border-gray-200 hover:bg-gray-200 ${controlClassName} ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+            }`}
+        >
+          <span className="text-gray-700 truncate flex-1 text-left mr-2" title={displayValue}>{displayValue}</span>
+          <IoChevronDown className={`w-4 h-4 text-gray-400 shrink-0`} />
+        </button>
+      )}
 
       {isOpen && (
         <div className={`absolute top-full mt-1 left-0 w-full bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-48 overflow-y-auto ${dropdownClassName}`}>
-          {options.map((option) => (
+          {availableOptions.map((option) => (
             <button
               key={option.key}
               onClick={() => selectOption(option.key)}

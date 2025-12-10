@@ -11,7 +11,7 @@ const upsertCellSchema = z.object({
   rowId: z.string().min(1, "Row ID is required"),
   columnId: z.string().uuid("Invalid column ID"),
   tableId: z.string().uuid("Invalid table ID"),
-  value: z.string().nullable(),
+  value: z.string().optional().default(""),
 });
 
 export const cellRouter = createTRPCRouter({

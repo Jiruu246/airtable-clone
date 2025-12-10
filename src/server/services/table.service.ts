@@ -14,6 +14,7 @@ import {
   viewRepository,
 } from "~/server/repositories/view.repository";
 import { RandomDataGenerator } from "~/server/utils/sample-data";
+import { CellServiceImpl } from "~/server/services/cell.service";
 
 export interface TableService {
   listTablesByBaseId(baseId: string): Promise<Table[]>;
@@ -157,11 +158,26 @@ export class TableServiceImpl implements TableService {
   }
 
   async createTableWithSampleData(data: CreateTableWithSampleDataInput): Promise<Table> {
+    // Process rows with sort keys
+    const processedRows = data.rows.map(row => {
+      const processedRow: Record<string, { value: string; sortKey: string; }> = {};
+      
+      data.columns.forEach(column => {
+        const value = row[column.name] ?? '';
+        processedRow[column.name] = {
+          value,
+          sortKey: CellServiceImpl.EncodeSortKey(value, column.columnType as ColumnTypeValue)
+        };
+      });
+      
+      return processedRow;
+    });
+
     const createData: CreateTableWithDataInput = {
       name: data.name.trim(),
       baseId: data.baseId,
       columns: data.columns,
-      rows: data.rows,
+      processedRows,
     };
 
     try {
@@ -209,7 +225,22 @@ export class TableServiceImpl implements TableService {
         data.numberOfRows
       );
 
-      await this.repository.createRowsWithData(data.tableId, randomRows, tableMetadata.columns);
+      // Process rows with sort keys
+      const processedRows = randomRows.map(row => {
+        const processedRow: Record<string, { value: string; sortKey: string; }> = {};
+        
+        tableMetadata.columns.forEach(column => {
+          const value = row[column.name] ?? '';
+          processedRow[column.name] = {
+            value,
+            sortKey: CellServiceImpl.EncodeSortKey(value, column.columnType)
+          };
+        });
+        
+        return processedRow;
+      });
+
+      await this.repository.createRowsWithData(data.tableId, processedRows, tableMetadata.columns);
     } catch (error) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",

@@ -39,7 +39,7 @@ export function useCellData({ tableId, viewId, rows, columns }: UseCellDataProps
             rowId,
             columnId,
             tableId,
-            value: value || null,
+            value: value,
           });
         } catch (error) {
           console.error("Error saving cell:", error);

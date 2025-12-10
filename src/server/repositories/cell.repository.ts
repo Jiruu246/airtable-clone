@@ -2,7 +2,6 @@ import { db } from "~/server/db";
 
 export interface CellRepository {
   findByRowAndColumn(rowId: string, columnId: string): Promise<Cell | null>;
-  update(rowId: string, columnId: string, data: UpdateCellData): Promise<Cell>;
   delete(rowId: string, columnId: string): Promise<void>;
   upsert(rowId: string, columnId: string, data: UpsertCellData): Promise<Cell>;
 }
@@ -11,37 +10,13 @@ export interface Cell {
   rowId: string;
   columnId: string;
   tableId: string;
-  value: string | null;
-}
-
-export interface UpdateCellData {
-  value: string | null;
+  value: string;
 }
 
 export interface UpsertCellData {
   tableId: string;
-  value: string | null;
-}
-
-export interface PaginatedTableData {
-  rows: RowData[];
-  nextCursor?: string;
-  hasMore: boolean;
-  totalCount: number;
-}
-
-export interface RowData {
-  id: string;
-  cells: Record<string, string | null>;
-}
-
-export interface GetPaginatedRowsParams {
-  tableId: string;
-  limit?: number;
-  cursor?: string;
-  search?: string;
-  sortBy?: string;
-  sortDirection?: 'asc' | 'desc';
+  value: string;
+  sort_key: string;
 }
 
 export class PrismaCellRepository implements CellRepository {
@@ -58,27 +33,6 @@ export class PrismaCellRepository implements CellRepository {
     if (!cell) {
       return null;
     }
-
-    return {
-      rowId: cell.rowId.toString(),
-      columnId: cell.columnId,
-      tableId: cell.tableId,
-      value: cell.value,
-    };
-  }
-
-  async update(rowId: string, columnId: string, data: UpdateCellData): Promise<Cell> {
-    const cell = await db.cell.update({
-      where: {
-        rowId_columnId: {
-          rowId: BigInt(rowId),
-          columnId,
-        },
-      },
-      data: {
-        value: data.value,
-      },
-    });
 
     return {
       rowId: cell.rowId.toString(),
@@ -109,12 +63,14 @@ export class PrismaCellRepository implements CellRepository {
       },
       update: {
         value: data.value,
+        sort_key: data.sort_key
       },
       create: {
         rowId: BigInt(rowId),
         columnId,
         tableId: data.tableId,
         value: data.value,
+        sort_key: data.sort_key
       },
     });
 
@@ -127,5 +83,4 @@ export class PrismaCellRepository implements CellRepository {
   }
 }
 
-// Export a singleton instance
 export const cellRepository = new PrismaCellRepository();

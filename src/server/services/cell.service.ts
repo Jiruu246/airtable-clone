@@ -28,7 +28,7 @@ export interface UpsertCellInput {
   rowId: string;
   columnId: string;
   tableId: string;
-  value: string | null;
+  value: string;
 }
 
 export interface GetPaginatedRowsInput {
@@ -41,47 +41,12 @@ export interface GetPaginatedRowsInput {
 }
 
 export class CellServiceImpl implements CellService {
+  // Constants for numeric value limits (18 integer digits + 1 decimal digit)
+  private static readonly MAX_NUMERIC_VALUE = 999999999999999999.9;
+  private static readonly MIN_NUMERIC_VALUE = -999999999999999999.9;
+  private static readonly SORT_KEY_LENGTH = 20;
+
   constructor(private readonly repository: CellRepository) {}
-
-  private async validateCellValue(columnId: string, value: string | null): Promise<void> {
-    if (value === null || value === '') {
-      // Null or empty values are always allowed
-      return;
-    }
-
-    // Get column type information
-    const column = await db.column.findUnique({
-      where: { id: columnId },
-    });
-
-    if (!column) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "Column not found",
-      });
-    }
-
-    const columnType = column.columnType as ColumnTypeValue;
-
-    switch (columnType) {
-      case ColumnTypes.Number.value:
-        const numValue = Number(value);
-        if (isNaN(numValue) || !isFinite(numValue)) {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Value must be a valid number for numeric columns",
-          });
-        }
-        break;
-      case ColumnTypes.Text.value:
-        break;
-      default:
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: `Unsupported column type: ${String(columnType)}`,
-        });
-    }
-  }
 
   async deleteCell(data: DeleteCellInput): Promise<void> {
     const existingCell = await this.repository.findByRowAndColumn(data.rowId, data.columnId);
@@ -130,11 +95,26 @@ export class CellServiceImpl implements CellService {
         });
       }
 
-      await this.validateCellValue(data.columnId, data.value);
+      const columnType = (await db.column.findUnique({
+        where: { id: data.columnId },
+      }))?.columnType as ColumnTypeValue;
+
+      let processedValue = data.value;
+
+      if (columnType === ColumnTypes.Number.value) {
+        let numValue = Number(data.value);
+        if (!isNaN(numValue) && isFinite(numValue)) {
+          numValue = Math.max(CellServiceImpl.MIN_NUMERIC_VALUE, Math.min(CellServiceImpl.MAX_NUMERIC_VALUE, numValue));
+          processedValue = String(Math.round(numValue * 10) / 10);
+        } else {
+          processedValue = '0';
+        }
+      }
 
       const upsertData: UpsertCellData = {
         tableId: data.tableId,
-        value: data.value,
+        value: processedValue,
+        sort_key: CellServiceImpl.EncodeSortKey(processedValue, columnType),
       };
 
       return await this.repository.upsert(data.rowId, data.columnId, upsertData);
@@ -148,6 +128,54 @@ export class CellServiceImpl implements CellService {
         cause: error,
       });
     }
+  }
+
+  static EncodeSortKey(value: string, columnType: ColumnTypeValue): string {
+    switch (columnType) {
+      case ColumnTypes.Number.value:
+        return CellServiceImpl.GenerateNumberSortKey(value);
+      case ColumnTypes.Text.value:
+        return value.toLowerCase().trim();
+      default:
+        return value.toLowerCase().trim();
+    }
+  }
+
+  private static GenerateNumberSortKey(value: string): string {
+    const numValue = Number(value);
+    if (isNaN(numValue) || !isFinite(numValue)) {
+      return '0'.padEnd(CellServiceImpl.SORT_KEY_LENGTH, '0');
+    }
+
+    const clampedValue = Math.max(CellServiceImpl.MIN_NUMERIC_VALUE, Math.min(CellServiceImpl.MAX_NUMERIC_VALUE, numValue));
+    const roundedValue = Math.round(clampedValue * 10) / 10;
+    
+    const signFlag = roundedValue >= 0 ? '1' : '0';
+    
+    const absValue = Math.abs(roundedValue);
+    const integerPart = Math.floor(absValue);
+    const decimalPart = Math.round((absValue - integerPart) * 10);
+    
+    let paddedInteger: string;
+    let sortDecimal: string;
+    
+    if (roundedValue >= 0) {
+      paddedInteger = integerPart.toString().padStart(18, '0');
+      sortDecimal = decimalPart.toString();
+    } else {
+      const maxInteger = Math.pow(10, 18) - 1; // 999999999999999999
+      const invertedInteger = (maxInteger - integerPart).toString().padStart(18, '0');
+      const invertedDecimal = (9 - decimalPart).toString();
+      paddedInteger = invertedInteger;
+      sortDecimal = invertedDecimal;
+    }
+    
+    const result = signFlag + paddedInteger + sortDecimal;
+    if (result.length > CellServiceImpl.SORT_KEY_LENGTH) {
+      throw new Error('Generated sort key exceeds fixed length');
+    }
+
+    return result;
   }
 }
 
