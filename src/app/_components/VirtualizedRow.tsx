@@ -18,6 +18,8 @@ export interface VirtualizedRowProps {
   onStopEditing: () => void;
 }
 
+const ROW_INDEX_COLUMN_WIDTH = 40; // Width for the fixed row index column
+
 export function VirtualizedRow({
   virtualRow,
   virtualColumns,
@@ -40,6 +42,18 @@ export function VirtualizedRow({
         height: `${virtualRow.size}px`,
       }}
     >
+      {/* Index column */}
+      <div
+        className="absolute flex items-center justify-center text-xs text-gray-500"
+        style={{
+          left: 0,
+          width: `${ROW_INDEX_COLUMN_WIDTH}px`, // or your preferred width
+          height: '100%',
+        }}
+      >
+        {virtualRow.index + 1}
+      </div>
+
       {virtualColumns.map((virtualColumn) => {
         const column = columns[virtualColumn.index];
         const cellKey = `${row?.id}-${column?.id}`;
@@ -64,7 +78,7 @@ export function VirtualizedRow({
             onEditValueChange={onEditValueChange}
             onStopEditing={onStopEditing}
             style={{
-              left: `${virtualColumn.start}px`,
+              left: `${virtualColumn.start + ROW_INDEX_COLUMN_WIDTH}px`,
               width: `${virtualColumn.size}px`,
             }}
           />

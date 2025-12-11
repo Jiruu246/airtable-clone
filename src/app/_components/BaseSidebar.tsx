@@ -51,7 +51,7 @@ export function BaseSidebar({ user }: HeaderProps) {
             className="h-6 w-6 transition-all duration-300 ease-in-out group-hover:scale-0 group-hover:opacity-0"
           />
           <button 
-            onClick={() => router.back()}
+            onClick={() => router.push('/')}
             className="absolute top-2 left-2 transition-all duration-300 ease-in-out scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100 hover:cursor-pointer"
           >
             <IoIosArrowRoundBack className="w-6 h-6" />

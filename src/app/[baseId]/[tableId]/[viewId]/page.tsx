@@ -51,6 +51,14 @@ export default function ViewPage({ params }: ViewPageProps) {
     { id: viewId },
     { enabled: !!viewId }
   );
+  const {data: filterData } = api.view.getViewFilters.useQuery(
+    { viewId },
+    { enabled: !!viewId }
+  );
+  const {data: sortData } = api.view.getViewOrdering.useQuery(
+    { viewId },
+    { enabled: !!viewId }
+  );
   const { hiddenColumns, toggleColumn } = useHiddenColumns({
     viewId: viewId,
   });
@@ -145,11 +153,13 @@ export default function ViewPage({ params }: ViewPageProps) {
         <div className="flex items-center gap-2">
           <div className="relative" ref={hideFieldsRef}>
             <button 
-              className="flex items-center gap-2 text-gray-600 hover:bg-gray-100 px-3 py-1.5 rounded text-sm"
+              className={`flex items-center gap-2 text-gray-600  px-3 py-1.5 rounded text-sm ${
+                hiddenColumns.size > 0 ? 'bg-blue-200' : 'hover:bg-gray-100'
+              }`}
               onClick={() => setIsHideFieldsOpen(!isHideFieldsOpen)}
             >
               <FaRegEyeSlash className="w-4 h-4" />
-              <span>Hide fields</span>
+              <span>{hiddenColumns.size > 0 ? `${hiddenColumns.size} hidden fields` : 'Hide fields'}</span>
             </button>
             <HideFieldsDropdown
               isOpen={isHideFieldsOpen}
@@ -160,7 +170,8 @@ export default function ViewPage({ params }: ViewPageProps) {
           </div>
           <div className="relative" ref={filterRef}>
             <button 
-              className="flex items-center gap-2 text-gray-600 hover:bg-gray-100 px-3 py-1.5 rounded text-sm"
+              className={`flex items-center gap-2 text-gray-600 px-3 py-1.5 rounded text-sm 
+                ${filterData?.conditions?.length ? 'bg-green-200' : 'hover:bg-gray-100'}`}
               onClick={() => setIsFilterOpen(!isFilterOpen)}
             >
               <IoFilterOutline className="w-4 h-4" />
@@ -178,7 +189,8 @@ export default function ViewPage({ params }: ViewPageProps) {
           </button>
           <div className="relative" ref={sortRef}>
             <button 
-              className="flex items-center gap-2 text-gray-600 hover:bg-gray-100 px-3 py-1.5 rounded text-sm"
+              className={`flex items-center gap-2 text-gray-600 px-3 py-1.5 rounded text-sm 
+                ${sortData?.conditions?.length ? 'bg-orange-200' : 'hover:bg-gray-100'}`}
               onClick={() => setIsSortOpen(!isSortOpen)}
             >
               <LuArrowUpDown className="w-4 h-4" />

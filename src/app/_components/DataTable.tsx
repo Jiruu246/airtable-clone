@@ -14,6 +14,7 @@ import { PiMagicWandThin } from "react-icons/pi";
 import type { TableColumn } from "./types/DataTable.types";
 
 const BOTTOM_PADDING = 400;
+const ROW_INDEX_COLUMN_WIDTH = 40;
 
 export interface DataTableProps {
   tableId: string;
@@ -131,7 +132,7 @@ export function DataTable({ tableId, viewId, visibleColumns, searchString }: Dat
         <TableHeader
           columns={visibleColumns}
           virtualColumns={virtualColumns}
-          totalWidth={columnVirtualizer.getTotalSize()}
+          totalWidth={columnVirtualizer.getTotalSize() + ROW_INDEX_COLUMN_WIDTH}
           onAddColumn={handleAddColumn}
           isAddingColumn={isAddingColumn}
         />
@@ -142,7 +143,7 @@ export function DataTable({ tableId, viewId, visibleColumns, searchString }: Dat
           className="relative focus:outline-none"
           style={{
             height: `${rowVirtualizer.getTotalSize() + BOTTOM_PADDING}px`,
-            width: `${columnVirtualizer.getTotalSize()}px`,
+            width: `${columnVirtualizer.getTotalSize() + ROW_INDEX_COLUMN_WIDTH}px`,
           }}
         >
           {virtualRows.map((virtualRow) => {
@@ -185,14 +186,14 @@ export function DataTable({ tableId, viewId, visibleColumns, searchString }: Dat
           )}
         </div>
         {/* Floating Footer */}
-        <div className="absolute bottom-0 left-0 right-0 h-10 bg-gray-50 border-t border-gray-200 flex items-center px-4 text-sm text-gray-600 shadow-lg">
+        <div className="absolute bottom-0 left-0 right-0 h-10 bg-gray-50 border-t border-gray-200 flex items-center px-4 text-sm text-gray-600 shadow-lg z-3">
           <div className="flex items-center gap-2 text-gray-900 font-light text-xs">
             <span>{metaData.data?.totalRows} records</span>
           </div>
         </div>
 
         {/* Floating Add Record Button */}
-        <div className="absolute bottom-9 left-3 flex shadow-lg bg-white rounded-full border border-gray-300">
+        <div className="absolute bottom-9 left-3 flex shadow-lg bg-white rounded-full border border-gray-300 z-4">
           <button
             className=" hover:bg-gray-200 hover:cursor-pointer disabled:cursor-not-allowed text-gray-800  px-4 py-2 rounded-l-full  transition-colors duration-200 flex items-center justify-center"
             onClick={() => handleAddRows(1)}

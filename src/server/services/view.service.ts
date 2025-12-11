@@ -221,7 +221,23 @@ export class ViewServiceImpl implements ViewService {
 
   async getViewFilters(viewId: string): Promise<ViewFilter | null> {
     try {
-      return await this.viewRepository.getViewFilter(viewId);
+      const rawFilter = await this.viewRepository.getViewFilter(viewId);
+      const processedConditions: ViewFilterCondition[] = [];
+
+      if (rawFilter) {
+        for (const condition of rawFilter.conditions) {
+          const processedCondition = condition;
+          if (processedCondition.value) {
+            const columnType = (await tableRepository.getColumnMetadata(processedCondition.column_id))!.columnType;
+            const decodedValue = CellServiceImpl.DecodeSortKey(processedCondition.value, columnType);
+            processedCondition.value = decodedValue;
+          }
+          processedConditions.push(processedCondition);
+        }
+        return { ...rawFilter, conditions: processedConditions };
+      } else {
+        return null;
+      }
     } catch (error) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",

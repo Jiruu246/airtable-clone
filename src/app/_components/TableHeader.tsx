@@ -16,6 +16,8 @@ export interface TableHeaderProps {
   isAddingColumn?: boolean;
 }
 
+const ROW_INDEX_COLUMN_WIDTH = 40;
+
 export function TableHeader({ columns, virtualColumns, totalWidth, onAddColumn, isAddingColumn }: TableHeaderProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedColumnType, setSelectedColumnType] = useState<ColumnTypeValue | null>(null);
@@ -68,11 +70,22 @@ export function TableHeader({ columns, virtualColumns, totalWidth, onAddColumn, 
       }}
     >
       <div
-        className="relative h-full"
+        className="relative h-full bg-white border-b border-gray-200"
         style={{
           width: `${totalWidth}px`,
         }}
       >
+        <div
+          className="absolute flex items-center justify-center"
+          style={{
+            left: 0,
+            width: `${ROW_INDEX_COLUMN_WIDTH}px`, // or your preferred width
+            height: '100%',
+          }}
+        >
+          <div className="border border-gray-300 shadow-sm rounded-sm w-4 h-4"/>
+        </div>
+
         {virtualColumns.map((virtualColumn) => {
           const column = columns[virtualColumn.index];
           if (!column) return null;
@@ -80,12 +93,13 @@ export function TableHeader({ columns, virtualColumns, totalWidth, onAddColumn, 
           return (
             <div
               key={column.id}
-              className="absolute flex h-full items-center border-r border-b border-gray-200 px-3 font-normal bg-white"
+              className="absolute flex gap-3 h-full items-center border-r border-gray-200 px-3 font-normal bg-white"
               style={{
-                left: `${virtualColumn.start}px`,
+                left: `${virtualColumn.start + ROW_INDEX_COLUMN_WIDTH}px`,
                 width: `${virtualColumn.size}px`,
               }}
             >
+              {getColumnTypeIcon(column.columnType)}
               <span className="truncate">{column.name}</span>
             </div>
           );
