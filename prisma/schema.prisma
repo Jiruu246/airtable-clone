@@ -50,7 +50,6 @@ model Table {
     columns Column[]
     rows    Row[]
     views   View[]
-    cells   Cell[]
     
     @@index([baseId], map: "idx_tables_base_id")
 }
@@ -82,18 +81,16 @@ model Row {
 model Cell {
     rowId    BigInt @map("row_id")
     columnId String @map("column_id")
-    tableId  String @map("table_id")
     value    String
     sort_key String
     
     row    Row    @relation(fields: [rowId], references: [id], onDelete: Cascade)
     column Column @relation(fields: [columnId], references: [id], onDelete: Cascade)
-    table  Table  @relation(fields: [tableId], references: [id], onDelete: Cascade)
     
     @@id([rowId, columnId])
-    @@index([tableId, value], map: "idx_cells_table_value")
-    @@index([tableId, columnId], map: "idx_cells_table_col")
-    @@index([tableId, rowId], map: "idx_cells_table_row")
+
+    @@index([rowId, columnId, sort_key], map: "idx_cells_row_col_sort")
+    @@index([rowId, columnId, value], map: "idx_cells_row_col_value")
 }
 
 model View {
@@ -115,7 +112,6 @@ model ViewConf {
     @@id([viewId, key])
 }
 
-// Next Auth Models (keeping for authentication)
 model Account {
     id                       String  @id @default(cuid())
     userId                   String

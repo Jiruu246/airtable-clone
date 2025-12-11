@@ -50,7 +50,6 @@ CREATE TABLE "Row" (
 CREATE TABLE "Cell" (
     "row_id" BIGINT NOT NULL,
     "column_id" TEXT NOT NULL,
-    "table_id" TEXT NOT NULL,
     "value" TEXT NOT NULL,
     "sort_key" TEXT NOT NULL,
 
@@ -130,13 +129,10 @@ CREATE INDEX "idx_columns_table_order" ON "Column"("table_id", "order_index");
 CREATE INDEX "idx_rows_table_id" ON "Row"("table_id");
 
 -- CreateIndex
-CREATE INDEX "idx_cells_table_value" ON "Cell"("table_id", "value");
+CREATE INDEX "idx_cells_row_col_sort" ON "Cell"("row_id", "column_id", "sort_key");
 
 -- CreateIndex
-CREATE INDEX "idx_cells_table_col" ON "Cell"("table_id", "column_id");
-
--- CreateIndex
-CREATE INDEX "idx_cells_table_row" ON "Cell"("table_id", "row_id");
+CREATE INDEX "idx_cells_row_col_value" ON "Cell"("row_id", "column_id", "value");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Account_provider_providerAccountId_key" ON "Account"("provider", "providerAccountId");
@@ -167,9 +163,6 @@ ALTER TABLE "Cell" ADD CONSTRAINT "Cell_row_id_fkey" FOREIGN KEY ("row_id") REFE
 
 -- AddForeignKey
 ALTER TABLE "Cell" ADD CONSTRAINT "Cell_column_id_fkey" FOREIGN KEY ("column_id") REFERENCES "Column"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Cell" ADD CONSTRAINT "Cell_table_id_fkey" FOREIGN KEY ("table_id") REFERENCES "Table"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "View" ADD CONSTRAINT "View_table_id_fkey" FOREIGN KEY ("table_id") REFERENCES "Table"("id") ON DELETE CASCADE ON UPDATE CASCADE;

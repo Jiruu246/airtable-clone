@@ -8,20 +8,10 @@ export interface TableRepository {
   update(id: string, data: UpdateTableData): Promise<Table>;
   delete(id: string): Promise<void>;
   createWithColumnsAndRows(data: CreateTableWithDataInput): Promise<Table>;
-  getTableRowsPaginated(id: string, cursor?: string, limit?: number): Promise<PaginatedTableData>;
   getTableMetadata(id: string): Promise<TableMetadata | null>;
   createRowsWithData(tableId: string, processedRows: Record<string, { value: string; sortKey: string; }>[], columns: { id: string; name: string; }[]): Promise<void>;
   addColumn(data: AddColumnData): Promise<ColumnMetadata>;
   getColumnMetadata(columnId: string): Promise<ColumnMetadata | null>;
-}
-
-export interface PaginatedTableData {
-  id: string;
-  rows: {
-    id: string;
-    [columnId: string]: string | null;
-  }[];
-  nextCursor?: string;
 }
 
 export interface Table {
@@ -241,7 +231,6 @@ export class PrismaTableRepository implements TableRepository {
             cellsToCreate.push({
               rowId,
               columnId: column.id,
-              tableId: table.id,
               value,
               sort_key: sortKey,
             });
@@ -260,66 +249,6 @@ export class PrismaTableRepository implements TableRepository {
       maxWait: 15000,
       timeout: 60000,
     });
-  }
-
-  async getTableRowsPaginated(id: string, cursor?: string, limit = 50): Promise<PaginatedTableData> {
-    const cursorId = cursor ? BigInt(cursor) : undefined;
-
-    let rows = await db.row.findMany({
-      where: {
-        tableId: id,
-        id: cursorId ? {
-          gt: cursorId,
-        } : undefined,
-      },
-      orderBy: {
-        id: "asc",
-      },
-      take: limit + 1,
-    });
-
-    const hasNextPage = rows.length > limit;
-    rows = hasNextPage ? rows.slice(0, -1) : rows;
-    const nextCursor = hasNextPage && rows.length > 0 ? rows[rows.length - 1]?.id.toString() : undefined;
-
-    const rowIds = rows.map(row => row.id);
-
-    const cells = await db.cell.findMany({
-      where: {
-        tableId: id,
-        rowId: {
-          in: rowIds,
-        },
-      },
-      select: {
-        rowId: true,
-        columnId: true,
-        value: true,
-      },
-      orderBy: {
-        rowId: "asc",
-      },
-    });
-
-    const transformedRows = rows.map((row) => {
-      const rowData: { id: string; [columnId: string]: string | null } = {
-        id: row.id.toString(),
-      };
-
-      const rowCells = cells.filter(cell => cell.rowId === row.id);
-
-      rowCells.forEach((cell) => {
-        rowData[cell.columnId] = cell.value;
-      });
-      return rowData;
-    });
-
-    // TODO: improve the pagination object structure
-    return {
-      id,
-      rows: transformedRows,
-      nextCursor,
-    };
   }
 
   async getTableMetadata(id: string): Promise<TableMetadata | null> {
@@ -410,7 +339,6 @@ export class PrismaTableRepository implements TableRepository {
           cellsToCreate.push({
             rowId: createdRow.id,
             columnId: column.id,
-            tableId,
             value,
             sort_key: sortKey,
           });
@@ -479,5 +407,4 @@ export class PrismaTableRepository implements TableRepository {
   }
 }
 
-// Export a singleton instance
 export const tableRepository = new PrismaTableRepository();

@@ -1,5 +1,4 @@
 import { TRPCError } from "@trpc/server";
-import { ColumnTypes } from "~/data/columnTypes";
 import {
   type BaseRepository,
   type Base,
@@ -8,7 +7,6 @@ import {
   baseRepository,
 } from "~/server/repositories/base.repository";
 import { tableService } from "~/server/services/table.service";
-import { SampleDataGenerator } from "~/server/utils/sample-data";
 
 export interface BaseService {
   listUserBases(userId: string): Promise<Base[]>;
@@ -61,23 +59,11 @@ export class BaseServiceImpl implements BaseService {
     };
 
     try {
-      // Create the base
       const base = await this.repository.create(createData);
       
-      // Generate sample table data using Faker.js
-      const columns = [
-        { name: "Name", columnType: ColumnTypes.Text.value, orderIndex: 0 },
-        { name: "Score", columnType: ColumnTypes.Number.value, orderIndex: 1 },
-      ];
-      const numberOfRows = 100;
-      const rows = SampleDataGenerator.generateRowsForColumns(columns, numberOfRows);
-          
-      // Create a table with sample data
       await tableService.createTableWithSampleData({
         name: "Sample Table",
         baseId: base.id,
-        columns,
-        rows,
       });
 
       return base;

@@ -26,14 +26,8 @@ const getTablesByBaseSchema = z.object({
 });
 
 const createTableWithSampleDataSchema = z.object({
-  name: z.string().min(1, "Table name is required").max(100, "Table name must be 100 characters or less"),
+  name: z.string().max(100, "Table name must be 100 characters or less").default("Sample Table"),
   baseId: z.string().uuid("Invalid base ID"),
-  columns: z.array(z.object({
-    name: z.string(),
-    columnType: ColumnTypeZodEnum,
-    orderIndex: z.number(),
-  })),
-  rows: z.array(z.record(z.string())),
 });
 
 const createRandomRowsSchema = z.object({
@@ -94,8 +88,6 @@ export const tableRouter = createTRPCRouter({
       return await tableService.createTableWithSampleData({
         name: input.name,
         baseId: input.baseId,
-        columns: input.columns,
-        rows: input.rows,
       });
     }),
 

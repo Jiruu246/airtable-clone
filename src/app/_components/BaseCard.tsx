@@ -75,7 +75,7 @@ export function BaseCard({
   };
 
   const handleCardClick = () => {
-    router.push(`/base/${id}`);
+    router.push(`/${id}`);
   };
 
   const handleDelete = () => {
