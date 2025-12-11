@@ -144,6 +144,39 @@ export class CellServiceImpl implements CellService {
     }
   }
 
+  static DecodeSortKey(sortKey: string, columnType: ColumnTypeValue): string {
+    if (columnType !== ColumnTypes.Number.value) {
+      return sortKey;
+    }
+
+    if (sortKey.length !== CellServiceImpl.SORT_KEY_LENGTH) {
+      return '0';
+    }
+    
+    const signFlag = sortKey[0];
+    const paddedInteger = sortKey.substring(1, 19);
+    const sortDecimal = sortKey[19] ?? '0';
+    
+    let integerPart: number;
+    let decimalPart: number;
+    
+    if (signFlag === '1') {
+      integerPart = parseInt(paddedInteger, 10);
+      decimalPart = parseInt(sortDecimal, 10);
+    } else {
+      const maxInteger = Math.pow(10, 18) - 1;
+      integerPart = maxInteger - parseInt(paddedInteger, 10);
+      decimalPart = 9 - parseInt(sortDecimal, 10);
+    }
+    
+    const absValue = integerPart + (decimalPart / 10);
+    const value = signFlag === '1' ? absValue : -absValue;
+    
+    const result = Math.round(value * 10) / 10;    
+    return result.toString();
+  }
+
+
   private static GenerateNumberSortKey(value: string): string {
     const numValue = Number(value);
     if (isNaN(numValue) || !isFinite(numValue)) {
