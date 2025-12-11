@@ -19,6 +19,24 @@ const listViewsByTableSchema = z.object({
   tableId: z.string().uuid("Invalid table ID"),
 });
 
+const getViewByIdSchema = z.object({
+  id: z.string().uuid("Invalid view ID"),
+});
+
+const createViewSchema = z.object({
+  name: z.string().min(1, "View name is required").max(100, "View name must be 100 characters or less"),
+  tableId: z.string().uuid("Invalid table ID"),
+});
+
+const updateViewSchema = z.object({
+  id: z.string().uuid("Invalid view ID"),
+  name: z.string().min(1, "View name is required").max(100, "View name must be 100 characters or less"),
+});
+
+const deleteViewSchema = z.object({
+  id: z.string().uuid("Invalid view ID"),
+});
+
 const addHiddenColumnSchema = z.object({
   viewId: z.string().uuid("Invalid view ID"),
   columnId : z.string().uuid("Invalid column ID"),
@@ -95,6 +113,36 @@ export const viewRouter = createTRPCRouter({
     .input(listViewsByTableSchema)
     .query(async ({ input }) => {
       return await viewService.listViewsByTableId(input.tableId);
+    }),
+
+  getById: protectedProcedure
+    .input(getViewByIdSchema)
+    .query(async ({ input }) => {
+      return await viewService.getViewById(input.id);
+    }),
+
+  create: protectedProcedure
+    .input(createViewSchema)
+    .mutation(async ({ input }) => {
+      return await viewService.createView({
+        name: input.name,
+        tableId: input.tableId,
+      });
+    }),
+
+  update: protectedProcedure
+    .input(updateViewSchema)
+    .mutation(async ({ input }) => {
+      return await viewService.updateView(input.id, {
+        name: input.name,
+      });
+    }),
+
+  delete: protectedProcedure
+    .input(deleteViewSchema)
+    .mutation(async ({ input }) => {
+      await viewService.deleteView(input.id);
+      return { success: true };
     }),
 
   getViewRowsPaginated: protectedProcedure

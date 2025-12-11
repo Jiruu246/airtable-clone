@@ -60,7 +60,7 @@ export function TableCell({
     <div
       className={`absolute flex h-full items-center border-r border-gray-200 px-3 cursor-pointer ${
         isSelected
-          ? 'ring-2 ring-blue-500 bg-blue-50'
+          ? 'ring-2 ring-blue-500 bg-blue-50 z-10'
           : 'hover:bg-gray-50'
       }`}
       style={style}

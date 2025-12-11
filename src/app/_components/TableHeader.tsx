@@ -22,8 +22,6 @@ export function TableHeader({ columns, virtualColumns, totalWidth, onAddColumn, 
   const [fieldName, setFieldName] = useState('');
   const useDropdownRef = useRef<HTMLDivElement>(null);
   
-  // const { data: columnTypes, isLoading: isLoadingColumnTypes } = api.metadata.getColumnTypes.useQuery();
-  
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (useDropdownRef.current && !useDropdownRef.current.contains(event.target as Node)) {
@@ -39,7 +37,7 @@ export function TableHeader({ columns, virtualColumns, totalWidth, onAddColumn, 
   }, [isDropdownOpen]);
 
   const handleCreateField = () => {
-    if (onAddColumn && fieldName.trim() && selectedColumnType) {
+    if (onAddColumn && selectedColumnType) {
       onAddColumn(selectedColumnType, fieldName.trim());
       handleClose();
     }

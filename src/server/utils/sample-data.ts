@@ -43,6 +43,3 @@ export class RandomDataGenerator {
     });
   }
 }
-
-// Keep backward compatibility
-export const SampleDataGenerator = RandomDataGenerator;

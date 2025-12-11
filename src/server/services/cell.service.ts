@@ -7,6 +7,7 @@ import {
   type UpsertCellData,
   cellRepository,
 } from "~/server/repositories/cell.repository";
+import { tableRepository } from "../repositories/table.repository";
 
 export interface CellService {
   deleteCell(data: DeleteCellInput): Promise<void>;
@@ -95,21 +96,9 @@ export class CellServiceImpl implements CellService {
         });
       }
 
-      const columnType = (await db.column.findUnique({
-        where: { id: data.columnId },
-      }))?.columnType as ColumnTypeValue;
+      const columnType = (await tableRepository.getColumnMetadata(data.columnId))!.columnType;
 
-      let processedValue = data.value;
-
-      if (columnType === ColumnTypes.Number.value) {
-        let numValue = Number(data.value);
-        if (!isNaN(numValue) && isFinite(numValue)) {
-          numValue = Math.max(CellServiceImpl.MIN_NUMERIC_VALUE, Math.min(CellServiceImpl.MAX_NUMERIC_VALUE, numValue));
-          processedValue = String(Math.round(numValue * 10) / 10);
-        } else {
-          processedValue = '0';
-        }
-      }
+      const processedValue = CellServiceImpl.ProcessCellValue(data.value, columnType);
 
       const upsertData: UpsertCellData = {
         tableId: data.tableId,
@@ -128,6 +117,20 @@ export class CellServiceImpl implements CellService {
         cause: error,
       });
     }
+  }
+
+  static ProcessCellValue(value: string, columnType: ColumnTypeValue): string {
+    let processedValue = value;  
+    if (columnType === ColumnTypes.Number.value) {
+      let numValue = Number(processedValue);
+      if (!isNaN(numValue) && isFinite(numValue)) {
+        numValue = Math.max(CellServiceImpl.MIN_NUMERIC_VALUE, Math.min(CellServiceImpl.MAX_NUMERIC_VALUE, numValue));
+        processedValue = String(Math.round(numValue * 10) / 10);
+      } else {
+        processedValue = '0';
+      }
+    }  
+    return processedValue;
   }
 
   static EncodeSortKey(value: string, columnType: ColumnTypeValue): string {

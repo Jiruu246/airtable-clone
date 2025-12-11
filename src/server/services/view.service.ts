@@ -7,6 +7,8 @@ import {
   type ViewFilterCondition,
   type ViewOrderingList,
   type ViewOrderingCondition,
+  type CreateViewData,
+  type UpdateViewData,
   viewRepository,
   type CompositeCursor,
   type PaginatedViewDataEncoded,
@@ -15,9 +17,14 @@ import { ColumnTypes } from "~/data/columnTypes";
 import { TextFilterOperators, NumberFilterOperators } from "~/data/filterOperators";
 import { tableRepository } from "../repositories/table.repository";
 import { LogicalOperators, type LogicalOperatorValue } from "~/data/logicalOperators";
+import { CellServiceImpl } from "./cell.service";
 
 export interface ViewService {
   listViewsByTableId(tableId: string): Promise<View[]>;
+  getViewById(viewId: string): Promise<View | null>;
+  createView(data: { name: string; tableId: string }): Promise<View>;
+  updateView(viewId: string, data: { name: string }): Promise<View>;
+  deleteView(viewId: string): Promise<void>;
   getViewRowsPaginated(viewId: string, cursor?: string, limit?: number, searchString?: string): Promise<PaginatedViewDataEncoded>;
   getViewMetadata(viewId: string): Promise<ViewMetadata>;
   addHiddenColumn(viewId: string, columnId: string): Promise<void>;
@@ -47,6 +54,90 @@ export class ViewServiceImpl implements ViewService {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "Failed to get views for table",
+        cause: error,
+      });
+    }
+  }
+
+  async getViewById(viewId: string): Promise<View | null> {
+    try {
+      return await this.viewRepository.findById(viewId);
+    } catch (error) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to get view",
+        cause: error,
+      });
+    }
+  }
+
+  async createView(data: CreateViewData): Promise<View> {
+    try {
+      // Validate that the table exists by checking if we can get its metadata
+      const tableExists = await tableRepository.findById(data.tableId);
+      if (!tableExists) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Table not found",
+        });
+      }
+      
+      return await this.viewRepository.create(data);
+    } catch (error) {
+      if (error instanceof TRPCError) {
+        throw error;
+      }
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to create view",
+        cause: error,
+      });
+    }
+  }
+
+  async updateView(viewId: string, data: UpdateViewData): Promise<View> {
+    try {
+      // Check if view exists first
+      const existingView = await this.viewRepository.findById(viewId);
+      if (!existingView) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "View not found",
+        });
+      }
+      
+      return await this.viewRepository.update(viewId, data);
+    } catch (error) {
+      if (error instanceof TRPCError) {
+        throw error;
+      }
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to update view",
+        cause: error,
+      });
+    }
+  }
+
+  async deleteView(viewId: string): Promise<void> {
+    try {
+      // Check if view exists first
+      const existingView = await this.viewRepository.findById(viewId);
+      if (!existingView) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "View not found",
+        });
+      }
+      
+      await this.viewRepository.delete(viewId);
+    } catch (error) {
+      if (error instanceof TRPCError) {
+        throw error;
+      }
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to delete view",
         cause: error,
       });
     }
@@ -149,11 +240,9 @@ export class ViewServiceImpl implements ViewService {
         });
       }
       
-      const processedCondition = await this.roundConditionValueIfNeeded(condition);
-      
+      const processedCondition = await this.processViewFilterCondition(condition);
       await this.viewRepository.addViewFilterCondition(viewId, processedCondition, operator);
     } catch (error) {
-      // Check if this is a validation error and preserve the message
       if (error instanceof TRPCError) {
         throw error;
       }
@@ -200,11 +289,9 @@ export class ViewServiceImpl implements ViewService {
         });
       }
       
-      const processedCondition = await this.roundConditionValueIfNeeded(condition);
-      
+      const processedCondition = await this.processViewFilterCondition(condition);
       await this.viewRepository.updateViewFilterCondition(viewId, conditionIndex, processedCondition);
     } catch (error) {
-      // Check if this is a validation error and preserve the message
       if (error instanceof TRPCError) {
         throw error;
       }
@@ -268,25 +355,14 @@ export class ViewServiceImpl implements ViewService {
     return true;
   }
 
-  async roundConditionValueIfNeeded(condition: ViewFilterCondition): Promise<ViewFilterCondition> {
-    const columnMetadata = await tableRepository.getColumnMetadata(condition.column_id);
-    if (!columnMetadata) {
-      return condition;
+  async processViewFilterCondition(condition: ViewFilterCondition): Promise<ViewFilterCondition> {
+    const processedCondition = condition;
+    if (processedCondition.value) {
+      const columnType = (await tableRepository.getColumnMetadata(processedCondition.column_id))!.columnType;
+      const processedValue = CellServiceImpl.ProcessCellValue(processedCondition.value, columnType);
+      processedCondition.value = CellServiceImpl.EncodeSortKey(processedValue, columnType);
     }
-
-    const { columnType } = columnMetadata;
-    
-    if (columnType === ColumnTypes.Number.value && condition.value) {
-      const numValue = parseFloat(condition.value);
-      if (!isNaN(numValue)) {
-        return {
-          ...condition,
-          value: numValue.toFixed(1)
-        };
-      }
-    }
-    
-    return condition;
+    return processedCondition;
   }
 
   async getViewOrdering(viewId: string): Promise<ViewOrderingList | null> {

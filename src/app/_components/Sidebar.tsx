@@ -90,7 +90,7 @@ export function Sidebar() {
     onSuccess: (newBase) => {
       //TODO: navigate to the new base page before waiting for the table data to be created
       void utils.base.list.invalidate();
-      router.push(`/base/${newBase.id}`);
+      router.push(`/${newBase.id}`);
     },
     onError: (error) => {
       console.error("Failed to create base:", error);

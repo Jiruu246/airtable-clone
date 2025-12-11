@@ -379,19 +379,21 @@ export class PrismaViewRepository implements ViewRepository {
   }
 
   private buildOrderByClause(viewOrdering?: ViewOrderingList | null): Prisma.Sql {
-    if (!viewOrdering || viewOrdering.conditions.length === 0) {
-      return Prisma.sql`r."id" ASC`;
+    const defaultOrder = Prisma.sql`r."id" ASC`;
+
+    if (!viewOrdering?.conditions.length) {
+      return defaultOrder;
     }
 
-    const orderByClauses: Prisma.Sql[] = [];
-    
-    viewOrdering.conditions.forEach((condition, index) => {
+    const orderByClauses = viewOrdering.conditions.map((condition, index) => {
       const alias = `order_cell_${index}`;
-      const direction = condition.direction === OrderDirections.Ascending.value ? Prisma.sql`ASC` : Prisma.sql`DESC`;
-      orderByClauses.push(Prisma.sql`COALESCE(${Prisma.raw(alias)}."sort_key", '') ${direction}`);
+      const direction = condition.direction === OrderDirections.Ascending.value 
+        ? Prisma.sql`ASC` 
+        : Prisma.sql`DESC`;
+      return Prisma.sql`COALESCE(${Prisma.raw(alias)}."sort_key", '') ${direction}`;
     });
     
-    orderByClauses.push(Prisma.sql`r."id" ASC`);
+    orderByClauses.push(defaultOrder);
     return Prisma.join(orderByClauses, ', ');
   }
 
@@ -520,7 +522,6 @@ export class PrismaViewRepository implements ViewRepository {
 
     const cells = await db.cell.findMany({
       where: {
-        tableId: view.tableId,
         rowId: {
           in: rowIds,
         },
@@ -660,7 +661,6 @@ export class PrismaViewRepository implements ViewRepository {
       const hiddenColumns = (confData.columnIds || []).filter(id => id !== columnId);
 
       if (hiddenColumns.length === 0) {
-        // Remove the configuration if no hidden columns remain
         await db.viewConf.delete({
           where: {
             viewId_key: {
@@ -670,7 +670,6 @@ export class PrismaViewRepository implements ViewRepository {
           },
         });
       } else {
-        // Update the configuration
         await db.viewConf.update({
           where: {
             viewId_key: {
@@ -703,8 +702,6 @@ export class PrismaViewRepository implements ViewRepository {
 
     return [];
   }
-
-
 
   async getViewFilter(viewId: string): Promise<ViewFilter | null> {
     const existingConf = await db.viewConf.findUnique({

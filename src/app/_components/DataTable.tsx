@@ -178,7 +178,7 @@ export function DataTable({ tableId, viewId, visibleColumns, searchString }: Dat
               }}
             >
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-500 rounded-full animate-spin" />
                 <span>Loading more rows...</span>
               </div>
             </div>
@@ -194,18 +194,26 @@ export function DataTable({ tableId, viewId, visibleColumns, searchString }: Dat
         {/* Floating Add Record Button */}
         <div className="absolute bottom-9 left-3 flex shadow-lg bg-white rounded-full border border-gray-300">
           <button
-            className=" hover:bg-gray-200 text-gray-800  px-4 py-2 rounded-l-full  transition-colors duration-200 flex items-center justify-center"
+            className=" hover:bg-gray-200 hover:cursor-pointer disabled:cursor-not-allowed text-gray-800  px-4 py-2 rounded-l-full  transition-colors duration-200 flex items-center justify-center"
             onClick={() => handleAddRows(1)}
             disabled={isAddingRow}
           >
-            <GoPlus className="w-5 h-5" />
+            {isAddingRow ? (
+              <span className="w-5 h-5 border-2 border-gray-300 border-t-gray-500 rounded-full animate-spin inline-block" />
+            ) : (
+              <GoPlus className="w-5 h-5" />
+            )}
           </button>
           <button
-            className="bg-white hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-r-full border-l border-gray-300 transition-colors duration-200 flex items-center justify-center gap-2"
+            className="bg-white hover:bg-gray-200 hover:cursor-pointer disabled:cursor-not-allowed text-gray-800 px-4 py-2 rounded-r-full border-l border-gray-300 transition-colors duration-200 flex items-center justify-center gap-2"
             onClick={() => handleAddRows(100000)}
             disabled={isAddingRow}
           >
-            <PiMagicWandThin className="w-5 h-5" />
+            {isAddingRow ? (
+              <span className="w-5 h-5 border-2 border-gray-300 border-t-gray-500 rounded-full animate-spin inline-block" />
+            ) : (
+              <PiMagicWandThin className="w-5 h-5" />
+            )}
             <span className="text-xs">Add 100,000 rows</span>
           </button>
         </div>

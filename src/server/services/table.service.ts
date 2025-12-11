@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import type { ColumnTypeValue } from "~/data/columnTypes";
+import { ColumnTypes, type ColumnTypeValue } from "~/data/columnTypes";
 import {
   type TableRepository,
   type Table,
@@ -22,7 +22,7 @@ export interface TableService {
   createTable(data: CreateTableInput): Promise<Table>;
   updateTable(data: UpdateTableInput): Promise<Table>;
   deleteTable(data: DeleteTableInput): Promise<void>;
-  createTableWithSampleData(data: CreateTableWithSampleDataInput): Promise<Table>;
+  createTableWithSampleData(data: CreateTableInput): Promise<Table>;
   createRandomRows(data: CreateRandomRowsInput): Promise<void>;
   addColumn(data: AddColumnInput): Promise<{ id: string; name: string; columnType: string; orderIndex: number; }>;
 }
@@ -41,15 +41,7 @@ export interface DeleteTableInput {
   id: string;
 }
 
-export interface CreateTableWithSampleDataInput {
-  name: string;
-  baseId: string;
-  columns: {
-    name: string;
-    columnType: string;
-  }[];
-  rows: Record<string, string>[];
-}
+
 
 export interface CreateRandomRowsInput {
   tableId: string;
@@ -157,16 +149,23 @@ export class TableServiceImpl implements TableService {
     }
   }
 
-  async createTableWithSampleData(data: CreateTableWithSampleDataInput): Promise<Table> {
-    // Process rows with sort keys
-    const processedRows = data.rows.map(row => {
+  async createTableWithSampleData(data: CreateTableInput): Promise<Table> {
+    const columns = [
+      { name: "Name", columnType: ColumnTypes.Text.value },
+      { name: "Score", columnType: ColumnTypes.Number.value },
+    ];
+    
+    const numberOfRows = 100;
+    const rows = RandomDataGenerator.generateRowsForColumns(columns, numberOfRows);
+    
+    const processedRows = rows.map(row => {
       const processedRow: Record<string, { value: string; sortKey: string; }> = {};
       
-      data.columns.forEach(column => {
+      columns.forEach(column => {
         const value = row[column.name] ?? '';
         processedRow[column.name] = {
           value,
-          sortKey: CellServiceImpl.EncodeSortKey(value, column.columnType as ColumnTypeValue)
+          sortKey: CellServiceImpl.EncodeSortKey(value, column.columnType)
         };
       });
       
@@ -176,16 +175,15 @@ export class TableServiceImpl implements TableService {
     const createData: CreateTableWithDataInput = {
       name: data.name.trim(),
       baseId: data.baseId,
-      columns: data.columns,
+      columns,
       processedRows,
     };
 
     try {
       const table = await this.repository.createWithColumnsAndRows(createData);
       
-      // Create default GridView for the table
       await this.viewRepository.create({
-        name: 'GridView',
+        name: 'Grid view',
         tableId: table.id,
       });
       
@@ -267,7 +265,7 @@ export class TableServiceImpl implements TableService {
       });
     }
 
-    const columnName = data.columnName?.trim() ?? 'New Column';
+    const columnName = (data.columnName?.trim() ?? '' ) || 'New Column';
 
     const nextOrderIndex = tableMetadata.columns.length > 0 
       ? Math.max(...tableMetadata.columns.map(col => col.orderIndex)) + 1 

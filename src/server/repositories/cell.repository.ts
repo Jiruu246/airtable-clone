@@ -9,7 +9,6 @@ export interface CellRepository {
 export interface Cell {
   rowId: string;
   columnId: string;
-  tableId: string;
   value: string;
 }
 
@@ -37,7 +36,6 @@ export class PrismaCellRepository implements CellRepository {
     return {
       rowId: cell.rowId.toString(),
       columnId: cell.columnId,
-      tableId: cell.tableId,
       value: cell.value,
     };
   }
@@ -68,7 +66,6 @@ export class PrismaCellRepository implements CellRepository {
       create: {
         rowId: BigInt(rowId),
         columnId,
-        tableId: data.tableId,
         value: data.value,
         sort_key: data.sort_key
       },
@@ -77,7 +74,6 @@ export class PrismaCellRepository implements CellRepository {
     return {
       rowId: cell.rowId.toString(),
       columnId: cell.columnId,
-      tableId: cell.tableId,
       value: cell.value,
     };
   }
