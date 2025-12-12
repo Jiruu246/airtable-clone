@@ -15,7 +15,7 @@ export default function TablePage({ params }: TablePageProps) {
   const router = useRouter();
   const { baseId, tableId } = use(params);
 
-  const { data: currentTable } = api.table.getById.useQuery({ id: tableId });
+  const { data: currentTable } = api.table.getById.useQuery({ tableId: tableId });
 
   useEffect(() => {
     if (currentTable?.views?.[0]?.id) {

@@ -9,7 +9,7 @@
 
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
-import { ZodError } from "zod";
+import z, { ZodError } from "zod";
 
 import { auth } from "~/server/auth";
 import { db } from "~/server/db";
@@ -102,6 +102,37 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
 });
 
 /**
+ * Base owner middleware
+ *
+ * Ensures that the current user is the owner of the base they are trying to access.
+ */
+export const createOwnershipMiddleware = <T extends { userId: string }>(
+  getResource: (opts: { ctx: Awaited<ReturnType<typeof createTRPCContext>>; input: unknown }) => Promise<T | null>
+) =>
+  t.middleware(async ({ ctx, input, next }) => {
+    if (!ctx.session?.user?.id) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+    
+    const resource = await getResource({ ctx, input });
+
+    if (!resource) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Resource not found" });
+    }
+
+    if (resource.userId !== ctx.session.user.id) {
+      throw new TRPCError({ code: "FORBIDDEN", message: "Access denied" });
+    }
+
+    return next({
+      ctx: {
+        session: { ...ctx.session, user: ctx.session.user },
+        resource,
+      },
+    });
+  });
+
+/**
  * Public (unauthenticated) procedure
  *
  * This is the base piece you use to build new queries and mutations on your tRPC API. It does not
@@ -131,3 +162,69 @@ export const protectedProcedure = t.procedure
       },
     });
   });
+
+/**
+ * Base owner procedure
+ *
+ */
+export const baseOwnerProcedure = protectedProcedure
+  .input(z.object({ baseId: z.string().uuid("Invalid base ID") }))
+  .use(
+    createOwnershipMiddleware(async ({ ctx, input }) => {
+      const { baseId } = input as { baseId: string };
+      return await ctx.db.base.findUnique({
+        where: { id: baseId },
+      });
+    })
+  );
+
+/**
+ * Table owner procedure
+ * 
+ */
+export const tableOwnerProcedure = protectedProcedure
+  .input(z.object({ tableId: z.string().uuid("Invalid table ID") }))
+  .use(
+    createOwnershipMiddleware(async ({ ctx, input }) => {
+      const { tableId } = input as { tableId: string };
+      const table = await ctx.db.table.findUnique({
+        where: { id: tableId },
+        include: { base: true },
+      });
+      return table?.base ?? null;
+    })
+  );
+
+/**
+ * Column owner procedure
+ *
+ */
+export const columnOwnerProcedure = protectedProcedure
+  .input(z.object({ columnId: z.string().uuid("Invalid column ID") }))
+  .use(
+    createOwnershipMiddleware(async ({ ctx, input }) => {
+      const { columnId } = input as { columnId: string };
+      const column = await ctx.db.column.findUnique({
+        where: { id: columnId },
+        include: { table: { include: { base: true } } },
+      });
+      return column?.table.base ?? null;
+    })
+  );
+
+/**
+ * view owner procedure
+ *
+ */
+export const viewOwnerProcedure = protectedProcedure
+  .input(z.object({ viewId: z.string().uuid("Invalid view ID") }))
+  .use(
+    createOwnershipMiddleware(async ({ ctx, input }) => {
+      const { viewId } = input as { viewId: string };
+      const view = await ctx.db.view.findUnique({
+        where: { id: viewId },
+        include: { table: { include: { base: true } } },
+      });
+      return view?.table.base ?? null;
+    })
+  );

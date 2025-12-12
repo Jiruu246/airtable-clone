@@ -11,7 +11,7 @@ export function useColumnData({ tableId, viewId }: UseColumnDataProps) {
 
   const addColumnMutation = api.table.addColumn.useMutation({
     onSuccess: () => {
-      void utils.view.getViewMetadata.invalidate({ id: viewId });
+      void utils.view.getViewMetadata.invalidate({ viewId: viewId });
     },
     onError: (error) => {
       console.error("Failed to add column:", error);

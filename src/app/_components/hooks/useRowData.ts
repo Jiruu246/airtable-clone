@@ -13,7 +13,7 @@ export function useRowData({ tableId, viewId, refetch }: UseRowDataProps) {
   const createRandomRowsMutation = api.table.createRandomRows.useMutation({
     onSuccess: () => {
       void refetch();
-      void utils.view.getViewMetadata.invalidate({ id: viewId });
+      void utils.view.getViewMetadata.invalidate({ viewId: viewId });
     },
     onError: (error) => {
       console.error("Failed to create random rows:", error);

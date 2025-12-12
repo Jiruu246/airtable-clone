@@ -1,12 +1,13 @@
 "use client";
 
-import { use, useState, useRef, useEffect } from "react";
+import { use, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "~/trpc/react";
 import { TableActionsDropdown } from "~/app/_components/TableActionsDropdown";
 
 import { IoChevronDown } from "react-icons/io5";
 import { GoPlus } from "react-icons/go";
+import useOutsideClick from "~/app/_components/hooks/useClickOutside";
 
 interface TableLayoutProps {
   children: React.ReactNode;
@@ -17,14 +18,14 @@ interface TableLayoutProps {
 }
 
 export default function TableLayout({ children, params }: TableLayoutProps) {
-  const [isTableActionsOpen, setIsTableActionsOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const tableActionsRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const utils = api.useUtils();
 
   const { baseId, tableId } = use(params);
 
-  const { data: currentTable, isLoading } = api.table.getById.useQuery({ id: tableId });
+  const { data: currentTable, isLoading } = api.table.getById.useQuery({ tableId: tableId });
   const { data: allTables } = api.table.getByBaseId.useQuery({ baseId });
 
   const createTableMutation = api.table.createWithSampleData.useMutation({
@@ -37,18 +38,9 @@ export default function TableLayout({ children, params }: TableLayoutProps) {
     },
   });
 
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (tableActionsRef.current && !tableActionsRef.current.contains(event.target as Node)) {
-        setIsTableActionsOpen(false);
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
+  useOutsideClick(tableActionsRef, () => {
+    setIsDropdownOpen(false);
+  });
 
   const handleCreateNewTable = () => {
     createTableMutation.mutate({
@@ -96,7 +88,7 @@ export default function TableLayout({ children, params }: TableLayoutProps) {
                     onContextMenu={(e) => {
                       if (isActive) {
                         e.preventDefault();
-                        setIsTableActionsOpen(true);
+                        setIsDropdownOpen(true);
                       }
                     }}
                   >
@@ -105,11 +97,11 @@ export default function TableLayout({ children, params }: TableLayoutProps) {
                   </button>
                   {isActive && (
                     <TableActionsDropdown
-                      isOpen={isTableActionsOpen}
+                      isOpen={isDropdownOpen}
                       tableId={currentTable.id}
                       tableName={currentTable.name}
                       baseId={baseId}
-                      onClose={() => setIsTableActionsOpen(false)}
+                      onClose={() => setIsDropdownOpen(false)}
                     />
                   )}
                 </div>

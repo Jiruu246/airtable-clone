@@ -26,7 +26,7 @@ export interface DataTableProps {
 export function DataTable({ tableId, viewId, visibleColumns, searchString }: DataTableProps) {
   const parentRef = useRef<HTMLDivElement>(null);
   const tableContentRef = useRef<HTMLDivElement>(null);
-  const metaData = api.view.getViewMetadata.useQuery({ id: viewId });
+  const metaData = api.view.getViewMetadata.useQuery({ viewId: viewId });
 
   // The data update is now broken when go back and forth between base, the data is not up to date until a refetch is triggered
   const {
@@ -36,7 +36,7 @@ export function DataTable({ tableId, viewId, visibleColumns, searchString }: Dat
     isFetchingNextPage,
     refetch,
   } = api.view.getViewRowsPaginated.useInfiniteQuery(
-    { id: viewId, limit: 50, searchString },
+    { viewId: viewId, limit: 50, searchString },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     }

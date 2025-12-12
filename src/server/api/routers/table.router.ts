@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { baseOwnerProcedure, createTRPCRouter, tableOwnerProcedure } from "~/server/api/trpc";
 import { tableService } from "~/server/services/table.service";
 import { ColumnTypeZodEnum } from "../schema/schema";
 
@@ -9,16 +9,16 @@ const createTableSchema = z.object({
 });
 
 const updateTableSchema = z.object({
-  id: z.string().uuid("Invalid table ID"),
+  tableId: z.string().uuid("Invalid table ID"),
   name: z.string().min(1, "Table name is required").max(100, "Table name must be 100 characters or less"),
 });
 
 const deleteTableSchema = z.object({
-  id: z.string().uuid("Invalid table ID"),
+  tableId: z.string().uuid("Invalid table ID"),
 });
 
 const getTableSchema = z.object({
-  id: z.string().uuid("Invalid table ID"),
+  tableId: z.string().uuid("Invalid table ID"),
 });
 
 const getTablesByBaseSchema = z.object({
@@ -42,19 +42,19 @@ const addColumnSchema = z.object({
 });
 
 export const tableRouter = createTRPCRouter({
-  getByBaseId: protectedProcedure
+  getByBaseId: baseOwnerProcedure
     .input(getTablesByBaseSchema)
     .query(async ({ input }) => {
       return await tableService.listTablesByBaseId(input.baseId);
     }),
 
-  getById: protectedProcedure
+  getById: tableOwnerProcedure
     .input(getTableSchema)
     .query(async ({ input }) => {
-      return await tableService.getById(input.id);
+      return await tableService.getById(input.tableId);
     }),
 
-  create: protectedProcedure
+  create: baseOwnerProcedure
     .input(createTableSchema)
     .mutation(async ({ input }) => {
       return await tableService.createTable({
@@ -63,26 +63,26 @@ export const tableRouter = createTRPCRouter({
       });
     }),
 
-  update: protectedProcedure
+  update: tableOwnerProcedure
     .input(updateTableSchema)
     .mutation(async ({ input }) => {
       return await tableService.updateTable({
-        id: input.id,
+        id: input.tableId,
         name: input.name,
       });
     }),
 
-  delete: protectedProcedure
+  delete: tableOwnerProcedure
     .input(deleteTableSchema)
     .mutation(async ({ input }) => {
       await tableService.deleteTable({
-        id: input.id,
+        id: input.tableId,
       });
       
       return { success: true };
     }),
 
-  createWithSampleData: protectedProcedure
+  createWithSampleData: baseOwnerProcedure
     .input(createTableWithSampleDataSchema)
     .mutation(async ({ input }) => {
       return await tableService.createTableWithSampleData({
@@ -91,7 +91,7 @@ export const tableRouter = createTRPCRouter({
       });
     }),
 
-  createRandomRows: protectedProcedure
+  createRandomRows: tableOwnerProcedure
     .input(createRandomRowsSchema)
     .mutation(async ({ input }) => {
       await tableService.createRandomRows({
@@ -102,7 +102,7 @@ export const tableRouter = createTRPCRouter({
       return { success: true, rowsCreated: input.numberOfRows };
     }),
 
-  addColumn: protectedProcedure
+  addColumn: tableOwnerProcedure
     .input(addColumnSchema)
     .mutation(async ({ input }) => {
       return await tableService.addColumn({

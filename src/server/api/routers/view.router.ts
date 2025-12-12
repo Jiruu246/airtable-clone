@@ -1,18 +1,18 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, tableOwnerProcedure, viewOwnerProcedure } from "~/server/api/trpc";
 import { viewService } from "~/server/services/view.service";
 import { FilterOperatorZodEnum, LogicalOperatorZodEnum, OrderingTypeZodEnum } from "../schema/schema";
 import { LogicalOperators } from "~/data/logicalOperators";
 
 const getViewRowsPaginatedSchema = z.object({
-  id: z.string().uuid("Invalid view ID"),
+  viewId: z.string().uuid("Invalid view ID"),
   cursor: z.string().optional(),
   limit: z.number().int().min(1).max(1000).default(50),
   searchString: z.string().optional(),
 });
 
 const getViewMetadataSchema = z.object({
-  id: z.string().uuid("Invalid view ID"),
+  viewId: z.string().uuid("Invalid view ID"),
 });
 
 const listViewsByTableSchema = z.object({
@@ -20,7 +20,7 @@ const listViewsByTableSchema = z.object({
 });
 
 const getViewByIdSchema = z.object({
-  id: z.string().uuid("Invalid view ID"),
+  viewId: z.string().uuid("Invalid view ID"),
 });
 
 const createViewSchema = z.object({
@@ -29,12 +29,12 @@ const createViewSchema = z.object({
 });
 
 const updateViewSchema = z.object({
-  id: z.string().uuid("Invalid view ID"),
+  viewId: z.string().uuid("Invalid view ID"),
   name: z.string().min(1, "View name is required").max(100, "View name must be 100 characters or less"),
 });
 
 const deleteViewSchema = z.object({
-  id: z.string().uuid("Invalid view ID"),
+  viewId: z.string().uuid("Invalid view ID"),
 });
 
 const addHiddenColumnSchema = z.object({
@@ -109,19 +109,19 @@ const updateViewOrderingConditionSchema = z.object({
 });
 
 export const viewRouter = createTRPCRouter({
-  listViewsByTableId: protectedProcedure
+  listViewsByTableId: tableOwnerProcedure
     .input(listViewsByTableSchema)
     .query(async ({ input }) => {
       return await viewService.listViewsByTableId(input.tableId);
     }),
 
-  getById: protectedProcedure
+  getById: viewOwnerProcedure
     .input(getViewByIdSchema)
     .query(async ({ input }) => {
-      return await viewService.getViewById(input.id);
+      return await viewService.getViewById(input.viewId);
     }),
 
-  create: protectedProcedure
+  create: tableOwnerProcedure
     .input(createViewSchema)
     .mutation(async ({ input }) => {
       return await viewService.createView({
@@ -130,108 +130,108 @@ export const viewRouter = createTRPCRouter({
       });
     }),
 
-  update: protectedProcedure
+  update: viewOwnerProcedure
     .input(updateViewSchema)
     .mutation(async ({ input }) => {
-      return await viewService.updateView(input.id, {
+      return await viewService.updateView(input.viewId, {
         name: input.name,
       });
     }),
 
-  delete: protectedProcedure
+  delete: viewOwnerProcedure
     .input(deleteViewSchema)
     .mutation(async ({ input }) => {
-      await viewService.deleteView(input.id);
+      await viewService.deleteView(input.viewId);
       return { success: true };
     }),
 
-  getViewRowsPaginated: protectedProcedure
+  getViewRowsPaginated: viewOwnerProcedure
     .input(getViewRowsPaginatedSchema)
     .query(async ({ input }) => {
-      return await viewService.getViewRowsPaginated(input.id, input.cursor, input.limit, input.searchString);
+      return await viewService.getViewRowsPaginated(input.viewId, input.cursor, input.limit, input.searchString);
     }),
 
-  getViewMetadata: protectedProcedure
+  getViewMetadata: viewOwnerProcedure
     .input(getViewMetadataSchema)
     .query(async ({ input }) => {
-      return await viewService.getViewMetadata(input.id);
+      return await viewService.getViewMetadata(input.viewId);
     }),
 
-  addHiddenColumn: protectedProcedure
+  addHiddenColumn: viewOwnerProcedure
     .input(addHiddenColumnSchema)
     .mutation(async ({ input }) => {
       await viewService.addHiddenColumn(input.viewId, input.columnId);
       return { success: true };
     }),
 
-  removeHiddenColumn: protectedProcedure
+  removeHiddenColumn: viewOwnerProcedure
     .input(removeHiddenColumnSchema)
     .mutation(async ({ input }) => {
       await viewService.removeHiddenColumn(input.viewId, input.columnId);
       return { success: true };
     }),
 
-  getHiddenColumns: protectedProcedure
+  getHiddenColumns: viewOwnerProcedure
     .input(getHiddenColumnsSchema)
     .query(async ({ input }) => {
       return await viewService.getHiddenColumns(input.viewId);
     }),
 
-  getViewFilters: protectedProcedure
+  getViewFilters: viewOwnerProcedure
     .input(getViewFiltersSchema)
     .query(async ({ input }) => {
       return await viewService.getViewFilters(input.viewId);
     }),
 
-  addViewFilterCondition: protectedProcedure
+  addViewFilterCondition: viewOwnerProcedure
     .input(addViewFilterConditionSchema)
     .mutation(async ({ input }) => {
       await viewService.addViewFilterCondition(input.viewId, input.condition, input.operator);
       return { success: true };
     }),
 
-  removeViewFilterCondition: protectedProcedure
+  removeViewFilterCondition: viewOwnerProcedure
     .input(removeViewFilterConditionSchema)
     .mutation(async ({ input }) => {
       await viewService.removeViewFilterCondition(input.viewId, input.conditionIndex);
       return { success: true };
     }),
 
-  updateViewFilterCondition: protectedProcedure
+  updateViewFilterCondition: viewOwnerProcedure
     .input(updateViewFilterConditionSchema)
     .mutation(async ({ input }) => {
       await viewService.updateViewFilterCondition(input.viewId, input.conditionIndex, input.condition);
       return { success: true };
     }),
 
-  updateViewFilterOperator: protectedProcedure
+  updateViewFilterOperator: viewOwnerProcedure
     .input(updateViewFilterOperatorSchema)
     .mutation(async ({ input }) => {
       await viewService.updateViewFilterOperator(input.viewId, input.operator);
       return { success: true };
     }),
 
-  getViewOrdering: protectedProcedure
+  getViewOrdering: viewOwnerProcedure
     .input(getViewOrderingSchema)
     .query(async ({ input }) => {
       return await viewService.getViewOrdering(input.viewId);
     }),
 
-  addViewOrderingCondition: protectedProcedure
+  addViewOrderingCondition: viewOwnerProcedure
     .input(addViewOrderingConditionSchema)
     .mutation(async ({ input }) => {
       await viewService.addViewOrderingCondition(input.viewId, input.condition);
       return { success: true };
     }),
 
-  removeViewOrderingCondition: protectedProcedure
+  removeViewOrderingCondition: viewOwnerProcedure
     .input(removeViewOrderingConditionSchema)
     .mutation(async ({ input }) => {
       await viewService.removeViewOrderingCondition(input.viewId, input.conditionIndex);
       return { success: true };
     }),
 
-  updateViewOrderingCondition: protectedProcedure
+  updateViewOrderingCondition: viewOwnerProcedure
     .input(updateViewOrderingConditionSchema)
     .mutation(async ({ input }) => {
       await viewService.updateViewOrderingCondition(input.viewId, input.conditionIndex, input.condition);

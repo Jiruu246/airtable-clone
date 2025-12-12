@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import type { TableColumn } from "./types/DataTable.types";
 import type { VirtualItem } from "@tanstack/react-virtual";
 import { GoPlus } from "react-icons/go";
@@ -7,6 +7,7 @@ import { FaChevronDown } from "react-icons/fa6";
 import { MdTextFormat } from "react-icons/md";
 import { AiOutlineNumber } from "react-icons/ai";
 import { ColumnTypeList, ColumnTypes, type ColumnTypeValue } from "~/data/columnTypes";
+import useOutsideClick from "./hooks/useClickOutside";
 
 export interface TableHeaderProps {
   columns: TableColumn[];
@@ -24,19 +25,9 @@ export function TableHeader({ columns, virtualColumns, totalWidth, onAddColumn, 
   const [fieldName, setFieldName] = useState('');
   const useDropdownRef = useRef<HTMLDivElement>(null);
   
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (useDropdownRef.current && !useDropdownRef.current.contains(event.target as Node)) {
-        handleClose();
-      }
-    };
-
-    if (isDropdownOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isDropdownOpen]);
+  useOutsideClick(useDropdownRef, () => {
+    handleClose();
+  });
 
   const handleCreateField = () => {
     if (onAddColumn && selectedColumnType) {

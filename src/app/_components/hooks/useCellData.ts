@@ -59,7 +59,7 @@ export function useCellData({ tableId, viewId, rows, columns }: UseCellDataProps
     }));
 
     utils.view.getViewRowsPaginated.setInfiniteData(
-      { id: viewId },
+      { viewId: viewId },
       (oldData) => {
         if (!oldData) return oldData;
 

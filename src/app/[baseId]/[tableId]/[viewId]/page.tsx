@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState, useRef, useEffect } from "react";
+import { use, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "~/trpc/react";
 import { DataTable } from "~/app/_components/DataTable";
@@ -12,10 +12,7 @@ import { useHiddenColumns } from "~/app/_components/hooks/useHiddenColumns";
 
 import { RxHamburgerMenu } from "react-icons/rx";
 import { RxViewGrid } from "react-icons/rx";
-import { FaRegEyeSlash } from "react-icons/fa";
-import { IoFilterOutline } from "react-icons/io5";
 import { BsCardList } from "react-icons/bs";
-import { LuArrowUpDown } from "react-icons/lu";
 import { IoColorFillOutline } from "react-icons/io5";
 import { CgFormatLineHeight } from "react-icons/cg";
 import { GoShare } from "react-icons/go";
@@ -32,14 +29,7 @@ interface ViewPageProps {
 }
 
 export default function ViewPage({ params }: ViewPageProps) {
-  const [isHideFieldsOpen, setIsHideFieldsOpen] = useState(false);
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [isSortOpen, setIsSortOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchString, setSearchString] = useState<string>("");
-  const hideFieldsRef = useRef<HTMLDivElement>(null);
-  const filterRef = useRef<HTMLDivElement>(null);
-  const sortRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   
   const utils = api.useUtils();
@@ -48,15 +38,7 @@ export default function ViewPage({ params }: ViewPageProps) {
 
   const { data: allViews, isLoading } = api.view.listViewsByTableId.useQuery({ tableId });
   const { data: viewMetadata } = api.view.getViewMetadata.useQuery(
-    { id: viewId },
-    { enabled: !!viewId }
-  );
-  const {data: filterData } = api.view.getViewFilters.useQuery(
-    { viewId },
-    { enabled: !!viewId }
-  );
-  const {data: sortData } = api.view.getViewOrdering.useQuery(
-    { viewId },
+    { viewId: viewId },
     { enabled: !!viewId }
   );
   const { hiddenColumns, toggleColumn } = useHiddenColumns({
@@ -71,25 +53,6 @@ export default function ViewPage({ params }: ViewPageProps) {
         console.error("Failed to create view:", error);
     }
   });
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (hideFieldsRef.current && !hideFieldsRef.current.contains(event.target as Node)) {
-        setIsHideFieldsOpen(false);
-      }
-      if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
-        setIsFilterOpen(false);
-      }
-      if (sortRef.current && !sortRef.current.contains(event.target as Node)) {
-        setIsSortOpen(false);
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
 
   const handleCreateNewView = () => {
     createViewMutation.mutate({
@@ -125,57 +88,23 @@ export default function ViewPage({ params }: ViewPageProps) {
           </button>
         </div>
         <div className="flex items-center gap-2">
-          <div className="relative" ref={hideFieldsRef}>
-            <button 
-              className={`flex items-center gap-2 text-gray-600  px-3 py-1.5 rounded text-sm ${
-                hiddenColumns.size > 0 ? 'bg-blue-200' : 'hover:bg-gray-100'
-              }`}
-              onClick={() => setIsHideFieldsOpen(!isHideFieldsOpen)}
-            >
-              <FaRegEyeSlash className="w-4 h-4" />
-              <span>{hiddenColumns.size > 0 ? `${hiddenColumns.size} hidden fields` : 'Hide fields'}</span>
-            </button>
-            <HideFieldsDropdown
-              isOpen={isHideFieldsOpen}
-              columns={viewMetadata?.columns ?? []}
-              hiddenColumns={hiddenColumns}
-              onToggleColumn={toggleColumn}
-            />
-          </div>
-          <div className="relative" ref={filterRef}>
-            <button 
-              className={`flex items-center gap-2 text-gray-600 px-3 py-1.5 rounded text-sm 
-                ${filterData?.conditions?.length ? 'bg-green-200' : 'hover:bg-gray-100'}`}
-              onClick={() => setIsFilterOpen(!isFilterOpen)}
-            >
-              <IoFilterOutline className="w-4 h-4" />
-              <span>Filter</span>
-            </button>
-            <FilterDropdown
-              isOpen={isFilterOpen}
-              columns={viewMetadata?.columns ?? []}
-              viewId={viewId}
-            />
-          </div>
+          <HideFieldsDropdown
+            columns={viewMetadata?.columns ?? []}
+            hiddenColumns={hiddenColumns}
+            onToggleColumn={toggleColumn}
+          />
+          <FilterDropdown
+            columns={viewMetadata?.columns ?? []}
+            viewId={viewId}
+          />
           <button className="flex items-center gap-2 text-gray-600 hover:bg-gray-100 px-3 py-1.5 rounded text-sm">
             <BsCardList className="w-4 h-4" />
             <span>Group</span>
           </button>
-          <div className="relative" ref={sortRef}>
-            <button 
-              className={`flex items-center gap-2 text-gray-600 px-3 py-1.5 rounded text-sm 
-                ${sortData?.conditions?.length ? 'bg-orange-200' : 'hover:bg-gray-100'}`}
-              onClick={() => setIsSortOpen(!isSortOpen)}
-            >
-              <LuArrowUpDown className="w-4 h-4" />
-              <span>Sort</span>
-            </button>
-            <SortDropdown
-              isOpen={isSortOpen}
-              columns={viewMetadata?.columns ?? []}
-              viewId={viewId}
-            />
-          </div>
+          <SortDropdown
+            columns={viewMetadata?.columns ?? []}
+            viewId={viewId}
+          />
           <button className="flex items-center gap-2 text-gray-600 hover:bg-gray-100 px-3 py-1.5 rounded text-sm">
             <IoColorFillOutline className="w-4 h-4" />
             <span>Color</span>
@@ -187,19 +116,10 @@ export default function ViewPage({ params }: ViewPageProps) {
             <GoShare className="w-4 h-4" />
             <span>Share and sync</span>
           </button>
-          <div className="relative">
-            <button 
-              className="text-gray-600 hover:bg-gray-100 p-2 rounded"
-              onClick={() => setIsSearchOpen(!isSearchOpen)}
-            >
-              <IoSearch className="w-4 h-4" />
-            </button>
-            <SearchDropdown
-              isOpen={isSearchOpen}
-              onSearchChange={setSearchString}
-              onClose={() => setIsSearchOpen(false)}
-            />
-          </div>
+          <SearchDropdown
+            searchValue={searchString}
+            onSearchChange={setSearchString}
+          />
         </div>
       </div>
 
