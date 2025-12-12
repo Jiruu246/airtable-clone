@@ -46,7 +46,7 @@ export default function ViewPage({ params }: ViewPageProps) {
 
   const { baseId, tableId, viewId } = use(params);
 
-  const { data: allViews } = api.view.listViewsByTableId.useQuery({ tableId });
+  const { data: allViews, isLoading } = api.view.listViewsByTableId.useQuery({ tableId });
   const { data: viewMetadata } = api.view.getViewMetadata.useQuery(
     { id: viewId },
     { enabled: !!viewId }
@@ -63,8 +63,8 @@ export default function ViewPage({ params }: ViewPageProps) {
     viewId: viewId,
   });
   const createViewMutation = api.view.create.useMutation({
-    onSuccess: (newView) => {
-        void utils.view.listViewsByTableId.invalidate({ tableId });
+    onSuccess: async (newView) => {
+        await utils.view.listViewsByTableId.invalidate({ tableId });
         router.push(`/${baseId}/${tableId}/${newView.id}`);
     },
     onError: (error) => {
@@ -106,34 +106,8 @@ export default function ViewPage({ params }: ViewPageProps) {
 
   const currentView = allViews?.find(view => view.id === viewId);
 
-  if (!allViews) {
-    return (
-      <div className="bg-white p-12">
-        <div className="text-center">
-          <div className="text-gray-500 text-xl mb-3">
-            Table not found
-          </div>
-          <div className="text-gray-400 text-base">
-            The requested table could not be found.
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!currentView) {
-    return (
-      <div className="bg-white p-12">
-        <div className="text-center">
-          <div className="text-gray-500 text-xl mb-3">
-            View not found
-          </div>
-          <div className="text-gray-400 text-base">
-            The requested view could not be found in this table.
-          </div>
-        </div>
-      </div>
-    );
+  if (isLoading || !allViews || !currentView) {
+    return null;
   }
 
   return (
@@ -235,11 +209,14 @@ export default function ViewPage({ params }: ViewPageProps) {
         <div className="bg-white border-r border-gray-200 flex flex-col">
           <div className="p-3">
             <button
-              className="flex items-center gap-2 text-gray-700 hover:bg-gray-100 px-3 py-2 rounded w-full text-left text-sm"
+              className={`flex items-center gap-2 text-gray-700 hover:bg-gray-100 px-3 py-2 rounded w-full text-left text-sm
+                ${createViewMutation.isPending ? 'cursor-not-allowed opacity-50' : ''}`}
               onClick={handleCreateNewView}
               disabled={createViewMutation.isPending}
             >
-              <GoPlus className="w-4 h-4" />
+              {createViewMutation.isPending 
+                ? <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-500 rounded-full animate-spin" /> 
+                : <GoPlus className="w-4 h-4" />}
               <span>{createViewMutation.isPending ? "Creating..." : "Create new..."}</span>
             </button>
           </div>

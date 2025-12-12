@@ -24,7 +24,7 @@ export default function TableLayout({ children, params }: TableLayoutProps) {
 
   const { baseId, tableId } = use(params);
 
-  const { data: currentTable } = api.table.getById.useQuery({ id: tableId });
+  const { data: currentTable, isLoading } = api.table.getById.useQuery({ id: tableId });
   const { data: allTables } = api.table.getByBaseId.useQuery({ baseId });
 
   const createTableMutation = api.table.createWithSampleData.useMutation({
@@ -63,19 +63,8 @@ export default function TableLayout({ children, params }: TableLayoutProps) {
     }
   };
 
-  if (!currentTable) {
-    return (
-      <div className="bg-white p-12">
-        <div className="text-center">
-          <div className="text-gray-500 text-xl mb-3">
-            Table not found
-          </div>
-          <div className="text-gray-400 text-base">
-            The requested table could not be found.
-          </div>
-        </div>
-      </div>
-    );
+  if (isLoading || !currentTable) {
+    return null;
   }
 
   return (

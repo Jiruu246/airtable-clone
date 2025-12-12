@@ -1,7 +1,14 @@
+import type { Metadata } from 'next';
 import Image from 'next/image';
 import React from 'react';
 import { FaGoogle } from "react-icons/fa";
 import { signIn } from "~/server/auth";
+
+export const metadata: Metadata = {
+  title: "Sign in - Airtable Clone",
+  description: "Login page for Airtable Clone",
+  icons: [{ rel: "icon", url: "/logo.svg" }],
+}
 
 const LoginPage: React.FC = () => {
   return (
