@@ -17,22 +17,16 @@ export interface Column {
 }
 
 export class RandomDataGenerator {
-  /**
-   * Generate random value based on column type
-   */
   static generateValueForColumn(columnType: ColumnTypeValue): string {
     switch (columnType) {
       case ColumnTypes.Number.value:
         return faker.number.int({ min: 1, max: 1000 }).toString();
       case ColumnTypes.Text.value:
       default:
-        return faker.lorem.words({ min: 1, max: 3 });
+        return faker.person.fullName();
     }
   }
 
-  /**
-   * Generate multiple random rows for given columns
-   */
   static generateRowsForColumns(columns: Column[], numberOfRows: number): Record<string, string>[] {
     return Array.from({ length: numberOfRows }, () => {
       const row: Record<string, string> = {};

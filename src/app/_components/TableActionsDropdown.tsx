@@ -67,7 +67,7 @@ export const TableActionsDropdown: React.FC<TableActionsDropdownProps> = ({
   const handleSaveEdit = () => {
     if (newTableName.trim() && newTableName.trim() !== tableName) {
       updateTableMutation.mutate({
-        id: tableId,
+        tableId: tableId,
         name: newTableName.trim(),
       });
     } else {
@@ -86,7 +86,7 @@ export const TableActionsDropdown: React.FC<TableActionsDropdownProps> = ({
   };
 
   const handleConfirmDelete = () => {
-    deleteTableMutation.mutate({ id: tableId });
+    deleteTableMutation.mutate({ tableId: tableId });
   };
 
   const handleCancelDelete = () => {

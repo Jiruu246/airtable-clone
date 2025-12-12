@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { columnOwnerProcedure, createTRPCRouter } from "~/server/api/trpc";
 import { cellService } from "~/server/services/cell.service";
 
 const deleteCellSchema = z.object({
@@ -15,7 +15,7 @@ const upsertCellSchema = z.object({
 });
 
 export const cellRouter = createTRPCRouter({
-  delete: protectedProcedure
+  delete: columnOwnerProcedure
     .input(deleteCellSchema)
     .mutation(async ({ input }) => {
       await cellService.deleteCell({
@@ -26,7 +26,7 @@ export const cellRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  upsert: protectedProcedure
+  upsert: columnOwnerProcedure
     .input(upsertCellSchema)
     .mutation(async ({ input }) => {
       return await cellService.upsertCell({

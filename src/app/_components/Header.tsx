@@ -2,12 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { CiSearch  } from "react-icons/ci";
 import { RxHamburgerMenu } from "react-icons/rx";
 import { AiOutlineQuestionCircle } from "react-icons/ai";
 import { GoBell } from "react-icons/go";
 import UserDropdownMenu from "./UserDropdown";
+import useOutsideClick from "./hooks/useClickOutside";
 
 interface HeaderProps {
   user: {
@@ -22,21 +23,9 @@ export function Header({ user }: HeaderProps) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
-        setShowUserMenu(false);
-      }
-    };
-
-    if (showUserMenu) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showUserMenu]);
+  useOutsideClick(userMenuRef, () => {
+    setShowUserMenu(false);
+  });
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 shadow-sm">

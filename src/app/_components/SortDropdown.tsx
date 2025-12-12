@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Dropdown } from './Dropdown';
 import { SelectDropdown } from './SelectDropdown';
 import type { TableColumn } from './types/DataTable.types';
 import { ColumnTypes, type ColumnTypeValue } from '~/data/columnTypes';
@@ -9,6 +8,8 @@ import { OrderDirections, type OrderDirectionValue } from '~/data/orderingType';
 import { api } from '~/trpc/react';
 import { GoPlus } from 'react-icons/go';
 import { IoCloseOutline } from "react-icons/io5";
+import { DropdownBase } from './DropdownBase';
+import { LuArrowUpDown } from "react-icons/lu";
 
 interface SortCondition {
   columnId: string;
@@ -36,20 +37,20 @@ const getDirectionOptionsForColumn = (columnType: ColumnTypeValue) => {
 };
 
 interface SortDropdownProps {
-  isOpen: boolean;
   columns: TableColumn[];
   viewId?: string;
 }
 
 export const SortDropdown: React.FC<SortDropdownProps> = ({
-  isOpen,
   columns,
   viewId,
 }) => {
+  const [isOpen, setIsOpen] = useState(false);
   const [conditions, setConditions] = useState<SortCondition[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
   const utils = api.useUtils();
+  
   const { data: viewOrdering, refetch: refetchOrdering } = api.view.getViewOrdering.useQuery(
     { viewId: viewId! },
     { enabled: !!viewId && isOpen }
@@ -161,7 +162,7 @@ export const SortDropdown: React.FC<SortDropdownProps> = ({
   }));
 
   // Get columns that are not currently used in sorting
-  const availableColumns = columns.filter(col => 
+  const availableColumns = columns.filter(col =>
     !conditions.some(condition => condition.columnId === col.id)
   );
 
@@ -199,78 +200,87 @@ export const SortDropdown: React.FC<SortDropdownProps> = ({
   };
 
   return (
-    <Dropdown
-      isOpen={isOpen}
-      positionClasses="top-full mt-1 right-[-80px]"
-      width="w-120"
-    >
-      <div className="text-sm font-normal text-gray-500 px-4 pt-4">
-        Sort by
-      </div>
-      <div className="p-2">
-        {conditions.length > 0 && (
-          <>
-            {conditions.map((condition, index) => {
-              const column = columns.find(col => col.id === condition.columnId);
-              const directionOptions = getDirectionOptionsForColumn(column?.columnType ?? ColumnTypes.Text.value);
-              
-              return (
-                <div key={index} className="rounded-lg p-2">
-                  <div className="flex items-center gap-2">                    
-                    {/* Column Selector */}
-                    <SelectDropdown
-                      options={columnOptions}
-                      condition={(key) => !(conditions.some(c => c.columnId === key) || key === condition.columnId)}
-                      PreSelectedKey={condition.columnId}
-                      onSelectItem={(columnId) => updateCondition(index, 'columnId', columnId)}
-                      placeholder="Select field"
-                      className="flex-1 min-w-0"
-                      controlClassName="px-3 py-2 border rounded-md"
-                    />
+    <div className="relative">
+      <button
+        className={`flex items-center gap-2 text-gray-600 px-3 py-1.5 rounded text-sm
+          ${viewOrdering?.conditions?.length ? 'bg-orange-200' : 'hover:bg-gray-100'}`}
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <LuArrowUpDown className="w-4 h-4" />
+        <span>Sort</span>
+      </button>
+      <DropdownBase
+        isOpen={isOpen}
+        positionClasses="top-full mt-1 right-[-80px]"
+        width="w-120"
+        onClose={() => setIsOpen(false)}
+      >
+        <div className="text-sm font-normal text-gray-500 px-4 pt-4">
+          Sort by
+        </div>
+        <div className="p-2">
+          {conditions.length > 0 && (
+            <>
+              {conditions.map((condition, index) => {
+                const column = columns.find(col => col.id === condition.columnId);
+                const directionOptions = getDirectionOptionsForColumn(column?.columnType ?? ColumnTypes.Text.value);
 
-                    {/* Direction Selector */}
-                    <SelectDropdown
-                      options={directionOptions}
-                      PreSelectedKey={condition.direction}
-                      onSelectItem={(direction) => updateCondition(index, 'direction', direction as OrderDirectionValue)}
-                      placeholder="Select direction"
-                      className="flex-1 min-w-0"
-                      controlClassName="px-3 py-2 border rounded-md"
-                    />
-
-                    {/* Remove Button */}
-                    <button
-                      onClick={() => removeCondition(index)}
-                      className="p-2 hover:bg-gray-100 border-gray-200 hover:cursor-pointer rounded-md"
-                    >
-                      <IoCloseOutline className="w-4 h-5" />
-                    </button>
+                return (
+                  <div key={index} className="rounded-lg p-2">
+                    <div className="flex items-center gap-2">
+                      {/* Column Selector */}
+                      <SelectDropdown
+                        options={columnOptions}
+                        condition={(key) => !(conditions.some(c => c.columnId === key) || key === condition.columnId)}
+                        PreSelectedKey={condition.columnId}
+                        onSelectItem={(columnId) => updateCondition(index, 'columnId', columnId)}
+                        placeholder="Select field"
+                        className="flex-1 min-w-0"
+                        controlClassName="px-3 py-2 border rounded-md"
+                      />
+                      {/* Direction Selector */}
+                      <SelectDropdown
+                        options={directionOptions}
+                        PreSelectedKey={condition.direction}
+                        onSelectItem={(direction) => updateCondition(index, 'direction', direction as OrderDirectionValue)}
+                        placeholder="Select direction"
+                        className="flex-1 min-w-0"
+                        controlClassName="px-3 py-2 border rounded-md"
+                      />
+                      {/* Remove Button */}
+                      <button
+                        onClick={() => removeCondition(index)}
+                        className="p-2 hover:bg-gray-100 border-gray-200 hover:cursor-pointer rounded-md"
+                      >
+                        <IoCloseOutline className="w-4 h-5" />
+                      </button>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </>
-        )}
-        {availableColumns.length > 0 && (
-          <div className="flex justify-between w-full pt-2">
-            <div className="flex gap-4 w-full">
-              <SelectDropdown
-                options={availableColumnOptions}
-                onSelectItem={addConditionWithColumn}
-                placeholder="Add another sort..."
-                trigger={
-                  <div className="flex items-center gap-2 text-gray-500 hover:text-gray-700 cursor-pointer p-2">
-                    <GoPlus className="w-4 h-4" />
-                    <span className="text-sm">
-                      Add another sort
-                    </span>
-                  </div>
-                }
-              />
+                );
+              })}
+            </>
+          )}
+          {availableColumns.length > 0 && (
+            <div className="flex justify-between w-full pt-2">
+              <div className="flex gap-4 w-full">
+                <SelectDropdown
+                  options={availableColumnOptions}
+                  onSelectItem={addConditionWithColumn}
+                  placeholder="Add another sort..."
+                  trigger={
+                    <div className="flex items-center gap-2 text-gray-500 hover:text-gray-700 cursor-pointer p-2">
+                      <GoPlus className="w-4 h-4" />
+                      <span className="text-sm">
+                        Add another sort
+                      </span>
+                    </div>
+                  }
+                />
+              </div>
             </div>
-          </div>
-        )}
-      </div>
-    </Dropdown>
+          )}
+        </div>
+      </DropdownBase>
+    </div>
   );
 };

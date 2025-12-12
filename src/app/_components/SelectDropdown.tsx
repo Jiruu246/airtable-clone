@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { IoChevronDown } from "react-icons/io5";
+import useOutsideClick from './hooks/useClickOutside';
 
 interface SelectOption {
   key: string;
@@ -50,16 +51,9 @@ export const SelectDropdown: React.FC<SelectDropdownProps> = ({
     setIsOpen(false);
   };
 
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  useOutsideClick(dropdownRef, () => {
+    setIsOpen(false);
+  });
 
   const availableOptions = condition
     ? options.filter(option => condition(option.key))

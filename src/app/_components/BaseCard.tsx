@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "~/trpc/react";
 
@@ -14,6 +14,7 @@ import { GoCopy } from "react-icons/go";
 import { FaArrowRight } from "react-icons/fa6";
 import { PiUsersThree } from "react-icons/pi";
 import { PiPaintBrushHousehold } from "react-icons/pi";
+import useOutsideClick from "./hooks/useClickOutside";
 
 interface BaseCardProps {
   id: string;
@@ -26,9 +27,8 @@ export function BaseCard({
   name,
   onDelete,
 }: BaseCardProps) {
-  const [isMoreDropdownOpen, setIsMoreDropdownOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const moreButtonRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const utils = api.useUtils();
@@ -47,32 +47,9 @@ export function BaseCard({
     }
   });
 
-  //TODO: ugly & bug prone, refactor later
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Node;
-      if (
-        moreButtonRef.current && 
-        !moreButtonRef.current.contains(target) &&
-        dropdownRef.current &&
-        !dropdownRef.current.contains(target)
-      ) {
-        setIsMoreDropdownOpen(false);
-      }
-    };
-
-    if (isMoreDropdownOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isMoreDropdownOpen]);
-
-  const handleMoreClick = () => {
-    setIsMoreDropdownOpen(!isMoreDropdownOpen);
-  };
+  useOutsideClick(dropdownRef, () => {
+    setIsDropdownOpen(false);
+  });
 
   const handleCardClick = () => {
     router.push(`/${id}`);
@@ -80,8 +57,8 @@ export function BaseCard({
 
   const handleDelete = () => {
     setIsDeleting(true);
-    deleteBaseMutation.mutate({ id });
-    setIsMoreDropdownOpen(false);
+    deleteBaseMutation.mutate({ baseId: id });
+    setIsDropdownOpen(false);
   };
 
   return (
@@ -91,7 +68,7 @@ export function BaseCard({
     >
       {/* Card buttons */}
       <div 
-        className={`absolute top-4 right-4 ${isMoreDropdownOpen ? 'flex' : 'hidden group-hover:flex'} gap-1`}
+        className={`absolute top-4 right-4 ${isDropdownOpen ? 'flex' : 'hidden group-hover:flex'} gap-1`}
         onClick={(e) => e.stopPropagation()}>
         <button
           className="border border-gray-200 rounded-md p-1.5 shadow-sm hover:shadow-md hover:cursor-pointer z-10"
@@ -100,16 +77,15 @@ export function BaseCard({
         </button>
         <div className="relative" ref={dropdownRef}>
           <button
-            ref={moreButtonRef}
             className="border border-gray-200 rounded-md p-1.5 shadow-sm hover:shadow-md hover:cursor-pointer z-10"
-            onClick={handleMoreClick}
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           >
             <IoIosMore className="w-4 h-4 text-gray-600" />
           </button>
           
           {/* More Dropdown Menu */}
           <Dropdown 
-            isOpen={isMoreDropdownOpen}
+            isOpen={isDropdownOpen}
             width="w-60"
             >
             <DropdownItem

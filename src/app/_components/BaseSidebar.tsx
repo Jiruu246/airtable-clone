@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { IoIosArrowRoundBack } from "react-icons/io";
 import { AiOutlineQuestionCircle } from "react-icons/ai";
 import { GoBell } from "react-icons/go";
 import UserDropdownMenu from "./UserDropdown";
+import useOutsideClick from "./hooks/useClickOutside";
 
 interface HeaderProps {
   user: {
@@ -22,21 +23,9 @@ export function BaseSidebar({ user }: HeaderProps) {
   const userMenuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
-        setShowUserMenu(false);
-      }
-    };
-
-    if (showUserMenu) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showUserMenu]);
+  useOutsideClick(userMenuRef, () => {
+    setShowUserMenu(false);
+  });
 
   return (
     <aside className="h-screen bg-white border-r border-gray-200 flex flex-col p-2">

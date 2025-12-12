@@ -22,7 +22,7 @@ export default function BaseLayout({ children, params }: BaseLayoutProps) {
   }
 
   const baseId = use(params).baseId;
-  const { data: base } = api.base.getById.useQuery({ id: baseId });
+  const { data: base } = api.base.getById.useQuery({ baseId: baseId });
 
   return (
     <div className="h-screen bg-gray-100 grid grid-cols-[auto_1fr]">
