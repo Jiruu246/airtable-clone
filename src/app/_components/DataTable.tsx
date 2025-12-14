@@ -35,7 +35,6 @@ export function DataTable({ tableId, viewId, visibleColumns, searchString }: Dat
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-    refetch,
   } = api.view.getViewRowsPaginated.useInfiniteQuery(
     { 
       viewId: viewId, 
@@ -85,7 +84,7 @@ export function DataTable({ tableId, viewId, visibleColumns, searchString }: Dat
   const { isAddingRow, handleAddRows } = useRowData({
     tableId,
     viewId,
-    refetch,
+    searchString,
   });
 
   const { isAddingColumn, handleAddColumn } = useColumnData({
@@ -223,6 +222,15 @@ export function DataTable({ tableId, viewId, visibleColumns, searchString }: Dat
             <span className="text-xs">Add 100,000 rows</span>
           </button>
         </div>
+        
+        {isAddingRow && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+            <div className="flex flex-col items-center">
+              <span className="w-10 h-10 border-5 border-gray-300 border-t-gray-50/0 rounded-full animate-spin mb-4" />
+              <span className="text-md text-white font-semibold drop-shadow">Processing...</span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -67,7 +67,6 @@ export const DropdownBase: React.FC<DropdownBaseProps> = ({
     header,
     onClose,
 }) => {
-    console.log("DropdownBase render", { isOpen });
     const dropdownRef = useRef(null);
 
     useOutsideClick(dropdownRef, () => {
