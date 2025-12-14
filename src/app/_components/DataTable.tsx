@@ -35,7 +35,6 @@ export function DataTable({ tableId, viewId, visibleColumns, searchString }: Dat
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-    refetch,
   } = api.view.getViewRowsPaginated.useInfiniteQuery(
     { 
       viewId: viewId, 
@@ -85,7 +84,7 @@ export function DataTable({ tableId, viewId, visibleColumns, searchString }: Dat
   const { isAddingRow, handleAddRows } = useRowData({
     tableId,
     viewId,
-    refetch,
+    searchString,
   });
 
   const { isAddingColumn, handleAddColumn } = useColumnData({

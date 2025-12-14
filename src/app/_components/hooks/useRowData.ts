@@ -3,16 +3,15 @@ import { api } from "~/trpc/react";
 interface UseRowDataProps {
   tableId: string;
   viewId: string;
-  refetch: () => Promise<unknown>;
+  searchString?: string;
 }
 
-export function useRowData({ tableId, viewId, refetch }: UseRowDataProps) {
+export function useRowData({ tableId, viewId, searchString }: UseRowDataProps) {
   const utils = api.useUtils();
 
   const createRandomRowsMutation = api.table.createRandomRows.useMutation({
     onSuccess: () => {
-      void refetch();
-      void utils.view.getViewMetadata.invalidate({ viewId: viewId });
+      void utils.view.getViewRowsPaginated.reset({viewId, limit: 80, searchString});
     },
     onError: (error) => {
       console.error("Failed to create random rows:", error);

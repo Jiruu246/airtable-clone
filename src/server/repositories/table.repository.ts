@@ -300,60 +300,65 @@ export class PrismaTableRepository implements TableRepository {
       return;
     }
 
-    await db.$transaction(async (tx) => {
-      // Create rows
-      const rowsToCreate = Array.from({ length: processedRows.length }, () => ({
-        tableId,
-      }));
-      
-      await tx.row.createMany({
-        data: rowsToCreate,
-      });
+    const BATCH_SIZE = 500;
 
-      // Get the newly created rows
-      const createdRows = await tx.row.findMany({
-        where: { tableId },
-        select: { id: true },
-        orderBy: { id: 'desc' },
-        take: processedRows.length,
-      });
+    for (let i = 0; i < processedRows.length; i += BATCH_SIZE) {
+      const batch = processedRows.slice(i, i + BATCH_SIZE);
 
-      if (createdRows.length !== processedRows.length) {
-        throw new Error(`Expected ${processedRows.length} rows to be created, but got ${createdRows.length}`);
-      }
-
-      // Create cells with the provided data
-      const cellsToCreate = [];
-      for (let rowIndex = 0; rowIndex < processedRows.length; rowIndex++) {
-        const processedRowData = processedRows[rowIndex];
-        const createdRow = createdRows[rowIndex];
+      await db.$transaction(async (tx) => {
+        const rowsToCreate = Array.from({ length: batch.length }, () => ({
+          tableId,
+        }));
         
-        if (!processedRowData || !createdRow) {
-          throw new Error(`Processed row data or created row at index ${rowIndex} is undefined`);
+        await tx.row.createMany({
+          data: rowsToCreate,
+        });
+
+        // Get the newly created rows
+        const createdRows = await tx.row.findMany({
+          where: { tableId },
+          select: { id: true },
+          orderBy: { id: 'desc' },
+          take: batch.length,
+        });
+
+        if (createdRows.length !== batch.length) {
+          throw new Error(`Expected ${batch.length} rows to be created, but got ${createdRows.length}`);
         }
-        
-        for (const column of columns) {
-          const cellData = processedRowData[column.name];
-          const value = cellData?.value ?? '';
-          const sortKey = cellData?.sortKey ?? '';
-          cellsToCreate.push({
-            rowId: createdRow.id,
-            columnId: column.id,
-            value,
-            sort_key: sortKey,
+
+        // Create cells with the provided data
+        const cellsToCreate = [];
+        for (let rowIndex = 0; rowIndex < batch.length; rowIndex++) {
+          const processedRowData = batch[rowIndex];
+          const createdRow = createdRows[rowIndex];
+          
+          if (!processedRowData || !createdRow) {
+            throw new Error(`Processed row data or created row at index ${rowIndex} is undefined`);
+          }
+          
+          for (const column of columns) {
+            const cellData = processedRowData[column.name];
+            const value = cellData?.value ?? '';
+            const sortKey = cellData?.sortKey ?? '';
+            cellsToCreate.push({
+              rowId: createdRow.id,
+              columnId: column.id,
+              value,
+              sort_key: sortKey,
+            });
+          }
+        }
+
+        if (cellsToCreate.length > 0) {
+          await tx.cell.createMany({
+            data: cellsToCreate,
           });
         }
-      }
-
-      if (cellsToCreate.length > 0) {
-        await tx.cell.createMany({
-          data: cellsToCreate,
-        });
-      }
-    }, {
-      maxWait: 15000,
-      timeout: 60000,
-    });
+      }, {
+        maxWait: 15000,
+        timeout: 60000,
+      });
+    }
   }
 
   async addColumn(data: AddColumnData): Promise<ColumnMetadata> {

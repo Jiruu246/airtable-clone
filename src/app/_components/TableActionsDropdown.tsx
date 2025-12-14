@@ -21,7 +21,6 @@ export const TableActionsDropdown: React.FC<TableActionsDropdownProps> = ({
   baseId,
   onClose,
 }) => {
-    console.log("is Open:", isOpen);
   const [isEditing, setIsEditing] = useState(false);
   const [newTableName, setNewTableName] = useState(tableName);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
