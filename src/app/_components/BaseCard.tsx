@@ -125,8 +125,8 @@ export function BaseCard({
       </div>
 
       {/* Thumbnail */}
-      <div className="bg-[#0d7f78] rounded-lg flex items-center justify-center h-14 w-14">
-        <p className="text-xl font-medium text-white">
+      <div className="bg-[#0d7f78] rounded-xl flex items-center justify-center h-14 w-14">
+        <p className="text-xl font-normal text-white">
           {name.slice(0, 2)}
         </p>
       </div>

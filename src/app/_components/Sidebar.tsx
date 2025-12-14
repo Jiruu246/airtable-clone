@@ -11,7 +11,6 @@ import { FaPlus } from "react-icons/fa6";
 import { TbUpload } from "react-icons/tb";
 import { api } from "~/trpc/react";
 
-// Types
 interface NavigationItemProps {
   icon: ReactNode;
   label: string;
@@ -36,8 +35,8 @@ const NavigationItem = ({
   rightIcon, 
   onClick 
 }: NavigationItemProps) => {
-  const baseClasses = "w-full flex items-center px-4 py-2.5 text-gray-700 rounded-sm transition-colors";
-  const activeClasses = isActive ? "bg-gray-200" : "hover:bg-gray-200 hover:cursor-pointer";
+  const baseClasses = "w-full flex items-center px-3 py-2.5 text-gray-700 rounded-sm";
+  const activeClasses = isActive ? "bg-[#f2f4f8]" : "hover:bg-[#f2f4f8] hover:cursor-pointer";
   
   return (
     <button 
@@ -45,11 +44,11 @@ const NavigationItem = ({
       onClick={onClick}
     >
       <div className="flex items-center gap-3 flex-1">
-        {icon}
-        <span className="text-sm font-medium">{label}</span>
+        <div className="flex items-center justify-center w-5 h-5">{icon}</div>
+        <span className="text-sm font-normal">{label}</span>
       </div>
       {hasChevron && (
-        <IoChevronForward className="w-4 h-4 transition-transform" />
+        <IoChevronForward className="w-3 h-3 transition-transform" />
       )}
       {rightIcon && (
         <div className="flex items-center gap-1">
@@ -62,16 +61,16 @@ const NavigationItem = ({
 
 const ActionButton = ({ icon, label, onClick }: ActionButtonProps) => (
   <button 
-    className="w-full flex items-center gap-3 px-4 py-2.5 text-gray-700 rounded-sm hover:bg-gray-200 hover:cursor-pointer transition-colors"
+    className="w-full flex items-center gap-1 px-2 py-2 text-gray-800 rounded-sm hover:bg-gray-200 hover:cursor-pointer transition-colors"
     onClick={onClick}
   >
     {icon}
-    <span className="text-sm font-medium">{label}</span>
+    <span className="text-xs font-normal">{label}</span>
   </button>
 );
 
 const CreateButton = ({ onClick }: { onClick?: () => void }) => (
-  <div className="px-4 pt-2">
+  <div className="pt-2">
     <button 
       className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 hover:cursor-pointer text-white rounded-lg transition-colors font-medium text-xs disabled:bg-blue-300 disabled:cursor-not-allowed"
       onClick={onClick}
@@ -104,11 +103,11 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-72 bg-gray-50 border-r border-gray-200 flex flex-col p-2 z-40">
+    <aside className="fixed left-0 top-14 h-[calc(100vh-3.5rem)] w-75 bg-white border-r border-gray-200 flex flex-col p-3 z-40">
       {/* Main Navigation */}
       <nav className="flex-1 flex flex-col gap-1">
         <NavigationItem
-          icon={<GrHomeRounded className="w-5 h-5" />}
+          icon={<GrHomeRounded className="w-4 h-4" />}
           label="Home"
           isActive={true}
         />
@@ -137,21 +136,23 @@ export function Sidebar() {
       </nav>
 
       {/* Bottom Actions */}
-      <div className="border-t border-gray-200 py-2">
-        <ActionButton
-          icon={<IoBookOutline className="w-5 h-5" />}
-          label="Templates and apps"
-        />
-        
-        <ActionButton
-          icon={<PiShoppingBagOpen className="w-5 h-5" />}
-          label="Marketplace"
-        />
-        
-        <ActionButton
-          icon={<TbUpload className="w-5 h-5" />}
-          label="Import"
-        />
+      <div className="border-t border-gray-200 py-1 pt-3">
+        <div className="flex flex-col mb-2">
+          <ActionButton
+            icon={<IoBookOutline className="w-4 h-4" />}
+            label="Templates and apps"
+          />
+          
+          <ActionButton
+            icon={<PiShoppingBagOpen className="w-4 h-4" />}
+            label="Marketplace"
+          />
+          
+          <ActionButton
+            icon={<TbUpload className="w-4 h-4" />}
+            label="Import"
+          />
+        </div>
 
         <CreateButton onClick={handleCreateBase} />
       </div>

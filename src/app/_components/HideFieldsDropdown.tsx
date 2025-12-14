@@ -22,7 +22,7 @@ export const HideFieldsDropdown: React.FC<HideFieldsDropdownProps> = ({
   return (
     <div className="relative">
       <button
-        className={`flex items-center gap-2 text-gray-600  px-3 py-1.5 rounded text-sm ${hiddenColumns.size > 0 ? 'bg-blue-200' : 'hover:bg-gray-100'
+        className={`flex items-center gap-2 text-gray-600 px-2 py-1.5 rounded text-xs font-light ${hiddenColumns.size > 0 ? 'bg-blue-200' : 'hover:bg-gray-100'
           }`}
         onClick={() => setIsOpen(!isOpen)}
       >

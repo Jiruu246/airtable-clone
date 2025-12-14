@@ -28,39 +28,38 @@ export function Header({ user }: HeaderProps) {
   });
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 shadow-sm">
+    <header className="fixed top-0 left-0 right-0 z-50 flex h-14 items-center justify-between border-b border-gray-200 bg-white px-4 shadow-2xs">
       {/* Logo and Navigation */}
       <div className="flex items-center space-x-5">
-        <RxHamburgerMenu className="h-5 w-5 text-gray-600 cursor-pointer" />
+        <RxHamburgerMenu className="h-4 w-4 text-gray-600 cursor-pointer" />
         <Link href="/" className="flex items-center space-x-2">
           <Image
             src="/logo.svg"
             alt="Airtable Logo"
-            width={180}
-            height={180}
-            className="h-7 w-7"
+            width={102}
+            height={22.2}
           />
-          <span className="text-xl font-semibold text-gray-900">Airtable</span>
         </Link>
       </div>
 
       {/* Search */}
-      <div className="flex-1 max-w-xs mx-8">
-        <button className="w-full flex items-center justify-between px-4 py-1.5 border border-gray-300 rounded-full text-sm text-gray-500 bg-white shadow-xs hover:shadow-lg hover:cursor-pointer transition-shadow duration-200">
-          <div className="flex items-center space-x-3">
-            <CiSearch className="h-4 w-4 text-gray-400" />
-            <span>Search...</span>
+      <div className="flex-1 max-w-[354px] mx-8">
+        <button className="w-full flex items-center justify-between px-4 py-2 border border-gray-300 rounded-full bg-white shadow-2xs hover:shadow-lg hover:cursor-pointer transition-shadow duration-200">
+          <div className="flex items-end space-x-2">
+            <CiSearch className="h-4 w-4 text-gray-700 self-end block" />
+            <p className="text-xs text-gray-500 font-light leading-none self-end">Search...</p>
           </div>
-          <span className="text-sm text-gray-400">ctrl K</span>
+          <span className="text-xs text-gray-400">ctrl K</span>
         </button>
       </div>
 
       {/* User Menu */}
       <div className="flex items-center space-x-3">
-        <button className="p-2 rounded-full hover:bg-gray-100 hover:cursor-pointer">
-            <AiOutlineQuestionCircle className="h-5 w-5" />
+        <button className="flex gap-1 p-2 items-end rounded-full hover:bg-gray-100 hover:cursor-pointer">
+            <AiOutlineQuestionCircle className="h-4 w-4 self-end block" />
+            <p className="text-sm font-light leading-none self-end">Help</p>
         </button>
-        <button className="p-1.5 rounded-full border border-gray-400 shadow-sm hover:bg-gray-100 hover:cursor-pointer">
+        <button className="p-1.5 rounded-full border border-gray-300 shadow-sm hover:bg-gray-100 hover:cursor-pointer">
             <GoBell className="h-4 w-4" />
         </button>
 
@@ -73,8 +72,8 @@ export function Header({ user }: HeaderProps) {
               <Image
                 src={user.image}
                 alt={user.name ?? "User"}
-                width={32}
-                height={32}
+                width={25}
+                height={25}
                 className="rounded-full"
               />
             ) : (

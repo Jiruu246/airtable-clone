@@ -18,7 +18,7 @@ export interface VirtualizedRowProps {
   onStopEditing: () => void;
 }
 
-const ROW_INDEX_COLUMN_WIDTH = 40; // Width for the fixed row index column
+const ROW_INDEX_COLUMN_WIDTH = 84;
 
 export function VirtualizedRow({
   virtualRow,
@@ -44,14 +44,16 @@ export function VirtualizedRow({
     >
       {/* Index column */}
       <div
-        className="absolute flex items-center justify-center text-xs text-gray-500"
+        className="absolute p-2 flex items-center"
         style={{
           left: 0,
-          width: `${ROW_INDEX_COLUMN_WIDTH}px`, // or your preferred width
+          width: `${ROW_INDEX_COLUMN_WIDTH}px`, 
           height: '100%',
         }}
       >
-        {virtualRow.index + 1}
+        <div className="flex items-center justify-center w-7">
+          <p className="text-[clamp(0.05rem,0.70rem,0.70rem)] font-light text-gray-500">{virtualRow.index + 1}</p>
+        </div>
       </div>
 
       {virtualColumns.map((virtualColumn) => {

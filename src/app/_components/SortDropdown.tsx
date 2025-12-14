@@ -38,12 +38,14 @@ const getDirectionOptionsForColumn = (columnType: ColumnTypeValue) => {
 
 interface SortDropdownProps {
   columns: TableColumn[];
-  viewId?: string;
+  viewId: string;
+  searchString?: string;
 }
 
 export const SortDropdown: React.FC<SortDropdownProps> = ({
   columns,
   viewId,
+  searchString,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [conditions, setConditions] = useState<SortCondition[]>([]);
@@ -52,28 +54,28 @@ export const SortDropdown: React.FC<SortDropdownProps> = ({
   const utils = api.useUtils();
   
   const { data: viewOrdering, refetch: refetchOrdering } = api.view.getViewOrdering.useQuery(
-    { viewId: viewId! },
+    { viewId: viewId },
     { enabled: !!viewId && isOpen }
   );
 
   const addConditionMutation = api.view.addViewOrderingCondition.useMutation({
     onSuccess: () => {
       void refetchOrdering();
-      void utils.view.getViewRowsPaginated.invalidate();
+      void utils.view.getViewRowsPaginated.reset({viewId, limit: 80, searchString});
     },
   });
 
   const removeConditionMutation = api.view.removeViewOrderingCondition.useMutation({
     onSuccess: () => {
       void refetchOrdering();
-      void utils.view.getViewRowsPaginated.invalidate();
+      void utils.view.getViewRowsPaginated.reset({viewId, limit: 80, searchString});
     },
   });
 
   const updateConditionMutation = api.view.updateViewOrderingCondition.useMutation({
     onSuccess: () => {
       void refetchOrdering();
-      void utils.view.getViewRowsPaginated.invalidate();
+      void utils.view.getViewRowsPaginated.reset({viewId, limit: 80, searchString});
     },
   });
 
@@ -161,7 +163,6 @@ export const SortDropdown: React.FC<SortDropdownProps> = ({
     value: col.name,
   }));
 
-  // Get columns that are not currently used in sorting
   const availableColumns = columns.filter(col =>
     !conditions.some(condition => condition.columnId === col.id)
   );
@@ -202,7 +203,7 @@ export const SortDropdown: React.FC<SortDropdownProps> = ({
   return (
     <div className="relative">
       <button
-        className={`flex items-center gap-2 text-gray-600 px-3 py-1.5 rounded text-sm
+        className={`flex items-center gap-2 text-gray-600 px-2 py-1.5 rounded text-xs font-light
           ${viewOrdering?.conditions?.length ? 'bg-orange-200' : 'hover:bg-gray-100'}`}
         onClick={() => setIsOpen(!isOpen)}
       >

@@ -299,16 +299,22 @@ export class PrismaViewRepository implements ViewRepository {
       const alias = `order_cell_${index}`;
       return Prisma.sql`COALESCE(${Prisma.raw(alias)}."sort_key", '')`;
     });
-    leftTuple.push(Prisma.sql`r."id"`);
-    const leftSide = Prisma.join(leftTuple, ', ');
     
     const rightTuple: Prisma.Sql[] = Array.from({ length: conditions.length }, (_, index) => {
       return Prisma.sql`${cursorValues[index]}`;
     });
-    rightTuple.push(Prisma.sql`${cursorRowId}`);
-    const rightSide = Prisma.join(rightTuple, ', ');
     
-    return Prisma.sql`(${leftSide}) ${operator} (${rightSide})`;
+    if (isAscending) {
+      leftTuple.push(Prisma.sql`r."id"`);
+      rightTuple.push(Prisma.sql`${cursorRowId}`);
+      const leftSide = Prisma.join(leftTuple, ', ');
+      const rightSide = Prisma.join(rightTuple, ', ');
+      return Prisma.sql`(${leftSide}) ${operator} (${rightSide})`;
+    } else {
+      const leftSide = Prisma.join(leftTuple, ', ');
+      const rightSide = Prisma.join(rightTuple, ', ');
+      return Prisma.sql`(${leftSide}) ${operator} (${rightSide}) OR ((${leftSide}) = (${rightSide}) AND r."id" > ${cursorRowId})`;
+    }
   }
 
   private buildMixComparison(

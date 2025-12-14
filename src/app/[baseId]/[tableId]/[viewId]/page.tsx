@@ -19,6 +19,7 @@ import { GoShare } from "react-icons/go";
 import { IoSearch } from "react-icons/io5";
 import { GoPlus } from "react-icons/go";
 import { IoChevronDown } from "react-icons/io5";
+import { PiGear } from "react-icons/pi";
 
 interface ViewPageProps {
   params: Promise<{
@@ -76,14 +77,14 @@ export default function ViewPage({ params }: ViewPageProps) {
   return (
     <div className="grid grid-rows-[auto_1fr] overflow-hidden">
       {/* Toolbar */}
-      <div className="bg-white border-b border-gray-200 px-4 py-2 flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      <div className="bg-white border-b border-gray-200 px-2 py-2 flex items-center justify-between">
+        <div className="flex items-center gap-1">
           <button className="flex items-center gap-2 text-gray-700 hover:bg-gray-100 px-3 py-1.5 rounded">
             <RxHamburgerMenu className="w-4 h-4" />
           </button>
-          <button className="flex items-center gap-2 hover:bg-gray-100 hover:cursor-pointer px-3 py-1.5 rounded font-medium">
+          <button className="flex items-center gap-2 hover:bg-gray-100 hover:cursor-pointer px-2 py-1.5 rounded">
             <RxViewGrid className="w-4 h-4 text-blue-500" />
-            <span className="text-sm">{currentView?.name}</span>
+            <span className="text-xs font-light">{currentView?.name}</span>
             <IoChevronDown className="w-4 h-4" />
           </button>
         </div>
@@ -96,23 +97,25 @@ export default function ViewPage({ params }: ViewPageProps) {
           <FilterDropdown
             columns={viewMetadata?.columns ?? []}
             viewId={viewId}
+            searchString={searchString}
           />
-          <button className="flex items-center gap-2 text-gray-600 hover:bg-gray-100 px-3 py-1.5 rounded text-sm">
+          <button className="flex items-center gap-2 text-gray-600 hover:bg-gray-100 px-2 py-1.5 rounded text-xs font-light">
             <BsCardList className="w-4 h-4" />
             <span>Group</span>
           </button>
           <SortDropdown
             columns={viewMetadata?.columns ?? []}
             viewId={viewId}
+            searchString={searchString}
           />
-          <button className="flex items-center gap-2 text-gray-600 hover:bg-gray-100 px-3 py-1.5 rounded text-sm">
+          <button className="flex items-center gap-2 text-gray-600 hover:bg-gray-100 px-2 py-1.5 rounded text-xs font-light">
             <IoColorFillOutline className="w-4 h-4" />
             <span>Color</span>
           </button>
-          <button className="flex items-center gap-2 text-gray-600 hover:bg-gray-100 px-3 py-1.5 rounded text-sm">
+          <button className="flex items-center gap-2 text-gray-600 hover:bg-gray-100 px-2 py-1.5 rounded text-xs font-light">
             <CgFormatLineHeight className="w-4 h-4" />
           </button>
-          <button className="flex items-center gap-2 text-gray-600 hover:bg-gray-100 px-3 py-1.5 rounded text-sm">
+          <button className="flex items-center gap-2 text-gray-600 hover:bg-gray-100 px-2 py-1.5 rounded text-xs font-light">
             <GoShare className="w-4 h-4" />
             <span>Share and sync</span>
           </button>
@@ -124,12 +127,12 @@ export default function ViewPage({ params }: ViewPageProps) {
       </div>
 
       {/* Main Content Area */}
-      <div className="grid grid-cols-[256px_1fr] overflow-hidden">
+      <div className="grid grid-cols-[280px_1fr] overflow-hidden">
         {/* Sidebar */}
         <div className="bg-white border-r border-gray-200 flex flex-col">
-          <div className="p-3">
+          <div className="p-2">
             <button
-              className={`flex items-center gap-2 text-gray-700 hover:bg-gray-100 px-3 py-2 rounded w-full text-left text-sm
+              className={`flex items-center gap-2 text-gray-700 hover:bg-gray-100 px-3 py-2 rounded w-full text-left text-xs font-normal hover:cursor-pointer
                 ${createViewMutation.isPending ? 'cursor-not-allowed opacity-50' : ''}`}
               onClick={handleCreateNewView}
               disabled={createViewMutation.isPending}
@@ -147,8 +150,9 @@ export default function ViewPage({ params }: ViewPageProps) {
               <input
                 type="text"
                 placeholder="Find a view"
-                className="w-full pl-9 pr-3 py-2 text-sm rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-9 pr-3 py-2 text-xs rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
+              <PiGear className="w-4 h-4 absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-700 hover:cursor-pointer" />
             </div>
           </div>
 
@@ -157,7 +161,7 @@ export default function ViewPage({ params }: ViewPageProps) {
             {allViews?.map((view) => (
               <button 
                 key={view.id}
-                className={`flex items-center gap-2 px-3 py-2 rounded w-full text-left text-sm mb-1 ${
+                className={`flex items-center gap-2 px-3 py-2 rounded w-full text-left text-xs font-normal mb-1 hover:cursor-pointer ${
                   viewId === view.id 
                     ? 'text-gray-700 bg-gray-100' 
                     : 'text-gray-600 hover:bg-gray-50'

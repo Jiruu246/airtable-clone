@@ -7,7 +7,7 @@ import { signIn } from "~/server/auth";
 export const metadata: Metadata = {
   title: "Sign in - Airtable Clone",
   description: "Login page for Airtable Clone",
-  icons: [{ rel: "icon", url: "/logo.svg" }],
+  icons: [{ rel: "icon", url: "/logo_no_txt.svg" }],
 }
 
 const LoginPage: React.FC = () => {
@@ -18,7 +18,7 @@ const LoginPage: React.FC = () => {
         <div className="flex-1 max-w-md">
           <div className="mb-8 space-y-8">
             <Image
-                src="/logo.svg"
+                src="/logo_no_txt.svg"
                 alt="Airtable Logo"
                 width={180}
                 height={180}
