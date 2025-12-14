@@ -17,7 +17,8 @@ export interface TableHeaderProps {
   isAddingColumn?: boolean;
 }
 
-const ROW_INDEX_COLUMN_WIDTH = 40;
+const ROW_INDEX_COLUMN_WIDTH = 84;
+const ROW_HEIGHT = 32;
 
 export function TableHeader({ columns, virtualColumns, totalWidth, onAddColumn, isAddingColumn }: TableHeaderProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -57,7 +58,8 @@ export function TableHeader({ columns, virtualColumns, totalWidth, onAddColumn, 
     <div
       className="sticky top-0 z-10 bg-gray-50 flex"
       style={{
-        height: "40px",
+        height: `${ROW_HEIGHT}px`,
+        width: `${totalWidth}px`,
       }}
     >
       <div
@@ -67,14 +69,16 @@ export function TableHeader({ columns, virtualColumns, totalWidth, onAddColumn, 
         }}
       >
         <div
-          className="absolute flex items-center justify-center"
+          className="absolute flex items-center p-2"
           style={{
             left: 0,
-            width: `${ROW_INDEX_COLUMN_WIDTH}px`, // or your preferred width
+            width: `${ROW_INDEX_COLUMN_WIDTH}px`,
             height: '100%',
           }}
         >
-          <div className="border border-gray-300 shadow-sm rounded-sm w-4 h-4"/>
+          <div className="flex items-center justify-center w-7">
+            <div className="border border-gray-300 shadow-sm rounded-sm w-4 h-4"/>
+          </div>
         </div>
 
         {virtualColumns.map((virtualColumn) => {
@@ -84,14 +88,14 @@ export function TableHeader({ columns, virtualColumns, totalWidth, onAddColumn, 
           return (
             <div
               key={column.id}
-              className="absolute flex gap-3 h-full items-center border-r border-gray-200 px-3 font-normal bg-white"
+              className="absolute flex gap-3 h-full items-center border-r border-gray-200 px-3 bg-white"
               style={{
                 left: `${virtualColumn.start + ROW_INDEX_COLUMN_WIDTH}px`,
                 width: `${virtualColumn.size}px`,
               }}
             >
               {getColumnTypeIcon(column.columnType)}
-              <span className="truncate">{column.name}</span>
+              <span className="font-light text-xs truncate">{column.name}</span>
             </div>
           );
         })}

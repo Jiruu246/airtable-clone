@@ -9,7 +9,6 @@ interface UseRowDataProps {
 export function useRowData({ tableId, viewId, refetch }: UseRowDataProps) {
   const utils = api.useUtils();
 
-  // TODO: Find a better way to optimize refetching after adding rows
   const createRandomRowsMutation = api.table.createRandomRows.useMutation({
     onSuccess: () => {
       void refetch();

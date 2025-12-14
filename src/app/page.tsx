@@ -22,20 +22,20 @@ export default async function Home() {
 
   return (
     <HydrateClient>
-      <div className="min-h-screen bg-gray-100">
+      <div className="min-h-screen bg-gray-50">
         {/* Header */}
         <Header user={session.user} />
 
-        <div className="pt-16">
+        <div className="pt-14">
           {/* Sidebar */}
           <Sidebar />
 
           {/* Main Content */}
           <main>
-            <div className="p-8 max-w-[1920px] ml-72">
-              <h1 className="text-3xl font-bold text-gray-900 mb-8">Home</h1>
+            <div className="px-11 py-7 max-w-[1920px] ml-75">
+              <h1 className="text-[27px] font-bold text-gray-900 mb-6">Home</h1>
 
-              <div className="mb-8">
+              <div className="mb-5">
                 <QuickActions />
               </div>
 
@@ -43,7 +43,7 @@ export default async function Home() {
               <div>
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex gap-2 items-center text-gray-600 hover:text-gray-900 cursor-pointer">
-                    <h2 className="text-md font-light">Opened anytime</h2>
+                    <h2 className="text-sm font-light">Opened anytime</h2>
                     <IoChevronDown className="w-4 h-4" />
                   </div>
                   <div className="flex gap-2 items-center">

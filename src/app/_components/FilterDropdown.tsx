@@ -41,12 +41,14 @@ const operatorsNotRequiringValue: FilterOperatorValue[] = [
 
 interface FilterDropdownProps {
   columns: TableColumn[];
-  viewId?: string;
+  viewId: string;
+  searchString?: string;
 }
 
 export const FilterDropdown: React.FC<FilterDropdownProps> = ({
   columns,
   viewId,
+  searchString,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [conditions, setConditions] = useState<FilterCondition[]>([]);
@@ -55,35 +57,35 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
 
   const utils = api.useUtils();
   const { data: viewFilters, refetch: refetchFilters } = api.view.getViewFilters.useQuery(
-    { viewId: viewId! },
+    { viewId: viewId },
     { enabled: !!viewId && isOpen }
   );
 
   const addConditionMutation = api.view.addViewFilterCondition.useMutation({
     onSuccess: () => {
       void refetchFilters();
-      void utils.view.getViewRowsPaginated.invalidate();
+      void utils.view.getViewRowsPaginated.reset({viewId, limit: 80, searchString});
     },
   });
 
   const removeConditionMutation = api.view.removeViewFilterCondition.useMutation({
     onSuccess: () => {
       void refetchFilters();
-      void utils.view.getViewRowsPaginated.invalidate();
+      void utils.view.getViewRowsPaginated.reset({viewId, limit: 80, searchString});
     },
   });
 
   const updateConditionMutation = api.view.updateViewFilterCondition.useMutation({
     onSuccess: () => {
       void refetchFilters();
-      void utils.view.getViewRowsPaginated.invalidate();
+      void utils.view.getViewRowsPaginated.reset({viewId, limit: 80, searchString});
     },
   });
 
   const updateOperatorMutation = api.view.updateViewFilterOperator.useMutation({
     onSuccess: () => {
       void refetchFilters();
-      void utils.view.getViewRowsPaginated.invalidate();
+      void utils.view.getViewRowsPaginated.reset({viewId, limit: 80, searchString});
     },
   });
 
@@ -240,7 +242,7 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
   return (
     <div className="relative">
       <button
-        className={`flex items-center gap-2 text-gray-600 px-3 py-1.5 rounded text-sm
+        className={`flex items-center gap-2 text-gray-600 px-2 py-1.5 rounded text-xs font-light
                   ${viewFilters?.conditions?.length ? 'bg-green-200' : 'hover:bg-gray-100'}`}
         onClick={() => setIsOpen(!isOpen)}
       >

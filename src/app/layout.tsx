@@ -10,7 +10,7 @@ import { auth } from "~/server/auth";
 export const metadata: Metadata = {
   title: "Airtable Clone",
   description: "An Airtable clone built with Next.js, tRPC, and Prisma",
-  icons: [{ rel: "icon", url: "/logo.svg" }],
+  icons: [{ rel: "icon", url: "/logo_no_txt.svg" }],
 };
 
 const geist = Geist({

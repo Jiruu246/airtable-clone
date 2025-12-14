@@ -82,7 +82,7 @@ export default function TableLayout({ children, params }: TableLayoutProps) {
               return (
                 <div key={table.id} className="relative shrink-0" ref={isActive ? tableActionsRef : null}>
                   <button
-                    className={`flex items-center font-normal gap-2 px-4 py-2 text-sm hover:cursor-pointer 
+                    className={`flex items-center gap-2 px-3 py-2 text-xs font-light hover:cursor-pointer 
                       ${classNames} ${!nextActive && !isActive? divider : ''}`}
                     onClick={() => handleSwitchTable(table.id)}
                     onContextMenu={(e) => {
@@ -116,16 +116,16 @@ export default function TableLayout({ children, params }: TableLayoutProps) {
               disabled={createTableMutation.isPending}
             >
               <GoPlus className="w-4 h-4" />
-              <span className="text-sm">
+              <span className="text-xs font-light">
                 {createTableMutation.isPending ? 'Creating...' : 'Add or import'}
               </span>
             </button>
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <button className="flex items-center gap-2 text-gray-700 px-3 py-1.5 rounded">
-            <span className="text-sm">Tools</span>
-            <IoChevronDown className="w-4 h-4" />
+          <button className="flex items-center gap-2 text-gray-700 px-4 py-1.5 rounded">
+            <span className="text-xs font-light">Tools</span>
+            <IoChevronDown className="w-3 h-3" />
           </button>
         </div>
       </div>

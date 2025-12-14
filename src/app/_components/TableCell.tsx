@@ -60,7 +60,7 @@ export function TableCell({
     <div
       className={`absolute flex h-full items-center border-r border-gray-200 px-3 cursor-pointer ${
         isSelected
-          ? 'ring-2 rounded-sm ring-blue-500 bg-blue-50 z-2'
+          ? 'ring-2 rounded-xs ring-blue-500 bg-blue-50 z-2'
           : 'hover:bg-gray-50'
       }`}
       style={style}
@@ -79,7 +79,7 @@ export function TableCell({
             className="w-full border-none bg-transparent p-0 text-sm focus:outline-none"
           />
         ) : (
-          <span className="text-sm text-gray-900 truncate block w-full">
+          <span className="text-xs font-light text-gray-900 truncate block w-full">
             {value ?? "\u00A0"}
           </span>
         )}

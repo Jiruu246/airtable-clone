@@ -45,7 +45,7 @@ export function QuickActions() {
       {actions.map((action, index) => (
         <div
           key={index}
-          className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow duration-200 cursor-pointer"
+          className="bg-white rounded-lg border border-gray-300 p-4 hover:shadow-md transition-shadow duration-200 cursor-pointer"
         >
           <div className="flex items-center gap-2 pb-2">
             <div className={`${action.color} rounded-lg flex items-center justify-center`}>
@@ -55,7 +55,7 @@ export function QuickActions() {
               {action.title}
             </h3>
           </div>
-          <p className="text-gray-600 text-xs leading-relaxed">
+          <p className="text-gray-500 text-xs leading-relaxed">
             {action.description}
           </p>
         </div>

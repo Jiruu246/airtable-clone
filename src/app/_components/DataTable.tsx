@@ -14,7 +14,8 @@ import { PiMagicWandThin } from "react-icons/pi";
 import type { TableColumn } from "./types/DataTable.types";
 
 const BOTTOM_PADDING = 400;
-const ROW_INDEX_COLUMN_WIDTH = 40;
+const ROW_INDEX_COLUMN_WIDTH = 84;
+const ROW_HEIGHT = 32;
 
 export interface DataTableProps {
   tableId: string;
@@ -36,7 +37,11 @@ export function DataTable({ tableId, viewId, visibleColumns, searchString }: Dat
     isFetchingNextPage,
     refetch,
   } = api.view.getViewRowsPaginated.useInfiniteQuery(
-    { viewId: viewId, limit: 50, searchString },
+    { 
+      viewId: viewId, 
+      limit: 80, 
+      searchString,
+     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     }
@@ -46,7 +51,7 @@ export function DataTable({ tableId, viewId, visibleColumns, searchString }: Dat
 
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
-    estimateSize: () => 40,
+    estimateSize: () => ROW_HEIGHT,
     getScrollElement: () => parentRef.current,
     overscan: 10,
   });
@@ -114,7 +119,7 @@ export function DataTable({ tableId, viewId, visibleColumns, searchString }: Dat
       const { scrollTop, scrollHeight, clientHeight } = scrollElement;
       const scrollPercentage = (scrollTop + clientHeight) / scrollHeight;
 
-      if (scrollPercentage > 0.8 && hasNextPage && !isFetchingNextPage) {
+      if (scrollPercentage > 0.6 && hasNextPage && !isFetchingNextPage) {
         void fetchNextPage();
       }
     };
@@ -175,7 +180,7 @@ export function DataTable({ tableId, viewId, visibleColumns, searchString }: Dat
               className="absolute left-0 right-0 flex items-center justify-center py-4 text-gray-500"
               style={{
                 top: `${rowVirtualizer.getTotalSize()}px`,
-                height: "40px",
+                height: `${ROW_HEIGHT}px`,
               }}
             >
               <div className="flex items-center gap-2">
@@ -186,23 +191,23 @@ export function DataTable({ tableId, viewId, visibleColumns, searchString }: Dat
           )}
         </div>
         {/* Floating Footer */}
-        <div className="absolute bottom-0 left-0 right-0 h-10 bg-gray-50 border-t border-gray-200 flex items-center px-4 text-sm text-gray-600 shadow-lg z-3">
-          <div className="flex items-center gap-2 text-gray-900 font-light text-xs">
+        <div className="absolute bottom-0 left-0 right-0 h-8 bg-gray-50 border-t border-gray-200 flex items-center px-4 text-gray-600 shadow-lg z-3">
+          <div className="flex items-center gap-2 text-gray-900 font-light text-[0.6rem]">
             <span>{metaData.data?.totalRows} records</span>
           </div>
         </div>
 
         {/* Floating Add Record Button */}
-        <div className="absolute bottom-9 left-3 flex shadow-lg bg-white rounded-full border border-gray-300 z-4">
+        <div className="absolute bottom-7 left-2 flex bg-white rounded-full border border-gray-300 z-4">
           <button
-            className=" hover:bg-gray-200 hover:cursor-pointer disabled:cursor-not-allowed text-gray-800  px-4 py-2 rounded-l-full  transition-colors duration-200 flex items-center justify-center"
+            className=" hover:bg-gray-200 hover:cursor-pointer disabled:cursor-not-allowed text-gray-800  px-4 py-2 rounded-l-full transition-colors duration-200 flex items-center justify-center"
             onClick={() => handleAddRows(1)}
             disabled={isAddingRow}
           >
             {isAddingRow ? (
               <span className="w-5 h-5 border-2 border-gray-300 border-t-gray-500 rounded-full animate-spin inline-block" />
             ) : (
-              <GoPlus className="w-5 h-5" />
+              <GoPlus className="w-4 h-4" />
             )}
           </button>
           <button
@@ -213,7 +218,7 @@ export function DataTable({ tableId, viewId, visibleColumns, searchString }: Dat
             {isAddingRow ? (
               <span className="w-5 h-5 border-2 border-gray-300 border-t-gray-500 rounded-full animate-spin inline-block" />
             ) : (
-              <PiMagicWandThin className="w-5 h-5" />
+              <PiMagicWandThin className="w-4 h-4" />
             )}
             <span className="text-xs">Add 100,000 rows</span>
           </button>
