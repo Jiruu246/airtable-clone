@@ -49,7 +49,6 @@ export function useCellData({ tableId, viewId, rows, columns }: UseCellDataProps
     500
   );
 
-  // TODO: Put the optimisitc update to the upsertCellMutation onMutate instead of here
   const handleCellChange = (rowId: string, columnId: string, value: string) => {
     const key = `${rowId}-${columnId}`;
 

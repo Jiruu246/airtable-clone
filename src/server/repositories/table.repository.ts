@@ -300,7 +300,7 @@ export class PrismaTableRepository implements TableRepository {
       return;
     }
 
-    const BATCH_SIZE = 500;
+    const BATCH_SIZE = 20_000;
 
     for (let i = 0; i < processedRows.length; i += BATCH_SIZE) {
       const batch = processedRows.slice(i, i + BATCH_SIZE);

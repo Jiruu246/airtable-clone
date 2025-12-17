@@ -9,6 +9,19 @@ import { IoChevronDown } from "react-icons/io5";
 import { GoPlus } from "react-icons/go";
 import useOutsideClick from "~/app/_components/hooks/useClickOutside";
 
+function QuaterPipeRight() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="3" height="3" viewBox="0 0 3 3" className="absolute bottom-0 right-0 translate-x-full">
+      <path fillRule="evenodd" clipRule="evenodd" d="M0 0C0 1.65686 1.34326 3 3 3H0V0Z" fill="white"></path>
+    </svg>);
+}
+
+function QuaterPipeLeft() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="3" height="3" viewBox="0 0 3 3" className="absolute bottom-0 left-0 -translate-x-full">
+      <path fillRule="evenodd" clipRule="evenodd" d="M3 0C3 1.65686 1.65674 3 0 3H3V0Z" fill="white"></path>
+    </svg>);
+}
 interface TableLayoutProps {
   children: React.ReactNode;
   params: Promise<{
@@ -62,7 +75,7 @@ export default function TableLayout({ children, params }: TableLayoutProps) {
   return (
     <div className="grid grid-rows-[auto_1fr] overflow-hidden">
       {/* Tables Navigation */}
-      <div className="bg-green-100 border-gray-200 flex items-center justify-between">
+      <div className="bg-green-100 border-gray-200 flex items-center justify-between shadow-[inset_0_-5px_5px_-5px_rgba(0,0,0,0.2)]">
         <div className="flex items-center gap-2 overflow-y-visible max-w-full">
           <div className="flex items-center shrink-0">
             {allTables?.map((table, index) => {
@@ -73,28 +86,32 @@ export default function TableLayout({ children, params }: TableLayoutProps) {
 
               let classNames = "";
               if (isActive) {
-                classNames += `bg-white text-gray-700 border-t border-gray-300 
-                  ${isFirst ? 'border-r rounded-tr-sm' : 'border-x rounded-t-sm'} `;
+                classNames += `bg-white text-gray-900 shadow-sm shadow-gray-400 z-10
+                  ${isFirst ? 'rounded-tr-sm' : 'rounded-t-sm'} `;
               } else {
-                classNames += "text-gray-500 hover:bg-gray-200/60 ";
+                classNames += "text-gray-500 hover:bg-black/10 rounded-t-sm hover:text-gray-900 ";
               }
 
               return (
                 <div key={table.id} className="relative shrink-0" ref={isActive ? tableActionsRef : null}>
-                  <button
-                    className={`flex items-center gap-2 px-3 py-2 text-xs font-light hover:cursor-pointer 
-                      ${classNames} ${!nextActive && !isActive? divider : ''}`}
-                    onClick={() => handleSwitchTable(table.id)}
-                    onContextMenu={(e) => {
-                      if (isActive) {
-                        e.preventDefault();
-                        setIsDropdownOpen(true);
-                      }
-                    }}
-                  >
-                    <span>{table.name}</span>
-                    {isActive && <IoChevronDown className="w-4 h-4" />}
-                  </button>
+                  <div className="relative">
+                    {isActive && <QuaterPipeLeft />}
+                    <button
+                      className={`flex items-center gap-2 px-3 py-2 text-xs font-normal hover:cursor-pointer
+                        ${classNames} ${!nextActive && !isActive ? divider : ''}`}
+                      onClick={() => handleSwitchTable(table.id)}
+                      onContextMenu={(e) => {
+                        if (isActive) {
+                          e.preventDefault();
+                          setIsDropdownOpen(true);
+                        }
+                      }}
+                    >
+                      <span>{table.name}</span>
+                      {isActive && <IoChevronDown className="w-4 h-4" />}
+                    </button>
+                    {isActive && <QuaterPipeRight />}
+                  </div>
                   {isActive && (
                     <TableActionsDropdown
                       isOpen={isDropdownOpen}
