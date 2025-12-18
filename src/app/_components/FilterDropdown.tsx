@@ -12,6 +12,7 @@ import { LogicalOperators, type LogicalOperatorValue } from '~/data/logicalOpera
 import { api } from '~/trpc/react';
 import { DropdownBase } from './DropdownBase';
 import { IoFilterOutline } from "react-icons/io5";
+import { GoGrabber } from "react-icons/go";
 
 interface FilterCondition {
   columnId: string;
@@ -255,16 +256,16 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
         width="w-140"
         onClose={() => setIsOpen(false)}
       >
-        <div className="text-sm font-normal text-gray-500 px-4 pt-4">
+        <div className="text-xs font-normal text-gray-500 px-2 pt-2">
           {conditions.length === 0 ? 'No filter conditions are applied' : 'In this view, show records'}
         </div>
-        <div className="p-2">
+        <div>
           {conditions.length > 0 && (
             <>
               {conditions.map((condition, index) => (
                 <div key={index} className="rounded-lg p-2">
                   <div className="flex items-center">
-                    <div className="text-sm text-gray-600 mr-2 w-20">
+                    <div className="text-xs text-gray-600 mr-2 w-20">
                       {index === 0 ? (
                         <div className="p-3">Where</div>
                       ) : index === 1 ? (
@@ -307,7 +308,7 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
                         onChange={(value) => updateCondition(index, 'value', value)}
                         placeholder="Enter value"
                         disabled={operatorsNotRequiringValue.includes(condition.operator)}
-                        className="w-full px-3 py-2 text-sm border border-gray-200 focus:outline-none disabled:bg-gray-50 disabled:cursor-not-allowed"
+                        className="w-full px-3 py-2 text-xs border border-gray-200 focus:outline-none disabled:bg-gray-50 disabled:cursor-not-allowed"
                         delay={300}
                       />
                     </div>
@@ -316,7 +317,12 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
                       onClick={() => removeCondition(index)}
                       className="p-2 hover:bg-gray-100 border-y border-r border-gray-200 hover:cursor-pointer"
                     >
-                      <PiTrash className="w-4 h-5" />
+                      <PiTrash className="w-4 h-4" />
+                    </button>
+                    <button
+                      className="p-2 hover:bg-gray-100 border-y border-r border-gray-200 hover:cursor-pointer"
+                    >
+                      <GoGrabber className="w-4 h-4" />
                     </button>
                   </div>
                 </div>

@@ -8,7 +8,7 @@ import { IoLanguageOutline } from "react-icons/io5";
 import { GoMail } from "react-icons/go";
 import { BsLink45Deg } from "react-icons/bs";
 import { GrTrash } from "react-icons/gr";
-import { Dropdown, DropdownItem } from "./Dropdown";
+import { DropdownBase, DropdownItemBase } from './DropdownBase';
 
 interface User {
   name?: string | null;
@@ -37,85 +37,85 @@ const UserDropdownMenu: React.FC<UserDropdownMenuProps> = ({
 
   const userHeader = (
     <>
-      <div className="font-medium text-gray-900">{user.name ?? 'User'}</div>
-      <div className="text-sm text-gray-500">{user.email ?? 'No email'}</div>
+      <div className="font-normal text-sm text-gray-600">{user.name ?? 'User'}</div>
+      <div className="font-normal text-sm text-gray-600">{user.email ?? 'No email'}</div>
     </>
   );
 
   return (
-    <Dropdown 
+    <DropdownBase 
       isOpen={isOpen} 
       positionClasses={positionClasses} 
       width="w-80"
       header={userHeader}
     >
-      <DropdownItem
+      <DropdownItemBase
         icon={<AiOutlineUser className="w-4 h-4" />}
         label="Account"
       />
       
-      <DropdownItem
+      <DropdownItemBase
         icon={<PiUsers className="w-4 h-4" />}
         label="Manage groups"
       />
       
-      <DropdownItem
+      <DropdownItemBase
         icon={<VscBell className="w-4 h-4" />}
         label="Notification preferences"
         hasArrow
       />
       
-      <DropdownItem
+      <DropdownItemBase
         icon={<IoLanguageOutline className="w-4 h-4" />}
         label="Language preferences"
         hasArrow
       />
       
-      <DropdownItem
+      <DropdownItemBase
         icon={<MdOutlineColorLens className="w-4 h-4" />}
         label="Appearance"
         hasArrow
         isDivider
       />
       
-      <DropdownItem
+      <DropdownItemBase
         icon={<GoMail className="w-4 h-4" />}
         label="Contact sales"
       />
       
-      <DropdownItem
+      <DropdownItemBase
         icon={<MdOutlineStars className="w-4 h-4" />}
         label="Upgrade"
       />
       
-      <DropdownItem
+      <DropdownItemBase
         icon={<GoMail className="w-4 h-4" />}
         label="Tell a friend"
         isDivider
       />
       
-      <DropdownItem
+      <DropdownItemBase
         icon={<BsLink45Deg className="w-4 h-4" />}
         label="Integrations"
       />
       
-      <DropdownItem
+      <DropdownItemBase
         icon={<PiWrenchLight className="w-4 h-4" />}
         label="Builder hub"
         isDivider
       />
       
-      <DropdownItem
+      <DropdownItemBase
         icon={<GrTrash className="w-4 h-4" />}
         label="Trash"
       />
       
-      <DropdownItem
+      <DropdownItemBase
         icon={<MdLogout className="w-4 h-4" />}
         label="Log out"
         onClick={handleSignOut}
       />
-    </Dropdown>
+    </DropdownBase>
   );
 };
 

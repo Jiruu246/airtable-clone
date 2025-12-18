@@ -7,7 +7,6 @@ import { api } from "~/trpc/react";
 import { LuDatabase } from "react-icons/lu";
 import { FaRegStar } from "react-icons/fa";
 import { IoIosMore } from "react-icons/io";
-import { Dropdown, DropdownItem } from "./Dropdown";
 import { LuPencil } from "react-icons/lu";
 import { FiTrash2 } from "react-icons/fi";
 import { GoCopy } from "react-icons/go";
@@ -15,6 +14,7 @@ import { FaArrowRight } from "react-icons/fa6";
 import { PiUsersThree } from "react-icons/pi";
 import { PiPaintBrushHousehold } from "react-icons/pi";
 import useOutsideClick from "./hooks/useClickOutside";
+import { DropdownBase, DropdownItemBase } from "./DropdownBase";
 
 interface BaseCardProps {
   id: string;
@@ -84,43 +84,43 @@ export function BaseCard({
           </button>
           
           {/* More Dropdown Menu */}
-          <Dropdown 
+          <DropdownBase 
             isOpen={isDropdownOpen}
             width="w-60"
             >
-            <DropdownItem
+            <DropdownItemBase
               icon={<LuPencil className="w-4 h-4" />}
               label="Edit"
             />
 
-            <DropdownItem
+            <DropdownItemBase
               icon={<GoCopy className="w-4 h-4" />}
               label="Duplicate"
             />
 
-            <DropdownItem
+            <DropdownItemBase
               icon={<FaArrowRight className="w-4 h-4" />}
               label="Move"
             />
 
-            <DropdownItem
+            <DropdownItemBase
               icon={<PiUsersThree className="w-4 h-4" />}
               label="Go to workspace"
             />
 
-            <DropdownItem
+            <DropdownItemBase
               icon={<PiPaintBrushHousehold className="w-4 h-4" />}
               label="Customize appearance"
               isDivider
             />
 
-            <DropdownItem
+            <DropdownItemBase
               icon={<FiTrash2 className="w-4 h-4" />}
               label={isDeleting ? "Deleting..." : "Delete"}
               onClick={handleDelete}
               disabled={isDeleting}
             />
-          </Dropdown>
+          </DropdownBase>
         </div>
       </div>
 

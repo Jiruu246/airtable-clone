@@ -11,14 +11,14 @@ import useOutsideClick from "~/app/_components/hooks/useClickOutside";
 
 function QuaterPipeRight() {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="3" height="3" viewBox="0 0 3 3" className="absolute bottom-0 right-0 translate-x-full">
+    <svg xmlns="http://www.w3.org/2000/svg" width="3" height="3" viewBox="0 0 3 3" className="absolute bottom-0 right-0 translate-x-full z-15">
       <path fillRule="evenodd" clipRule="evenodd" d="M0 0C0 1.65686 1.34326 3 3 3H0V0Z" fill="white"></path>
     </svg>);
 }
 
 function QuaterPipeLeft() {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="3" height="3" viewBox="0 0 3 3" className="absolute bottom-0 left-0 -translate-x-full">
+    <svg xmlns="http://www.w3.org/2000/svg" width="3" height="3" viewBox="0 0 3 3" className="absolute bottom-0 left-0 -translate-x-full z-15">
       <path fillRule="evenodd" clipRule="evenodd" d="M3 0C3 1.65686 1.65674 3 0 3H3V0Z" fill="white"></path>
     </svg>);
 }
@@ -147,7 +147,10 @@ export default function TableLayout({ children, params }: TableLayoutProps) {
         </div>
       </div>
 
-      {children}
+      {/* Main Content Area */}
+      <div className="flex flex-col overflow-hidden bg-white z-15">
+        {children}
+      </div>
     </div>
   );
 }

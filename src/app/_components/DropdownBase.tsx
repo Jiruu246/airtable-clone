@@ -30,10 +30,10 @@ export const DropdownItemBase: React.FC<DropdownItemBaseProps> = ({
         </>
     );
 
-    const baseClassName = `w-full flex items-center gap-3 px-4 py-2.5 transition-colors text-left text-sm ${
+    const baseClassName = `w-full flex items-center gap-3 px-4 py-2.5 transition-colors text-left text-xs rounded-md ${
         disabled 
             ? "text-gray-400 cursor-not-allowed" 
-            : "text-gray-700 hover:bg-gray-50 hover:cursor-pointer"
+            : "text-gray-700 hover:bg-gray-100 hover:cursor-pointer"
     } ${className}`;
 
     return (
@@ -45,7 +45,7 @@ export const DropdownItemBase: React.FC<DropdownItemBaseProps> = ({
             >
                 {content}
             </button>
-            {isDivider && <div className="border-t border-gray-200 my-1" />}
+            {isDivider && <div className="border-t border-gray-200 my-1 mx-3" />}
         </>
     );
 };
@@ -78,13 +78,13 @@ export const DropdownBase: React.FC<DropdownBaseProps> = ({
     return (
         <div 
             ref={dropdownRef} 
-            className={`absolute ${positionClasses} ${width} bg-white rounded-lg shadow-lg shadow-gray-400 border border-gray-200 overflow-visible z-50`}>
+            className={`absolute ${positionClasses} ${width} py-2 px-2.5 bg-white rounded-sm shadow-lg shadow-gray-400 border border-gray-200 overflow-visible z-50`}>
             {header && (
-                <div className="px-4 py-4 border-b border-gray-200">
+                <div className="py-3 mx-3 border-b border-gray-200">
                     {header}
                 </div>
             )}
-            <div className="py-1">
+            <div>
                 {children}
             </div>
         </div>

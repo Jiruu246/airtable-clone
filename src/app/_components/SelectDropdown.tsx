@@ -69,7 +69,7 @@ export const SelectDropdown: React.FC<SelectDropdownProps> = ({
         <button
           onClick={toggleDropdown}
           disabled={disabled}
-          className={`w-full flex items-center justify-between text-sm border-gray-200 hover:bg-gray-200 ${controlClassName} ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+          className={`w-full flex items-center justify-between text-xs border-gray-200 hover:bg-gray-200 ${controlClassName} ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
             }`}
         >
           <span className="text-gray-700 truncate flex-1 text-left mr-2" title={displayValue}>{displayValue}</span>
@@ -83,7 +83,7 @@ export const SelectDropdown: React.FC<SelectDropdownProps> = ({
             <button
               key={option.key}
               onClick={() => selectOption(option.key)}
-              className={`w-full px-3 py-3 text-left text-sm hover:bg-gray-50 text-gray-700 truncate ${
+              className={`w-full px-3 py-3 text-left text-xs hover:bg-gray-50 text-gray-700 truncate ${
                 option.key === PreSelectedKey ? 'bg-gray-50' : ''
               }`}
               title={option.value}

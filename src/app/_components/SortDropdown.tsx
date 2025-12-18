@@ -203,12 +203,12 @@ export const SortDropdown: React.FC<SortDropdownProps> = ({
   return (
     <div className="relative">
       <button
-        className={`flex items-center gap-2 text-gray-600 px-2 py-1.5 rounded text-xs font-light
-          ${viewOrdering?.conditions?.length ? 'bg-orange-200' : 'hover:bg-gray-100'}`}
+        className={`flex items-center gap-2  px-2 py-1.5 rounded text-xs font-light
+          ${viewOrdering?.conditions?.length ? 'bg-orange-200 text-gray-900' : 'hover:bg-gray-100 text-gray-600'}`}
         onClick={() => setIsOpen(!isOpen)}
       >
         <LuArrowUpDown className="w-4 h-4" />
-        <span>Sort</span>
+        <span>{viewOrdering?.conditions?.length ? `Sorted by ${viewOrdering.conditions.length} field${viewOrdering.conditions.length > 1 ? 's' : ''}` : "Sort"}</span>
       </button>
       <DropdownBase
         isOpen={isOpen}
@@ -216,10 +216,10 @@ export const SortDropdown: React.FC<SortDropdownProps> = ({
         width="w-120"
         onClose={() => setIsOpen(false)}
       >
-        <div className="text-sm font-normal text-gray-500 px-4 pt-4">
+        <div className="text-sm font-normal text-gray-500 px-2 pt-2">
           Sort by
         </div>
-        <div className="p-2">
+        <div>
           {conditions.length > 0 && (
             <>
               {conditions.map((condition, index) => {
@@ -227,7 +227,7 @@ export const SortDropdown: React.FC<SortDropdownProps> = ({
                 const directionOptions = getDirectionOptionsForColumn(column?.columnType ?? ColumnTypes.Text.value);
 
                 return (
-                  <div key={index} className="rounded-lg p-2">
+                  <div key={index} className="rounded-lg px-2 pt-2">
                     <div className="flex items-center gap-2">
                       {/* Column Selector */}
                       <SelectDropdown

@@ -39,7 +39,7 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
         positionClasses="top-full mt-1 right-0"
         width="w-80"
       >
-        <div className="p-2">
+        <div>
           <div className="flex items-center gap-2">
             <div className="flex-1">
               <DebounceInput
@@ -47,7 +47,7 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
                 value={searchValue}
                 onChange={handleSearchChange}
                 placeholder="Find in view..."
-                className="w-full px-2 text-sm focus:outline-none"
+                className="w-full px-2 text-xs focus:outline-none"
                 delay={300}
               />
             </div>

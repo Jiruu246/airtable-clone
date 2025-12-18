@@ -71,11 +71,11 @@ export default function ViewPage({ params }: ViewPageProps) {
   const currentView = allViews?.find(view => view.id === viewId);
 
   if (isLoading || !allViews || !currentView) {
-    return null;
+    return <div className="flex-1 bg-white z-20"></div>;
   }
 
   return (
-    <div className="grid grid-rows-[auto_1fr] overflow-hidden">
+    <div className="grid grid-rows-[auto_1fr] overflow-hidden h-full">
       {/* Toolbar */}
       <div className="bg-white border-b border-gray-200 px-2 py-2 flex items-center justify-between z-11">
         <div className="flex items-center gap-1">

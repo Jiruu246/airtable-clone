@@ -28,7 +28,7 @@ export default function BaseLayout({ children, params }: BaseLayoutProps) {
     <div className="h-screen bg-gray-100 grid grid-cols-[auto_1fr]">
       <BaseSidebar user={session.user} />
       
-      <div className="grid grid-rows-[auto_1fr] overflow-hidden">
+      <div className="h-screen grid grid-rows-[auto_1fr] overflow-hidden">
         <BaseHeader baseName={base?.name ?? "Loading..."} />
         {children}
       </div>

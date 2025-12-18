@@ -3,8 +3,21 @@
 import { useState, useEffect } from "react";
 import { api } from "~/trpc/react";
 import { useRouter } from "next/navigation";
-import { Dropdown, DropdownItem } from "./Dropdown";
-import { MdEdit, MdDelete } from "react-icons/md";
+import { DropdownBase, DropdownItemBase } from "./DropdownBase";
+import { GrUploadOption } from "react-icons/gr";
+import { TbPencil } from "react-icons/tb";
+import { FaRegEyeSlash } from "react-icons/fa";
+import { VscSettings } from "react-icons/vsc";
+import { LuCopy } from "react-icons/lu";
+import { TiFlowChildren } from "react-icons/ti";
+import { IoInformationCircleOutline } from "react-icons/io5";
+import { IoMdClose } from "react-icons/io";
+import { FaRegTrashAlt } from "react-icons/fa";
+import { LuLockKeyhole } from "react-icons/lu";
+import { AiOutlineQuestionCircle } from "react-icons/ai";
+import { IoChevronDown } from "react-icons/io5";
+import { FaPlus } from "react-icons/fa6";
+import { GoMail } from "react-icons/go";
 
 interface TableActionsDropdownProps {
   isOpen: boolean;
@@ -24,7 +37,7 @@ export const TableActionsDropdown: React.FC<TableActionsDropdownProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [newTableName, setNewTableName] = useState(tableName);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  
+
   const router = useRouter();
   const utils = api.useUtils();
 
@@ -36,7 +49,7 @@ export const TableActionsDropdown: React.FC<TableActionsDropdownProps> = ({
       setNewTableName(tableName);
     }
   }, [isOpen, tableName]);
-  
+
   const updateTableMutation = api.table.update.useMutation({
     onSuccess: () => {
       void utils.table.getByBaseId.invalidate({ baseId });
@@ -96,9 +109,9 @@ export const TableActionsDropdown: React.FC<TableActionsDropdownProps> = ({
 
   if (showDeleteConfirm) {
     return (
-      <Dropdown isOpen={true} width="w-80" positionClasses="left-0 mt-1">
-        <div className="px-4 py-4">
-          <h3 className="text-sm font-medium text-gray-900 mb-2">Are you sure you want to delete this table?</h3>
+      <DropdownBase isOpen={true} width="w-64" positionClasses="left-0 mt-1">
+        <div className="px-2">
+          <h3 className="text-sm font-normal text-gray-900 mb-2">Are you sure you want to delete this table?</h3>
           <p className="text-xs text-gray-600 mb-4">
             Recently deleted tables can be restored from trash.
           </p>
@@ -119,35 +132,57 @@ export const TableActionsDropdown: React.FC<TableActionsDropdownProps> = ({
             </button>
           </div>
         </div>
-      </Dropdown>
+      </DropdownBase>
     );
   }
 
   if (isEditing) {
     return (
-      <Dropdown isOpen={true} width="w-72" positionClasses="left-0 mt-1">
-        <div className="px-4 py-4">
-          <h3 className="text-sm font-medium text-gray-900 mb-3">Edit Table Name</h3>
-          <input
-            type="text"
-            value={newTableName}
-            onChange={(e) => setNewTableName(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-3"
-            placeholder="Enter table name"
-            maxLength={100}
-            autoFocus
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                handleSaveEdit();
-              } else if (e.key === 'Escape') {
-                handleCancelEdit();
-              }
-            }}
-          />
+      <DropdownBase isOpen={true} width="w-80" positionClasses="left-0 mt-1">
+        <div className="p-2">
+          <div className="space-y-2 pb-4">
+            <input
+              type="text"
+              value={newTableName}
+              onChange={(e) => setNewTableName(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-3"
+              placeholder="Enter table name"
+              maxLength={100}
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSaveEdit();
+                } else if (e.key === 'Escape') {
+                  handleCancelEdit();
+                }
+              }}
+            />
+            <div className="flex justify-between items-center">
+              <p className="font-light text-gray-500 text-sm">What should each record be called?</p>
+              <AiOutlineQuestionCircle className="w-4 h-4 text-gray-400 hover:cursor-pointer" />
+            </div>
+            <div className="bg-gray-100 text-gray-500 flex justify-between items-center text-sm p-2 rounded-md hover:cursor-pointer">
+              <p>Sample</p>
+              <IoChevronDown className="w-4 h-4" />
+            </div>
+            <div className="flex text-xs font-light text-gray-500 justify-start gap-4 items-center">
+              <p className="">
+                Examples:
+              </p>
+              <div className="flex gap-2 justify-center items-center">
+                <FaPlus className="w-3 h-3" />
+                <p>Add Sample</p>
+              </div>
+              <div className="flex gap-2 justify-center items-center">
+                <GoMail className="w-3 h-3" />
+                <p>Send Sample</p>
+              </div>
+            </div>
+          </div>
           <div className="flex gap-2 justify-end">
             <button
               onClick={handleCancelEdit}
-              className="px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded"
+              className="px-3 py-2 text-xs text-gray-600 hover:bg-gray-100 rounded"
               disabled={updateTableMutation.isPending}
             >
               Cancel
@@ -155,29 +190,65 @@ export const TableActionsDropdown: React.FC<TableActionsDropdownProps> = ({
             <button
               onClick={handleSaveEdit}
               disabled={updateTableMutation.isPending || !newTableName.trim()}
-              className="px-3 py-2 text-sm bg-blue-600 text-white hover:bg-blue-700 rounded disabled:opacity-50"
+              className="px-2 py-1 text-xs bg-blue-600 text-white hover:bg-blue-700 rounded disabled:opacity-50"
             >
               {updateTableMutation.isPending ? "Saving..." : "Save"}
             </button>
           </div>
         </div>
-      </Dropdown>
+      </DropdownBase>
     );
   }
 
   return (
-    <Dropdown isOpen={true} width="w-48" positionClasses="left-0 mt-1">
-      <DropdownItem
-        icon={<MdEdit className="w-4 h-4" />}
-        label="Edit table name"
+    <DropdownBase isOpen={true} width="w-82" positionClasses="left-0 mt-1">
+      <DropdownItemBase
+        icon={<GrUploadOption className="w-3 h-3" />}
+        label="Import data"
+        isDivider
+        hasArrow
+      />
+      <DropdownItemBase
+        icon={<TbPencil className="w-4 h-4" />}
+        label="Rename table"
         onClick={handleEditClick}
       />
-      <DropdownItem
-        icon={<MdDelete className="w-4 h-4" />}
+      <DropdownItemBase
+        icon={<FaRegEyeSlash className="w-4 h-4" />}
+        label="Hide table"
+      />
+      <DropdownItemBase
+        icon={<VscSettings className="w-4 h-4" />}
+        label="Manage fields"
+      />
+      <DropdownItemBase
+        icon={<LuCopy className="w-4 h-4" />}
+        label="Duplicate table"
+        isDivider
+      />
+      <DropdownItemBase
+        icon={<TiFlowChildren className="w-4 h-4" />}
+        label="Configure date dependencies"
+        isDivider
+      />
+      <DropdownItemBase
+        icon={<IoInformationCircleOutline className="w-4 h-4" />}
+        label="Edit table description"
+      />
+      <DropdownItemBase
+        icon={<LuLockKeyhole className="w-4 h-4" />}
+        label="Edit table permissions"
+        isDivider
+      />
+      <DropdownItemBase
+        icon={<IoMdClose className="w-4 h-4" />}
+        label="Clear data"
+      />
+      <DropdownItemBase
+        icon={<FaRegTrashAlt className="w-4 h-4" />}
         label="Delete table"
         onClick={handleDeleteClick}
-        className="text-red-600 hover:bg-red-50"
       />
-    </Dropdown>
+    </DropdownBase>
   );
 };
